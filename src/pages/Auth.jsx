@@ -23,6 +23,7 @@ export default function Auth() {
   const [staffSearch, setStaffSearch] = useState('');
   const [staffEditId, setStaffEditId] = useState(null);
   const [staffEditForm, setStaffEditForm] = useState({});
+  const [staffMode, setStaffMode] = useState('login'); // login | register
 
   const handleStaffLogin = () => {
     const admin = users.find(u => u.role === 'admin' && (u.login === staffLogin || u.email === staffLogin) && u.password === staffPass);
@@ -32,6 +33,35 @@ export default function Auth() {
     } else {
       setStaffError(language === 'ru' ? 'Неверный логин или пароль' : language === 'en' ? 'Invalid login or password' : "Login yoki parol noto'g'ri");
     }
+  };
+
+  const handleStaffRegister = () => {
+    if (!staffLogin || !staffPass) {
+      setStaffError(language === 'ru' ? 'Заполните все поля' : language === 'en' ? 'Fill all fields' : "Barcha maydonlarni to'ldiring");
+      return;
+    }
+    const exists = users.find(u => u.login === staffLogin || u.email === staffLogin);
+    if (exists) {
+      setStaffError(language === 'ru' ? 'Логин уже занят' : language === 'en' ? 'Login already taken' : 'Bu login band');
+      return;
+    }
+    signup({
+      email: staffLogin.includes('@') ? staffLogin : staffLogin + '@flowly.admin',
+      login: staffLogin,
+      password: staffPass,
+      name: 'Admin',
+      surname: staffLogin,
+      phone: '',
+      age: '',
+      address: '',
+    });
+    // Make admin after signup
+    setTimeout(() => {
+      const newAdmin = users.find(u => u.login === staffLogin);
+      if (newAdmin) updateUserByAdmin(newAdmin.id, { role: 'admin' });
+      setStaffLoggedIn(true);
+      setStaffError('');
+    }, 100);
   };
 
   const LANGUAGES = [
@@ -269,7 +299,10 @@ export default function Auth() {
                     {language === 'ru' ? 'Панель администратора' : language === 'en' ? 'Admin Panel' : 'Administrator Paneli'}
                   </h2>
                   <p className="text-xs text-center text-white/50">
-                    {language === 'ru' ? 'Войдите для доступа' : language === 'en' ? 'Login to access' : 'Kirish uchun login va parol kiriting'}
+                    {staffMode === 'login'
+                      ? (language === 'ru' ? 'Войдите для доступа' : language === 'en' ? 'Login to access' : 'Kirish uchun login va parol kiriting')
+                      : (language === 'ru' ? 'Создать аккаунт администратора' : language === 'en' ? 'Create admin account' : 'Admin akkaunt yaratish')
+                    }
                   </p>
                   <input type="text" placeholder="Login" value={staffLogin}
                     onChange={e => setStaffLogin(e.target.value)}
@@ -278,10 +311,35 @@ export default function Auth() {
                     onChange={e => setStaffPass(e.target.value)}
                     className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/40 outline-none focus:ring-2 focus:ring-blue-500" />
                   {staffError && <p className="text-red-400 text-xs text-center">{staffError}</p>}
-                  <button onClick={handleStaffLogin}
-                    className="w-full py-3 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold shadow-lg">
-                    {language === 'ru' ? 'Войти' : language === 'en' ? 'Login' : 'Kirish'}
-                  </button>
+
+                  {staffMode === 'login' ? (
+                    <>
+                      <button onClick={handleStaffLogin}
+                        className="w-full py-3 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold shadow-lg">
+                        {language === 'ru' ? 'Войти' : language === 'en' ? 'Login' : 'Kirish'}
+                      </button>
+                      <p className="text-center text-xs text-white/40">
+                        {language === 'ru' ? 'Нет аккаунта?' : language === 'en' ? 'No account?' : "Akkauntingiz yo'qmi?"}{' '}
+                        <button onClick={() => { setStaffMode('register'); setStaffError(''); }} className="text-purple-300 font-medium">
+                          {language === 'ru' ? 'Создать' : language === 'en' ? 'Register' : "Ro'yxatdan o'tish"}
+                        </button>
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <button onClick={handleStaffRegister}
+                        className="w-full py-3 rounded-xl bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold shadow-lg">
+                        {language === 'ru' ? 'Зарегистрироваться' : language === 'en' ? 'Register' : "Ro'yxatdan o'tish"}
+                      </button>
+                      <p className="text-center text-xs text-white/40">
+                        {language === 'ru' ? 'Уже есть аккаунт?' : language === 'en' ? 'Already have account?' : 'Akkauntingiz bormi?'}{' '}
+                        <button onClick={() => { setStaffMode('login'); setStaffError(''); }} className="text-purple-300 font-medium">
+                          {language === 'ru' ? 'Войти' : language === 'en' ? 'Login' : 'Kirish'}
+                        </button>
+                      </p>
+                    </>
+                  )}
+
                   <button type="button" onClick={() => setMode('login')} className="w-full text-xs text-white/40">{t('back')}</button>
                 </>
               ) : (
