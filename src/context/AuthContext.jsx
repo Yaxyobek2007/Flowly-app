@@ -794,6 +794,35 @@ export function AuthProvider({ children }) {
   useEffect(() => { localStorage.setItem('flowly-current-user', JSON.stringify(currentUser)); }, [currentUser]);
   useEffect(() => { localStorage.setItem('flowly-language', language); }, [language]);
 
+  // Auto-renewal check: if plan expired and autoRenew is on, renew automatically
+  useEffect(() => {
+    if (!currentUser || !currentUser.planExpiry || !currentUser.autoRenew) return;
+    const expiry = new Date(currentUser.planExpiry);
+    const now = new Date();
+    if (now > expiry && currentUser.plan === 'vip' && currentUser.lastCard) {
+      // Auto-renew for 1 month
+      const newExpiry = new Date();
+      newExpiry.setMonth(newExpiry.getMonth() + 1);
+      const autoPayment = {
+        date: new Date().toISOString(),
+        amount: 2.9,
+        cardLast4: currentUser.lastCard.last4,
+        cardExpiry: currentUser.lastCard.expiry,
+        plan: 'vip',
+        months: 1,
+        discount: 0,
+        type: 'auto-renewal',
+      };
+      const updated = {
+        ...currentUser,
+        planExpiry: newExpiry.toISOString(),
+        payments: [...(currentUser.payments || []), autoPayment],
+      };
+      setCurrentUser(updated);
+      setUsers(prev => prev.map(u => u.id === updated.id ? updated : u));
+    }
+  }, [currentUser]);
+
   const t = (key) => translations[language]?.[key] || translations['en'][key] || key;
 
   const login = (emailOrPhone, password) => {
@@ -939,6 +968,8 @@ export function AuthProvider({ children }) {
       ...currentUser,
       plan: planType,
       planExpiry: expiry.toISOString(),
+      autoRenew: true,
+      lastCard: paymentRecord ? { last4: paymentRecord.cardLast4, expiry: paymentRecord.cardExpiry } : currentUser.lastCard,
       payments: [...payments, paymentRecord].filter(Boolean),
     };
     setCurrentUser(updated);

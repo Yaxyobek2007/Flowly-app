@@ -8,6 +8,7 @@ export default function Auth() {
   const [loading, setLoading] = useState(false);
   const [logoRotation, setLogoRotation] = useState(0);
   const [showLangMenu, setShowLangMenu] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -129,8 +130,14 @@ export default function Auth() {
               <h2 className="text-lg font-bold text-white text-center">{t('login')}</h2>
               <input type="text" placeholder={t('email')} value={email} onChange={e => setEmail(e.target.value)}
                 className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/40 outline-none focus:ring-2 focus:ring-blue-500 transition-all" />
-              <input type="password" placeholder={t('password')} value={password} onChange={e => setPassword(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/40 outline-none focus:ring-2 focus:ring-blue-500 transition-all" />
+              <div className="relative">
+                <input type={showPassword ? 'text' : 'password'} placeholder={t('password')} value={password} onChange={e => setPassword(e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/40 outline-none focus:ring-2 focus:ring-blue-500 transition-all pr-12" />
+                <button type="button" onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70 text-sm">
+                  {showPassword ? '🙈' : '👁️'}
+                </button>
+              </div>
               {error && <p className="text-red-400 text-xs text-center">{error}</p>}
               <button type="submit" disabled={loading}
                 className="w-full py-3 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold transition-all shadow-lg shadow-blue-500/30 disabled:opacity-50 hover:from-blue-600 hover:to-blue-700">
@@ -180,8 +187,14 @@ export default function Auth() {
                 className="w-full px-3 py-2.5 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/40 outline-none focus:ring-2 focus:ring-blue-500 text-sm" />
               <input type="tel" placeholder={t('phone')} value={signupData.phone} onChange={e => setSignupData({...signupData, phone: e.target.value})}
                 className="w-full px-3 py-2.5 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/40 outline-none focus:ring-2 focus:ring-blue-500 text-sm" />
-              <input type="password" placeholder={t('password')} value={signupData.password} onChange={e => setSignupData({...signupData, password: e.target.value})}
-                className="w-full px-3 py-2.5 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/40 outline-none focus:ring-2 focus:ring-blue-500 text-sm" />
+              <div className="relative">
+                <input type={showPassword ? 'text' : 'password'} placeholder={t('password')} value={signupData.password} onChange={e => setSignupData({...signupData, password: e.target.value})}
+                  className="w-full px-3 py-2.5 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/40 outline-none focus:ring-2 focus:ring-blue-500 text-sm pr-12" />
+                <button type="button" onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70 text-sm">
+                  {showPassword ? '🙈' : '👁️'}
+                </button>
+              </div>
               <div className="grid grid-cols-2 gap-2">
                 <input type="number" placeholder={t('age')} value={signupData.age} onChange={e => setSignupData({...signupData, age: e.target.value})}
                   className="px-3 py-2.5 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/40 outline-none focus:ring-2 focus:ring-blue-500 text-sm" />

@@ -8,7 +8,7 @@ const dayOfWeekToKey = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 
 
 export default function MonthlyPlanner() {
   const { events, addEvent, deleteEvent, tasks, toggleTask } = useApp();
-  const { t } = useAuth();
+  const { t, language } = useAuth();
   const [currentMonth, setCurrentMonth] = useState(new Date(2026, 5, 1));
   const [selectedDay, setSelectedDay] = useState(null);
   const [showAddForm, setShowAddForm] = useState(false);

@@ -29,9 +29,25 @@ export default function Profile() {
   const handleAvatarUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
+    // Compress image to fit localStorage
     const reader = new FileReader();
     reader.onload = (ev) => {
-      updateProfile({ avatar: ev.target.result });
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const size = 200; // 200x200 max
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext('2d');
+        // Center crop
+        const min = Math.min(img.width, img.height);
+        const sx = (img.width - min) / 2;
+        const sy = (img.height - min) / 2;
+        ctx.drawImage(img, sx, sy, min, min, 0, 0, size, size);
+        const compressed = canvas.toDataURL('image/jpeg', 0.7);
+        updateProfile({ avatar: compressed });
+      };
+      img.src = ev.target.result;
     };
     reader.readAsDataURL(file);
   };

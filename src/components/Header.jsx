@@ -13,15 +13,6 @@ export default function Header({ onMenuClick, visible, onOpenShop }) {
   const { darkMode, toggleDark } = useTheme();
   const navigate = useNavigate();
 
-  // Date display (no clock) - Year, Month Day
-  const tashkent = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Tashkent" }));
-  const monthNames = {
-    uz: ['Yanvar','Fevral','Mart','Aprel','May','Iyun','Iyul','Avgust','Sentyabr','Oktyabr','Noyabr','Dekabr'],
-    ru: ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'],
-    en: ['January','February','March','April','May','June','July','August','September','October','November','December'],
-  };
-  const dateDisplay = `${tashkent.getFullYear()}, ${monthNames[lang]?.[tashkent.getMonth()] || monthNames.en[tashkent.getMonth()]} ${tashkent.getDate()}`;
-
   const [showSearch, setShowSearch] = useState(false);
   const [showNotifs, setShowNotifs] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
@@ -61,12 +52,11 @@ export default function Header({ onMenuClick, visible, onOpenShop }) {
   return (
     <>
       <header className={`sticky top-0 z-30 glass px-4 py-3 flex items-center justify-between transition-transform duration-300 ${visible ? 'translate-y-0' : '-translate-y-full'}`}>
-        {/* Left: Menu + Date */}
+        {/* Left: Menu only */}
         <div className="flex items-center gap-3">
           <button className="lg:hidden p-1" onClick={onMenuClick}>
             <Menu size={22} style={{ color: 'var(--text-primary)' }} />
           </button>
-          <span className="text-sm font-medium hidden sm:block" style={{ color: 'var(--text-primary)' }}>{dateDisplay}</span>
         </div>
 
         {/* Center: Search */}
