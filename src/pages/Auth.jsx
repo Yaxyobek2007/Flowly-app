@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 
 export default function Auth() {
-  const { login, loginWithGoogle, loginWithPhone, signup, language, setLanguage, t } = useAuth();
+  const { login, loginWithGoogle, loginWithPhone, signup, language, setLanguage, t, users } = useAuth();
   const [mode, setMode] = useState('login');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -238,9 +238,48 @@ export default function Auth() {
               <button type="button" onClick={() => setMode('login')} className="w-full text-xs text-white/40">{t('back')}</button>
             </form>
           )}
+
+          {/* STAFF ANALYTICS */}
+          {mode === 'staff' && (
+            <div className="space-y-3">
+              <h2 className="text-lg font-bold text-white text-center">
+                {language === 'ru' ? 'Аналитика' : language === 'en' ? 'Staff Analytics' : 'Xodimlar Analizi'}
+              </h2>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="p-3 rounded-xl bg-white/10 text-center">
+                  <p className="text-2xl font-bold text-blue-300">{users.length}</p>
+                  <p className="text-[10px] text-white/50">{language === 'ru' ? 'Всего пользователей' : language === 'en' ? 'Total users' : 'Jami foydalanuvchilar'}</p>
+                </div>
+                <div className="p-3 rounded-xl bg-white/10 text-center">
+                  <p className="text-2xl font-bold text-green-300">{users.filter(u => u.plan !== 'free').length}</p>
+                  <p className="text-[10px] text-white/50">Premium</p>
+                </div>
+              </div>
+              <div className="max-h-40 overflow-y-auto space-y-1">
+                {users.map(u => (
+                  <div key={u.id} className="flex items-center justify-between p-2 rounded-lg bg-white/5">
+                    <div>
+                      <p className="text-xs text-white/80 font-medium">{u.name} {u.surname}</p>
+                      <p className="text-[10px] text-white/40">{u.email}</p>
+                    </div>
+                    <span className={`text-[10px] px-2 py-0.5 rounded-full ${u.plan === 'vip' ? 'bg-purple-500/30 text-purple-300' : 'bg-white/10 text-white/50'}`}>{u.plan}</span>
+                  </div>
+                ))}
+              </div>
+              <button type="button" onClick={() => setMode('login')} className="w-full text-xs text-white/40">{t('back')}</button>
+            </div>
+          )}
         </div>
 
         <p className="text-center text-[10px] text-white/20 mt-4">© 2026 Flowly. Yaxyobek Nematillaev</p>
+
+        {/* Staff Analytics Access */}
+        <div className="text-center mt-3">
+          <button onClick={() => setMode('staff')}
+            className="text-[11px] text-white/30 hover:text-white/60 transition-colors underline">
+            {language === 'ru' ? 'Аналитика (для сотрудников)' : language === 'en' ? 'Analytics (staff)' : 'Analiz (xodimlar uchun)'}
+          </button>
+        </div>
       </div>
     </div>
   );

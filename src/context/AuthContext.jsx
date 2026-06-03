@@ -58,7 +58,7 @@ const translations = {
     slogan: "Plan. Act. Achieve.",
     description: "Hayotingizni boshqaring — kunlik, haftalik, oylik va yillik rejalar bilan",
     // Navigation
-    dashboard: "Dashboard",
+    dashboard: "Asosiy",
     dailyPlanner: "Kunlik reja",
     weeklyPlanner: "Haftalik reja",
     monthlyPlanner: "Oylik reja",
@@ -545,7 +545,7 @@ const translations = {
     back: "Back",
     slogan: "Plan. Act. Achieve.",
     description: "Manage your life — daily, weekly, monthly, and yearly plans",
-    dashboard: "Dashboard",
+    dashboard: "Main",
     dailyPlanner: "Daily",
     weeklyPlanner: "Weekly",
     monthlyPlanner: "Monthly",

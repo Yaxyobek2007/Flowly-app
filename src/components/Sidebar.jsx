@@ -21,9 +21,9 @@ const navItems = [
 
 // Translation map for sidebar labels
 const labels = {
-  uz: { dashboard: 'Dashboard', dailyPlanner: 'Kunlik reja', weeklyPlanner: 'Haftalik reja', monthlyPlanner: 'Oylik reja', yearlyGoals: 'Yillik maqsadlar', habitTracker: 'Odatlar', notes: 'Yozuvlar', analytics: 'Statistika', achievements: 'Yutuqlar', location: 'Xarita' },
+  uz: { dashboard: 'Asosiy', dailyPlanner: 'Kunlik reja', weeklyPlanner: 'Haftalik reja', monthlyPlanner: 'Oylik reja', yearlyGoals: 'Yillik maqsadlar', habitTracker: 'Odatlar', notes: 'Yozuvlar', analytics: 'Statistika', achievements: 'Yutuqlar', location: 'Xarita' },
   ru: { dashboard: 'Главная', dailyPlanner: 'День', weeklyPlanner: 'Неделя', monthlyPlanner: 'Месяц', yearlyGoals: 'Цели', habitTracker: 'Привычки', notes: 'Заметки', analytics: 'Аналитика', achievements: 'Достижения', location: 'Карта' },
-  en: { dashboard: 'Dashboard', dailyPlanner: 'Daily', weeklyPlanner: 'Weekly', monthlyPlanner: 'Monthly', yearlyGoals: 'Goals', habitTracker: 'Habits', notes: 'Notes', analytics: 'Analytics', achievements: 'Achievements', location: 'Map' },
+  en: { dashboard: 'Main', dailyPlanner: 'Daily', weeklyPlanner: 'Weekly', monthlyPlanner: 'Monthly', yearlyGoals: 'Goals', habitTracker: 'Habits', notes: 'Notes', analytics: 'Analytics', achievements: 'Achievements', location: 'Map' },
 };
 
 export default function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }) {

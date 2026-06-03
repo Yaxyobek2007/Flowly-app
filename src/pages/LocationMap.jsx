@@ -1,26 +1,52 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
-import { MapPin, Navigation, Plus, Trash2, ExternalLink, Search } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { MapPin, Navigation, Plus, Trash2, Search, ExternalLink } from 'lucide-react';
+import { MapContainer, TileLayer, Marker, Popup, useMapEvents, useMap } from 'react-leaflet';
+import L from 'leaflet';
+
+// Fix leaflet default icon issue
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+});
 
 const defaultLocations = [
-  { id: 1, name: "Universitet", address: "TTPU, Toshkent", lat: 41.3111, lng: 69.2797, type: "education", icon: "🏫" },
-  { id: 2, name: "Tashkent City", address: "Tashkent City Mall", lat: 41.3123, lng: 69.2787, type: "event", icon: "🏙️" },
-  { id: 3, name: "Konferensiya markazi", address: "Hilton Toshkent", lat: 41.3045, lng: 69.2715, type: "meeting", icon: "🏨" },
-  { id: 4, name: "Kafe", address: "Navoi ko'chasi", lat: 41.3150, lng: 69.2800, type: "personal", icon: "☕" },
-  { id: 5, name: "Ofis", address: "IT Park, Toshkent", lat: 41.3200, lng: 69.2850, type: "work", icon: "🏢" },
-  { id: 6, name: "Tug'ilgan kun joyi", address: "Andijon", lat: 40.7831, lng: 72.3442, type: "birthday", icon: "🎂" },
+  { id: 1, name: "TTPU Universitet", address: "Toshkent, O'zbekiston", lat: 41.3111, lng: 69.2797, type: "education", icon: "🏫" },
+  { id: 2, name: "Tashkent City", address: "Tashkent City Mall", lat: 41.3055, lng: 69.2812, type: "event", icon: "🏙️" },
+  { id: 3, name: "IT Park", address: "IT Park, Toshkent", lat: 41.3200, lng: 69.2850, type: "work", icon: "🏢" },
+  { id: 4, name: "Tug'ilgan kun joyi", address: "Andijon", lat: 40.7831, lng: 72.3442, type: "birthday", icon: "🎂" },
 ];
+
+function MapClickHandler({ onMapClick }) {
+  useMapEvents({ click: (e) => onMapClick(e.latlng) });
+  return null;
+}
+
+function FlyToLocation({ position }) {
+  const map = useMap();
+  useEffect(() => {
+    if (position) map.flyTo(position, 15, { duration: 1 });
+  }, [position, map]);
+  return null;
+}
 
 export default function LocationMap() {
   const { events } = useApp();
+  const { t } = useAuth();
+
   const [locations, setLocations] = useState(() => {
     const saved = localStorage.getItem('flowly-locations');
     return saved ? JSON.parse(saved) : defaultLocations;
   });
   const [showForm, setShowForm] = useState(false);
-  const [newLoc, setNewLoc] = useState({ name: '', address: '', type: 'personal', icon: '📍' });
+  const [newLoc, setNewLoc] = useState({ name: '', address: '', type: 'personal', icon: '📍', lat: null, lng: null });
   const [selectedLoc, setSelectedLoc] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [flyTo, setFlyTo] = useState(null);
+  const [pickingOnMap, setPickingOnMap] = useState(false);
 
   const saveLocations = (locs) => {
     setLocations(locs);
@@ -28,16 +54,18 @@ export default function LocationMap() {
   };
 
   const handleAdd = () => {
-    if (!newLoc.name || !newLoc.address) return;
-    const loc = {
-      ...newLoc,
-      id: Date.now(),
-      lat: 41.3 + Math.random() * 0.05,
-      lng: 69.27 + Math.random() * 0.03,
-    };
+    if (!newLoc.name || !newLoc.lat) return;
+    const loc = { ...newLoc, id: Date.now() };
     saveLocations([...locations, loc]);
-    setNewLoc({ name: '', address: '', type: 'personal', icon: '📍' });
+    setNewLoc({ name: '', address: '', type: 'personal', icon: '📍', lat: null, lng: null });
     setShowForm(false);
+    setPickingOnMap(false);
+  };
+
+  const handleMapClick = (latlng) => {
+    if (pickingOnMap) {
+      setNewLoc(prev => ({ ...prev, lat: latlng.lat, lng: latlng.lng }));
+    }
   };
 
   const handleDelete = (id) => {
@@ -45,21 +73,20 @@ export default function LocationMap() {
     if (selectedLoc?.id === id) setSelectedLoc(null);
   };
 
-  const openInMaps = (loc) => {
-    const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(loc.address + ' ' + loc.name)}`;
-    window.open(url, '_blank');
-  };
-
   const openDirections = (loc) => {
-    const url = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(loc.address + ' ' + loc.name)}`;
+    const url = `https://www.google.com/maps/dir/?api=1&destination=${loc.lat},${loc.lng}`;
     window.open(url, '_blank');
   };
 
-  // Events with locations
-  const eventsWithLocation = events.filter(e => e.location);
+  const openInMaps = (loc) => {
+    window.open(`https://www.google.com/maps/search/?api=1&query=${loc.lat},${loc.lng}`, '_blank');
+  };
+
   const filteredLocations = searchQuery
     ? locations.filter(l => l.name.toLowerCase().includes(searchQuery.toLowerCase()) || l.address.toLowerCase().includes(searchQuery.toLowerCase()))
     : locations;
+
+  const eventsWithLocation = events.filter(e => e.location);
 
   const typeColors = {
     education: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400',
@@ -71,14 +98,14 @@ export default function LocationMap() {
   };
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6">
+    <div className="max-w-6xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>Location & Map</h1>
-          <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Geolokatsiya, xarita va yo'l ko'rsatish</p>
+          <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>{t('locationTitle')}</h1>
+          <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{t('locationDesc')}</p>
         </div>
-        <button className="btn-primary flex items-center gap-2" onClick={() => setShowForm(!showForm)}>
-          <Plus size={18} /> Joy qo'shish
+        <button className="btn-primary flex items-center gap-2" onClick={() => { setShowForm(!showForm); setPickingOnMap(true); }}>
+          <Plus size={18} /> {t('addPlace')}
         </button>
       </div>
 
@@ -86,7 +113,7 @@ export default function LocationMap() {
       <div className="card">
         <div className="flex items-center gap-3">
           <Search size={18} style={{ color: 'var(--text-secondary)' }} />
-          <input type="text" placeholder="Joy qidirish..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
+          <input type="text" placeholder={t('searchPlace')} value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
             className="flex-1 bg-transparent outline-none" style={{ color: 'var(--text-primary)' }} />
         </div>
       </div>
@@ -94,71 +121,75 @@ export default function LocationMap() {
       {/* Add Form */}
       {showForm && (
         <div className="card animate-in" style={{ borderColor: 'var(--accent)' }}>
-          <h3 className="font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>Yangi joy qo'shish</h3>
+          <h3 className="font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>{t('addPlace')}</h3>
+          <p className="text-xs mb-3 p-2 rounded-lg bg-blue-50 dark:bg-blue-900/10 text-blue-600 dark:text-blue-400">
+            📍 Xaritadan joy tanlash uchun xaritaga bosing. Koordinatalar avtomatik tanlanadi.
+          </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <input type="text" placeholder="Joy nomi" value={newLoc.name} onChange={e => setNewLoc({...newLoc, name: e.target.value})}
+            <input type="text" placeholder={t('placeName')} value={newLoc.name} onChange={e => setNewLoc({...newLoc, name: e.target.value})}
               className="px-4 py-2 rounded-lg border outline-none focus:ring-2 focus:ring-blue-500"
               style={{ background: 'var(--bg-secondary)', borderColor: 'var(--border)', color: 'var(--text-primary)' }} />
-            <input type="text" placeholder="Manzil" value={newLoc.address} onChange={e => setNewLoc({...newLoc, address: e.target.value})}
+            <input type="text" placeholder={t('placeAddress')} value={newLoc.address} onChange={e => setNewLoc({...newLoc, address: e.target.value})}
               className="px-4 py-2 rounded-lg border outline-none focus:ring-2 focus:ring-blue-500"
               style={{ background: 'var(--bg-secondary)', borderColor: 'var(--border)', color: 'var(--text-primary)' }} />
             <select value={newLoc.type} onChange={e => setNewLoc({...newLoc, type: e.target.value})}
               className="px-4 py-2 rounded-lg border outline-none focus:ring-2 focus:ring-blue-500"
               style={{ background: 'var(--bg-secondary)', borderColor: 'var(--border)', color: 'var(--text-primary)' }}>
-              <option value="personal">Shaxsiy</option>
-              <option value="education">Ta'lim</option>
-              <option value="work">Ish</option>
-              <option value="meeting">Uchrashuv</option>
-              <option value="event">Tadbir</option>
-              <option value="birthday">Tug'ilgan kun</option>
+              <option value="personal">{t('personal')}</option>
+              <option value="education">{t('education')}</option>
+              <option value="work">{t('work')}</option>
+              <option value="meeting">{t('meeting')}</option>
+              <option value="event">{t('event')}</option>
+              <option value="birthday">{t('birthday')}</option>
             </select>
-            <select value={newLoc.icon} onChange={e => setNewLoc({...newLoc, icon: e.target.value})}
-              className="px-4 py-2 rounded-lg border outline-none focus:ring-2 focus:ring-blue-500 text-xl"
-              style={{ background: 'var(--bg-secondary)', borderColor: 'var(--border)' }}>
-              <option value="📍">📍</option><option value="🏫">🏫</option><option value="🏢">🏢</option>
-              <option value="🏠">🏠</option><option value="☕">☕</option><option value="🏙️">🏙️</option>
-              <option value="🏨">🏨</option><option value="🎂">🎂</option><option value="🏋️">🏋️</option>
-              <option value="🏥">🏥</option><option value="✈️">✈️</option><option value="🚉">🚉</option>
-            </select>
+            <div className="px-4 py-2 rounded-lg border text-sm" style={{ background: 'var(--bg-secondary)', borderColor: 'var(--border)', color: 'var(--text-secondary)' }}>
+              {newLoc.lat ? `📍 ${newLoc.lat.toFixed(4)}, ${newLoc.lng.toFixed(4)}` : '⬆️ Xaritadan tanlang'}
+            </div>
           </div>
           <div className="flex gap-2 mt-3">
-            <button className="btn-primary" onClick={handleAdd}>Qo'shish</button>
-            <button className="px-4 py-2 rounded-lg border" style={{ borderColor: 'var(--border)', color: 'var(--text-secondary)' }} onClick={() => setShowForm(false)}>Bekor</button>
+            <button className="btn-primary" onClick={handleAdd} disabled={!newLoc.lat || !newLoc.name}>{t('add')}</button>
+            <button className="px-4 py-2 rounded-lg border" style={{ borderColor: 'var(--border)', color: 'var(--text-secondary)' }} onClick={() => { setShowForm(false); setPickingOnMap(false); }}>{t('cancel')}</button>
           </div>
         </div>
       )}
 
-      {/* Map Preview (Interactive visual representation) */}
-      <div className="card overflow-hidden">
-        <h3 className="font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>🗺️ Xarita</h3>
-        <div className="relative w-full h-64 rounded-xl overflow-hidden" style={{ background: 'linear-gradient(135deg, #e0f2fe 0%, #dbeafe 30%, #bfdbfe 60%, #93c5fd 100%)' }}>
-          {/* Simplified map visualization */}
-          <div className="absolute inset-0 opacity-20">
-            <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-              <defs><pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="#3b82f6" strokeWidth="0.5"/></pattern></defs>
-              <rect width="100%" height="100%" fill="url(#grid)"/>
-            </svg>
-          </div>
-          {/* Location pins */}
-          {filteredLocations.map((loc, idx) => {
-            const x = 10 + (idx % 5) * 18 + Math.random() * 5;
-            const y = 15 + Math.floor(idx / 5) * 35 + Math.random() * 10;
-            return (
-              <div key={loc.id}
-                className={`absolute cursor-pointer transition-all hover:scale-125 ${selectedLoc?.id === loc.id ? 'scale-125 z-10' : ''}`}
-                style={{ left: `${x}%`, top: `${y}%` }}
-                onClick={() => setSelectedLoc(loc)}>
-                <div className="flex flex-col items-center">
-                  <span className="text-2xl drop-shadow-lg">{loc.icon}</span>
-                  <span className="text-[9px] font-bold px-1 rounded mt-0.5 whitespace-nowrap" style={{ background: 'rgba(255,255,255,0.9)', color: '#1e293b' }}>{loc.name}</span>
-                </div>
-              </div>
-            );
-          })}
-          {/* Toshkent label */}
-          <div className="absolute bottom-2 right-3 text-xs font-medium px-2 py-1 rounded-lg" style={{ background: 'rgba(255,255,255,0.8)', color: '#1e293b' }}>
-            📍 Toshkent, O'zbekiston
-          </div>
+      {/* MAP */}
+      <div className="card overflow-hidden p-0">
+        <div className="h-[400px] w-full rounded-2xl overflow-hidden">
+          <MapContainer center={[41.311, 69.279]} zoom={12} className="h-full w-full z-0"
+            style={{ height: '100%', width: '100%' }}>
+            <TileLayer
+              attribution='&copy; <a href="https://osm.org/copyright">OSM</a>'
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            />
+            <MapClickHandler onMapClick={handleMapClick} />
+            {flyTo && <FlyToLocation position={flyTo} />}
+
+            {/* Existing pins */}
+            {locations.map(loc => (
+              <Marker key={loc.id} position={[loc.lat, loc.lng]}
+                eventHandlers={{ click: () => { setSelectedLoc(loc); setFlyTo([loc.lat, loc.lng]); } }}>
+                <Popup>
+                  <div className="text-center min-w-[120px]">
+                    <span className="text-2xl">{loc.icon}</span>
+                    <p className="font-bold text-sm mt-1">{loc.name}</p>
+                    <p className="text-xs text-gray-500">{loc.address}</p>
+                    <div className="flex gap-1 mt-2 justify-center">
+                      <button onClick={() => openDirections(loc)} className="px-2 py-1 bg-green-500 text-white rounded text-[10px]">Yo'l</button>
+                      <button onClick={() => openInMaps(loc)} className="px-2 py-1 bg-blue-500 text-white rounded text-[10px]">Maps</button>
+                    </div>
+                  </div>
+                </Popup>
+              </Marker>
+            ))}
+
+            {/* New location pin (being placed) */}
+            {newLoc.lat && (
+              <Marker position={[newLoc.lat, newLoc.lng]}>
+                <Popup><span className="text-sm font-bold text-blue-600">📍 Yangi joy</span></Popup>
+              </Marker>
+            )}
+          </MapContainer>
         </div>
       </div>
 
@@ -174,10 +205,10 @@ export default function LocationMap() {
             </div>
             <div className="flex gap-2">
               <button onClick={() => openInMaps(selectedLoc)} className="btn-primary flex items-center gap-1 text-sm">
-                <ExternalLink size={14} /> Xaritada
+                <ExternalLink size={14} /> {t('openInMaps')}
               </button>
               <button onClick={() => openDirections(selectedLoc)} className="px-3 py-2 rounded-xl bg-green-500 text-white font-medium text-sm flex items-center gap-1 hover:bg-green-600 transition-all">
-                <Navigation size={14} /> Yo'l
+                <Navigation size={14} /> {t('getDirections')}
               </button>
             </div>
           </div>
@@ -188,21 +219,18 @@ export default function LocationMap() {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {filteredLocations.map((loc, idx) => (
           <div key={loc.id} className={`card flex items-center gap-4 animate-in cursor-pointer transition-all ${selectedLoc?.id === loc.id ? 'ring-2 ring-blue-500' : ''}`}
-            style={{ animationDelay: `${idx * 50}ms` }} onClick={() => setSelectedLoc(loc)}>
-            <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl" style={{ background: 'var(--bg-secondary)' }}>
-              {loc.icon}
-            </div>
+            style={{ animationDelay: `${idx * 50}ms` }}
+            onClick={() => { setSelectedLoc(loc); setFlyTo([loc.lat, loc.lng]); }}>
+            <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl" style={{ background: 'var(--bg-secondary)' }}>{loc.icon}</div>
             <div className="flex-1">
               <h4 className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>{loc.name}</h4>
               <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>{loc.address}</p>
             </div>
             <div className="flex gap-1">
-              <button onClick={(e) => { e.stopPropagation(); openDirections(loc); }}
-                className="p-2 rounded-lg hover:bg-green-50 dark:hover:bg-green-900/20" title="Yo'l ko'rsatish">
+              <button onClick={(e) => { e.stopPropagation(); openDirections(loc); }} className="p-2 rounded-lg hover:bg-green-50 dark:hover:bg-green-900/20" title={t('getDirections')}>
                 <Navigation size={14} className="text-green-500" />
               </button>
-              <button onClick={(e) => { e.stopPropagation(); handleDelete(loc.id); }}
-                className="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20">
+              <button onClick={(e) => { e.stopPropagation(); handleDelete(loc.id); }} className="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20">
                 <Trash2 size={14} className="text-red-400" />
               </button>
             </div>
@@ -213,7 +241,7 @@ export default function LocationMap() {
       {/* Events with locations */}
       {eventsWithLocation.length > 0 && (
         <div className="card">
-          <h3 className="font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>📅 Voqealar joylashuvi</h3>
+          <h3 className="font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>📅 {t('eventsLocation')}</h3>
           <div className="space-y-3">
             {eventsWithLocation.map(event => (
               <div key={event.id} className="flex items-center gap-3 p-3 rounded-xl cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/10"
@@ -222,9 +250,7 @@ export default function LocationMap() {
                 <span className="text-xl">{event.icon}</span>
                 <div className="flex-1">
                   <p className="font-medium text-sm" style={{ color: 'var(--text-primary)' }}>{event.title}</p>
-                  <p className="text-xs flex items-center gap-1" style={{ color: 'var(--text-secondary)' }}>
-                    <MapPin size={10} /> {event.location} • {event.date}
-                  </p>
+                  <p className="text-xs flex items-center gap-1" style={{ color: 'var(--text-secondary)' }}><MapPin size={10} /> {event.location} • {event.date}</p>
                 </div>
                 <Navigation size={16} className="text-blue-500" />
               </div>
