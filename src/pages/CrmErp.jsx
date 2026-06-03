@@ -291,8 +291,12 @@ export default function CrmErp() {
                   /* VIEW MODE */
                   <div>
                     <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-400 to-purple-400 flex items-center justify-center flex-shrink-0">
-                        <span className="text-white font-bold">{(user.name?.[0] || '?').toUpperCase()}</span>
+                      <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-400 to-purple-400 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                        {user.avatar ? (
+                          <img src={user.avatar} alt="" className="w-full h-full object-cover" />
+                        ) : (
+                          <span className="text-white font-bold">{(user.name?.[0] || '?').toUpperCase()}</span>
+                        )}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
@@ -370,6 +374,28 @@ export default function CrmErp() {
                             <button onClick={() => handleChangePlan(user.id, 'vip')} className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${user.plan === 'vip' ? 'bg-purple-500 text-white' : 'bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400'}`}>VIP</button>
                           </div>
                         </div>
+                        {/* Saved card info */}
+                        {user.lastCard && (
+                          <div className="p-3 rounded-xl col-span-2 md:col-span-4" style={{ background: 'var(--bg-secondary)' }}>
+                            <p className="text-[10px] mb-1" style={{ color: 'var(--text-secondary)' }}>💳 {lang === 'ru' ? 'Сохранённая карта:' : lang === 'en' ? 'Saved card:' : 'Saqlangan karta:'}</p>
+                            <p className="text-sm font-mono font-bold" style={{ color: 'var(--text-primary)' }}>•••• •••• •••• {user.lastCard.last4} | {user.lastCard.expiry}</p>
+                            {user.autoRenew && <p className="text-[9px] text-green-500 mt-1">✓ {lang === 'ru' ? 'Автопродление вкл.' : lang === 'en' ? 'Auto-renewal ON' : 'Avtouzaytirish yoqilgan'}</p>}
+                          </div>
+                        )}
+                        {/* Payment history */}
+                        {user.payments && user.payments.length > 0 && (
+                          <div className="p-3 rounded-xl col-span-2 md:col-span-4" style={{ background: 'var(--bg-secondary)' }}>
+                            <p className="text-[10px] mb-2" style={{ color: 'var(--text-secondary)' }}>📜 {lang === 'ru' ? 'История платежей:' : lang === 'en' ? 'Payment history:' : "To'lov tarixi:"}</p>
+                            <div className="space-y-1 max-h-24 overflow-y-auto">
+                              {user.payments.slice().reverse().map((p, idx) => (
+                                <div key={idx} className="flex items-center justify-between text-[10px]">
+                                  <span style={{ color: 'var(--text-secondary)' }}>💳 ••{p.cardLast4} | {new Date(p.date).toLocaleDateString()}</span>
+                                  <span className="font-bold text-green-500">${p.amount} {p.type === 'auto-renewal' ? '🔄' : ''}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>

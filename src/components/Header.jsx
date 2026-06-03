@@ -52,10 +52,17 @@ export default function Header({ onMenuClick, visible, onOpenShop }) {
   return (
     <>
       <header className={`sticky top-0 z-30 glass px-4 py-3 flex items-center justify-between transition-transform duration-300 ${visible ? 'translate-y-0' : '-translate-y-full'}`}>
-        {/* Left: Menu only */}
-        <div className="flex items-center gap-3">
+        {/* Left: Menu + Save */}
+        <div className="flex items-center gap-2">
           <button className="lg:hidden p-1" onClick={onMenuClick}>
             <Menu size={22} style={{ color: 'var(--text-primary)' }} />
+          </button>
+          <button onClick={() => { localStorage.setItem('flowly-last-save', Date.now().toString()); navigate('/'); }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all hover:bg-green-50 dark:hover:bg-green-900/20"
+            style={{ border: '1px solid var(--border)', color: 'var(--text-secondary)' }}
+            title={lang === 'ru' ? 'Сохранить' : lang === 'en' ? 'Save' : 'Saqlash'}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+            <span className="hidden sm:inline">{lang === 'ru' ? 'Сохранить' : lang === 'en' ? 'Save' : 'Saqlash'}</span>
           </button>
         </div>
 

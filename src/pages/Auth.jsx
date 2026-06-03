@@ -9,6 +9,11 @@ export default function Auth() {
   const [logoRotation, setLogoRotation] = useState(0);
   const [showLangMenu, setShowLangMenu] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [resetCodeSent, setResetCodeSent] = useState(false);
+  const [resetCodeVerified, setResetCodeVerified] = useState(false);
+  const [resetCode, setResetCode] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -246,13 +251,57 @@ export default function Auth() {
 
           {/* RESET */}
           {mode === 'reset' && (
-            <form onSubmit={e => { e.preventDefault(); setMode('login'); }} className="space-y-3">
+            <div className="space-y-3">
               <h2 className="text-lg font-bold text-white text-center">{t('resetPassword')}</h2>
-              <input type="text" placeholder={t('email')} value={email} onChange={e => setEmail(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/40 outline-none focus:ring-2 focus:ring-blue-500" />
-              <button type="submit" className="w-full py-3 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold shadow-lg">{t('sendCode')}</button>
-              <button type="button" onClick={() => setMode('login')} className="w-full text-xs text-white/40">{t('back')}</button>
-            </form>
+              {!resetCodeSent ? (
+                <>
+                  <input type="text" placeholder={t('email')} value={email} onChange={e => setEmail(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/40 outline-none focus:ring-2 focus:ring-blue-500" />
+                  {error && <p className="text-red-400 text-xs text-center">{error}</p>}
+                  <button type="button" onClick={() => { if (!email) { setError(t('requiredFields')); return; } setResetCodeSent(true); setError(''); }}
+                    className="w-full py-3 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold shadow-lg">{t('sendCode')}</button>
+                </>
+              ) : !resetCodeVerified ? (
+                <>
+                  <p className="text-xs text-center text-white/50">{email} {language === 'ru' ? 'отправлен код' : language === 'en' ? 'code sent' : 'ga kod yuborildi'}</p>
+                  <div className="flex justify-center gap-2">
+                    {[0,1,2,3].map(i => (
+                      <input key={i} type="text" maxLength="1" value={resetCode[i] || ''}
+                        onChange={e => { const v = e.target.value; const c = resetCode.split(''); c[i] = v; setResetCode(c.join('')); if (v && e.target.nextSibling) e.target.nextSibling.focus(); }}
+                        className="w-12 h-12 text-center text-xl font-bold rounded-xl bg-white/10 border border-white/20 text-white outline-none focus:ring-2 focus:ring-blue-500" />
+                    ))}
+                  </div>
+                  {error && <p className="text-red-400 text-xs text-center">{error}</p>}
+                  <button type="button" onClick={() => { if (resetCode === '1234') { setResetCodeVerified(true); setError(''); } else { setError(language === 'ru' ? 'Неверный код (тест: 1234)' : language === 'en' ? 'Wrong code (test: 1234)' : 'Kod noto\'g\'ri (test: 1234)'); } }}
+                    className="w-full py-3 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold shadow-lg">{t('verifyCode')}</button>
+                </>
+              ) : (
+                <>
+                  <p className="text-xs text-center text-green-400">✓ {language === 'ru' ? 'Код подтверждён! Введите новый пароль:' : language === 'en' ? 'Code verified! Enter new password:' : 'Kod tasdiqlandi! Yangi parol kiriting:'}</p>
+                  <div className="relative">
+                    <input type={showPassword ? 'text' : 'password'} placeholder={language === 'ru' ? 'Новый пароль' : language === 'en' ? 'New password' : 'Yangi parol'} value={newPassword}
+                      onChange={e => setNewPassword(e.target.value)}
+                      className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/40 outline-none focus:ring-2 focus:ring-blue-500 pr-12" />
+                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70 text-sm">{showPassword ? '🙈' : '👁️'}</button>
+                  </div>
+                  <div className="relative">
+                    <input type={showPassword ? 'text' : 'password'} placeholder={language === 'ru' ? 'Повторите пароль' : language === 'en' ? 'Confirm password' : 'Parolni tasdiqlang'} value={confirmPassword}
+                      onChange={e => setConfirmPassword(e.target.value)}
+                      className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/40 outline-none focus:ring-2 focus:ring-blue-500 pr-12" />
+                  </div>
+                  {error && <p className="text-red-400 text-xs text-center">{error}</p>}
+                  <button type="button" onClick={() => {
+                    if (newPassword !== confirmPassword) { setError(language === 'ru' ? 'Пароли не совпадают' : language === 'en' ? 'Passwords don\'t match' : 'Parollar mos emas'); return; }
+                    if (newPassword.length < 8) { setError(language === 'ru' ? 'Мин. 8 символов' : language === 'en' ? 'Min 8 chars' : 'Kamida 8 belgi'); return; }
+                    // Reset successful
+                    setMode('login'); setResetCodeSent(false); setResetCodeVerified(false); setResetCode(''); setNewPassword(''); setConfirmPassword('');
+                  }} className="w-full py-3 rounded-xl bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold shadow-lg">
+                    {language === 'ru' ? 'Сохранить новый пароль' : language === 'en' ? 'Save new password' : 'Yangi parolni saqlash'}
+                  </button>
+                </>
+              )}
+              <button type="button" onClick={() => { setMode('login'); setResetCodeSent(false); setResetCodeVerified(false); setResetCode(''); }} className="w-full text-xs text-white/40">{t('back')}</button>
+            </div>
           )}
         </div>
 

@@ -62,16 +62,29 @@ export default function Dashboard() {
 
   const userName = currentUser?.name || 'User';
 
+  // Full date display for home
+  const dayNames = {
+    uz: ['Yakshanba','Dushanba','Seshanba','Chorshanba','Payshanba','Juma','Shanba'],
+    ru: ['Воскресенье','Понедельник','Вторник','Среда','Четверг','Пятница','Суббота'],
+    en: ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'],
+  };
+  const monthNames = {
+    uz: ['Yanvar','Fevral','Mart','Aprel','May','Iyun','Iyul','Avgust','Sentyabr','Oktyabr','Noyabr','Dekabr'],
+    ru: ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'],
+    en: ['January','February','March','April','May','June','July','August','September','October','November','December'],
+  };
+  const fullDate = `${dayNames[lang]?.[tashkentTime.getDay()]}, ${tashkentTime.getDate()} ${monthNames[lang]?.[tashkentTime.getMonth()]} ${tashkentTime.getFullYear()}`;
+
   return (
     <div className="max-w-7xl mx-auto space-y-6">
       {/* Welcome */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>{t('dashboard')}</h1>
-          <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{t('welcomeUser')}, {userName}!</p>
+          <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>{t('welcomeUser')}, {userName}!</h1>
+          <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{fullDate}</p>
         </div>
         <div className="text-right">
-          <p className="text-xl font-bold font-mono" style={{ color: 'var(--accent)' }}>{timeStr}</p>
+          <p className="text-2xl font-bold font-mono" style={{ color: 'var(--accent)' }}>{timeStr}</p>
         </div>
       </div>
 
