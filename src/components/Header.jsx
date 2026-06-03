@@ -52,53 +52,10 @@ export default function Header({ onMenuClick, visible, onOpenShop }) {
   return (
     <>
       <header className={`sticky top-0 z-30 glass px-4 py-3 flex items-center justify-between transition-transform duration-300 ${visible ? 'translate-y-0' : '-translate-y-full'}`}>
-        {/* Left: Menu + Save (export data) */}
+        {/* Left: Menu only */}
         <div className="flex items-center gap-2">
           <button className="lg:hidden p-1" onClick={onMenuClick}>
             <Menu size={22} style={{ color: 'var(--text-primary)' }} />
-          </button>
-          <button onClick={() => {
-            // Play save sound
-            try {
-              const ctx = new (window.AudioContext || window.webkitAudioContext)();
-              const osc = ctx.createOscillator(); const g = ctx.createGain();
-              osc.connect(g); g.connect(ctx.destination);
-              osc.frequency.setValueAtTime(600, ctx.currentTime);
-              osc.frequency.setValueAtTime(900, ctx.currentTime + 0.05);
-              g.gain.setValueAtTime(0.2, ctx.currentTime);
-              g.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
-              osc.start(); osc.stop(ctx.currentTime + 0.15);
-            } catch(e) {}
-
-            // Export user data as JSON file
-            const exportData = {
-              exportDate: new Date().toISOString(),
-              user: currentUser,
-              tasks: JSON.parse(localStorage.getItem('flowly-tasks') || '[]'),
-              habits: JSON.parse(localStorage.getItem('flowly-habits') || '[]'),
-              goals: JSON.parse(localStorage.getItem('flowly-goals') || '[]'),
-              notes: JSON.parse(localStorage.getItem('flowly-notes') || '[]'),
-              events: JSON.parse(localStorage.getItem('flowly-events') || '[]'),
-              certificates: JSON.parse(localStorage.getItem('flowly-certificates') || '[]'),
-              locations: JSON.parse(localStorage.getItem('flowly-locations') || '[]'),
-              notifications: JSON.parse(localStorage.getItem('flowly-notifications') || '[]'),
-              settings: JSON.parse(localStorage.getItem('flowly-notif-settings') || '{}'),
-            };
-            const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `flowly-backup-${currentUser?.login || 'user'}-${new Date().toISOString().split('T')[0]}.json`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-          }}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all hover:bg-green-50 dark:hover:bg-green-900/20 active:scale-95"
-            style={{ border: '1px solid var(--border)', color: 'var(--text-secondary)' }}
-            title={lang === 'ru' ? 'Сохранить (скачать файл)' : lang === 'en' ? 'Save (download file)' : 'Saqlash (fayl yuklash)'}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-            <span className="hidden sm:inline">{lang === 'ru' ? 'Сохранить' : lang === 'en' ? 'Save' : 'Saqlash'}</span>
           </button>
         </div>
 
@@ -127,27 +84,58 @@ export default function Header({ onMenuClick, visible, onOpenShop }) {
 
           {/* Notifications */}
           <div className="relative">
-            <button onClick={() => { setShowNotifs(!showNotifs); setShowUserMenu(false); }}
+            <button onClick={() => {
+              setShowNotifs(!showNotifs);
+              setShowUserMenu(false);
+              // Vibrate + sound on open if has unread
+              if (!showNotifs && unreadCount > 0) {
+                if ('vibrate' in navigator) navigator.vibrate([100, 50, 100]);
+                try {
+                  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                  const osc = ctx.createOscillator(); const g = ctx.createGain();
+                  osc.connect(g); g.connect(ctx.destination);
+                  osc.frequency.setValueAtTime(880, ctx.currentTime);
+                  osc.frequency.setValueAtTime(1100, ctx.currentTime + 0.08);
+                  g.gain.setValueAtTime(0.2, ctx.currentTime);
+                  g.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+                  osc.start(); osc.stop(ctx.currentTime + 0.3);
+                } catch(e) {}
+              }
+            }}
               className="p-2 rounded-xl transition-colors hover:bg-blue-50 dark:hover:bg-blue-900/20 relative">
               <Bell size={18} style={{ color: 'var(--text-secondary)' }} />
-              {unreadCount > 0 && <span className="absolute top-1 right-1 w-4 h-4 bg-red-500 rounded-full text-[9px] text-white flex items-center justify-center font-bold">{unreadCount}</span>}
+              {unreadCount > 0 && (
+                <span className="absolute top-0.5 right-0.5 w-4 h-4 bg-red-500 rounded-full text-[9px] text-white flex items-center justify-center font-bold animate-pulse">{unreadCount}</span>
+              )}
             </button>
             {showNotifs && (
-              <div className="absolute right-0 mt-2 w-72 rounded-2xl shadow-2xl overflow-hidden animate-in" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
+              <div className="absolute right-0 mt-2 w-80 rounded-2xl shadow-2xl overflow-hidden animate-in" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
                 <div className="flex items-center justify-between p-3 border-b" style={{ borderColor: 'var(--border)' }}>
-                  <h4 className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>Bildirishnomalar</h4>
-                  <button onClick={clearNotifications} className="text-xs text-blue-500">Tozalash</button>
+                  <h4 className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>{t('notifications')}</h4>
+                  <button onClick={() => { clearNotifications(); if ('vibrate' in navigator) navigator.vibrate(50); }}
+                    className="text-xs px-2 py-0.5 rounded-lg bg-red-50 text-red-500 dark:bg-red-900/20 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors font-medium">
+                    🗑️ {t('clearAll')}
+                  </button>
                 </div>
-                <div className="max-h-52 overflow-y-auto">
+                <div className="max-h-60 overflow-y-auto">
                   {notifications.length === 0 ? (
-                    <p className="text-center py-6 text-xs" style={{ color: 'var(--text-secondary)' }}>Bo'sh</p>
-                  ) : notifications.slice(0, 8).map(n => (
-                    <div key={n.id} className={`p-3 border-b cursor-pointer ${n.read ? '' : 'bg-blue-50/50 dark:bg-blue-900/10'}`}
-                      style={{ borderColor: 'var(--border)' }} onClick={() => markNotificationRead(n.id)}>
-                      <p className="text-xs font-medium" style={{ color: 'var(--text-primary)' }}>{n.title}</p>
-                      <p className="text-[10px]" style={{ color: 'var(--text-secondary)' }}>{n.message}</p>
-                    </div>
-                  ))}
+                    <p className="text-center py-8 text-sm" style={{ color: 'var(--text-secondary)' }}>✓ {t('noNotifications')}</p>
+                  ) : (
+                    notifications.slice(0, 10).map(n => (
+                      <div key={n.id} className={`flex items-center gap-2 p-3 border-b transition-colors ${n.read ? '' : 'bg-blue-50/50 dark:bg-blue-900/10'}`}
+                        style={{ borderColor: 'var(--border)' }}>
+                        <div className="flex-1 cursor-pointer" onClick={() => markNotificationRead(n.id)}>
+                          <p className="text-xs font-medium" style={{ color: 'var(--text-primary)' }}>{n.title}</p>
+                          <p className="text-[10px]" style={{ color: 'var(--text-secondary)' }}>{n.message}</p>
+                        </div>
+                        <button onClick={() => { markNotificationRead(n.id); clearNotifications(); }}
+                          className="p-1 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 flex-shrink-0 opacity-50 hover:opacity-100 transition-opacity"
+                          title={t('delete')}>
+                          <X size={14} className="text-red-500" />
+                        </button>
+                      </div>
+                    ))
+                  )}
                 </div>
               </div>
             )}
