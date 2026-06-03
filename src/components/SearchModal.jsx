@@ -18,6 +18,8 @@ const searchablePages = [
   { path: '/premium', label: 'Premium', keywords: ['premium', 'pro', 'plan', 'obuna'] },
   { path: '/settings', label: 'Settings', keywords: ['sozlama', 'settings', 'nastroyka'] },
   { path: '/profile', label: 'Profile', keywords: ['profil', 'akkaunt', 'shaxsiy'] },
+  { path: '/location', label: 'Xarita', keywords: ['xarita', 'lokatsiya', 'map', 'joy', 'geolokatsiya'] },
+  { path: '/crm', label: 'CRM/ERP', keywords: ['crm', 'erp', 'boshqaruv', 'biznes', 'daromad'] },
 ];
 
 export default function SearchModal({ isOpen, onClose }) {

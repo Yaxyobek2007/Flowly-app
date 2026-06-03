@@ -2,7 +2,7 @@ import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard, CalendarDays, CalendarRange, Calendar,
   Target, CheckSquare, FileText, BarChart3, Trophy, Sun, Moon, X,
-  Settings, Award, Users, Crown, Shield, User
+  Settings, Award, Users, Crown, Shield, User, MapPin, Briefcase
 } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
@@ -20,6 +20,7 @@ const navItems = [
   { path: '/certificates', icon: Award, label: 'Sertifikatlar' },
   { path: '/friends', icon: Users, label: "Do'stlar" },
   { path: '/premium', icon: Crown, label: 'Premium' },
+  { path: '/location', icon: MapPin, label: 'Xarita' },
 ];
 
 const bottomItems = [
@@ -57,9 +58,14 @@ export default function Sidebar({ isOpen, onClose }) {
             </NavLink>
           ))}
           {currentUser?.role === 'admin' && (
-            <NavLink to="/admin" onClick={onClose} className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}>
-              <Shield size={18} /><span className="text-sm">Admin Panel</span>
-            </NavLink>
+            <>
+              <NavLink to="/admin" onClick={onClose} className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}>
+                <Shield size={18} /><span className="text-sm">Admin Panel</span>
+              </NavLink>
+              <NavLink to="/crm" onClick={onClose} className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}>
+                <Briefcase size={18} /><span className="text-sm">CRM / ERP</span>
+              </NavLink>
+            </>
           )}
         </nav>
 

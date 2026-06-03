@@ -19,6 +19,8 @@ import Premium from './pages/Premium';
 import Friends from './pages/Friends';
 import Certificates from './pages/Certificates';
 import AdminPanel from './pages/AdminPanel';
+import LocationMap from './pages/LocationMap';
+import CrmErp from './pages/CrmErp';
 
 function ProtectedRoute({ children }) {
   const { currentUser } = useAuth();
@@ -52,6 +54,8 @@ function AppRoutes() {
         <Route path="friends" element={<Friends />} />
         <Route path="certificates" element={<Certificates />} />
         <Route path="admin" element={<AdminPanel />} />
+        <Route path="location" element={<LocationMap />} />
+        <Route path="crm" element={<CrmErp />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
