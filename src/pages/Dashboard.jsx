@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
+import { useAuth } from '../context/AuthContext';
 import { CheckCircle2, Clock, Target, Flame, Calendar, TrendingUp, Award } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -31,10 +32,11 @@ function ProgressRing({ score }) {
 
 export default function Dashboard() {
   const { tasks, habits, goals, events, achievements, calculateLifeScore } = useApp();
+  const { currentUser, t, language } = useAuth();
   const navigate = useNavigate();
   const lifeScore = calculateLifeScore();
+  const lang = language || 'uz';
 
-  // Real time - Toshkent (UTC+5)
   const [currentTime, setCurrentTime] = useState(new Date());
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
@@ -43,9 +45,11 @@ export default function Dashboard() {
 
   const tashkentTime = new Date(currentTime.toLocaleString("en-US", { timeZone: "Asia/Tashkent" }));
   const timeStr = tashkentTime.toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-  const dateStr = tashkentTime.toLocaleDateString('uz-UZ', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
-  const todayTasks = tasks.filter(t => t.day === 'tuesday'); // June 3 = Tuesday
+  const dayOfWeekToKey = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+  const todayKey = dayOfWeekToKey[tashkentTime.getDay()];
+
+  const todayTasks = tasks.filter(t => t.day === todayKey);
   const completedToday = todayTasks.filter(t => t.completed).length;
   const totalToday = todayTasks.length;
   const maxStreak = Math.max(...habits.map(h => h.streak), 0);
@@ -56,17 +60,18 @@ export default function Dashboard() {
     .sort((a, b) => new Date(a.date) - new Date(b.date))
     .slice(0, 3);
 
+  const userName = currentUser?.name || 'User';
+
   return (
     <div className="max-w-7xl mx-auto space-y-6">
-      {/* Welcome + Time */}
+      {/* Welcome */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>Dashboard</h1>
-          <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Xush kelibsiz, Yaxyobek!</p>
+          <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>{t('dashboard')}</h1>
+          <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{t('welcomeUser')}, {userName}!</p>
         </div>
         <div className="text-right">
-          <p className="text-2xl font-bold font-mono" style={{ color: 'var(--accent)' }}>{timeStr}</p>
-          <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>📍 Toshkent, O'zbekiston — {dateStr}</p>
+          <p className="text-xl font-bold font-mono" style={{ color: 'var(--accent)' }}>{timeStr}</p>
         </div>
       </div>
 

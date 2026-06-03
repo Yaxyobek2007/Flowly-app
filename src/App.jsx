@@ -1,8 +1,9 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { AppProvider } from './context/AppContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import LoadingScreen from './components/LoadingScreen';
 import Layout from './components/Layout';
 import Auth from './pages/Auth';
 import Dashboard from './pages/Dashboard';
@@ -103,13 +104,18 @@ function AppRoutes() {
 }
 
 export default function App() {
+  const [loading, setLoading] = useState(true);
+
   return (
     <ThemeProvider>
       <AuthProvider>
         <AppProvider>
-          <BrowserRouter>
-            <AppRoutes />
-          </BrowserRouter>
+          {loading && <LoadingScreen onFinish={() => setLoading(false)} />}
+          {!loading && (
+            <BrowserRouter>
+              <AppRoutes />
+            </BrowserRouter>
+          )}
         </AppProvider>
       </AuthProvider>
     </ThemeProvider>
