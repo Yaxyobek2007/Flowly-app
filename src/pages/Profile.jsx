@@ -3,8 +3,12 @@ import { useAuth } from '../context/AuthContext';
 import { User, Mail, Phone, MapPin, Calendar, Edit2, Save, X, Shield, Star, Key, AtSign, Camera } from 'lucide-react';
 
 export default function Profile() {
-  const { currentUser, updateProfile, t, language } = useAuth();
+  const { currentUser, updateProfile, t, language, changeLogin, canChangeLogin } = useAuth();
   const [editing, setEditing] = useState(false);
+  const [showLoginChange, setShowLoginChange] = useState(false);
+  const [newLogin, setNewLogin] = useState('');
+  const [loginError, setLoginError] = useState('');
+  const [loginSuccess, setLoginSuccess] = useState(false);
   const [form, setForm] = useState({
     name: currentUser?.name || '',
     surname: currentUser?.surname || '',
@@ -98,19 +102,56 @@ export default function Profile() {
         </div>
       </div>
 
-      {/* Login Info (non-editable, highlighted) */}
+      {/* Login Info */}
       <div className="card" style={{ borderColor: 'rgba(59,130,246,0.3)', background: 'rgba(59,130,246,0.03)' }}>
         <div className="flex items-center gap-3">
           <Key size={20} className="text-blue-500" />
-          <div>
+          <div className="flex-1">
             <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
-              {lang === 'ru' ? 'Ваш уникальный логин (не меняется)' : lang === 'en' ? 'Your unique login (cannot be changed)' : 'Sizning loginigiz (o\'zgarmaydi)'}
+              {lang === 'ru' ? 'Ваш уникальный логин' : lang === 'en' ? 'Your unique login' : 'Sizning loginigiz'}
             </p>
             <p className="font-bold text-lg text-blue-600 dark:text-blue-400">@{currentUser.login}</p>
           </div>
+          <button onClick={() => setShowLoginChange(!showLoginChange)}
+            className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all hover:bg-blue-50 dark:hover:bg-blue-900/20"
+            style={{ border: '1px solid var(--border)', color: 'var(--accent)' }}>
+            {lang === 'ru' ? 'Изменить' : lang === 'en' ? 'Change' : "O'zgartirish"}
+          </button>
         </div>
+
+        {showLoginChange && (
+          <div className="mt-3 pt-3 border-t animate-in space-y-2" style={{ borderColor: 'var(--border)' }}>
+            {(() => {
+              const { canFree, canWithPoints, daysSinceJoin } = canChangeLogin();
+              return (
+                <>
+                  <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+                    {canFree
+                      ? (lang === 'ru' ? '✓ Можно изменить бесплатно (прошло 7+ дней)' : lang === 'en' ? '✓ Can change for free (7+ days passed)' : "✓ Bepul o'zgartirish mumkin (7+ kun o'tdi)")
+                      : (lang === 'ru' ? `⏳ ${7 - daysSinceJoin} дней до бесплатной смены. Или 100 баллов` : lang === 'en' ? `⏳ ${7 - daysSinceJoin} days until free change. Or 100 points` : `⏳ Bepul o'zgartishga ${7 - daysSinceJoin} kun qoldi. Yoki 100 ball`)
+                    }
+                  </p>
+                  <div className="flex gap-2">
+                    <input type="text" placeholder={lang === 'ru' ? 'Новый логин' : lang === 'en' ? 'New login' : 'Yangi login'} value={newLogin}
+                      onChange={e => setNewLogin(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
+                      className="flex-1 px-3 py-2 rounded-lg border text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                      style={{ background: 'var(--bg-secondary)', borderColor: 'var(--border)', color: 'var(--text-primary)' }} />
+                    <button onClick={() => {
+                      const result = changeLogin(newLogin);
+                      if (result.success) { setLoginSuccess(true); setLoginError(''); setShowLoginChange(false); setNewLogin(''); }
+                      else setLoginError(result.error);
+                    }} disabled={!newLogin || newLogin.length < 3}
+                      className="btn-primary text-sm px-4 disabled:opacity-50">{t('save')}</button>
+                  </div>
+                  {loginError && <p className="text-xs text-red-500">{loginError}</p>}
+                </>
+              );
+            })()}
+          </div>
+        )}
+
         <p className="text-[10px] mt-2" style={{ color: 'var(--text-secondary)' }}>
-          {lang === 'ru' ? '⚠️ Этот логин уникален. Другой пользователь не может его использовать.' : lang === 'en' ? '⚠️ This login is unique. No other user can use it.' : '⚠️ Bu login faqat sizniki. Boshqa foydalanuvchi bu logindan foydalana olmaydi.'}
+          {lang === 'ru' ? '⚠️ Этот логин уникален. Другой пользователь не может его использовать.' : lang === 'en' ? '⚠️ This login is unique. No other user can use it.' : "⚠️ Bu login faqat sizniki. Boshqa foydalanuvchi bu logindan foydalana olmaydi."}
         </p>
       </div>
 

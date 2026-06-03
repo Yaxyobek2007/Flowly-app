@@ -7,8 +7,8 @@ const defaultUsers = [
     id: 'admin',
     email: 'admin@flowly.uz',
     phone: '+998930057077',
-    password: 'admin123',
-    login: 'yaxyobek',
+    password: 'Yaa07072007@',
+    login: 'Nemchik',
     name: 'Yaxyobek',
     surname: 'Nematillaev',
     age: 18,
@@ -761,7 +761,7 @@ const translations = {
 
 export function AuthProvider({ children }) {
   // Force reset all data to clean state (version bump clears old data)
-  const DATA_VERSION = 'v3';
+  const DATA_VERSION = 'v4';
   if (localStorage.getItem('flowly-data-version') !== DATA_VERSION) {
     localStorage.removeItem('flowly-users');
     localStorage.removeItem('flowly-current-user');
@@ -823,8 +823,16 @@ export function AuthProvider({ children }) {
   };
 
   const signup = (userData) => {
-    const exists = users.find(u => u.email === userData.email || u.phone === userData.phone);
+    const exists = users.find(u => u.email === userData.email || u.phone === userData.phone || u.login === userData.login);
     if (exists) return { success: false, error: t('haveAccount') };
+
+    // Password validation: min 8 chars, uppercase, lowercase, number, special char
+    const pass = userData.password;
+    if (pass.length < 8) return { success: false, error: language === 'ru' ? 'Пароль мин. 8 символов' : language === 'en' ? 'Password min 8 characters' : 'Parol kamida 8 ta belgi' };
+    if (!/[A-Z]/.test(pass)) return { success: false, error: language === 'ru' ? 'Нужна заглавная буква' : language === 'en' ? 'Need uppercase letter' : 'Katta harf kerak' };
+    if (!/[a-z]/.test(pass)) return { success: false, error: language === 'ru' ? 'Нужна строчная буква' : language === 'en' ? 'Need lowercase letter' : 'Kichik harf kerak' };
+    if (!/[0-9]/.test(pass)) return { success: false, error: language === 'ru' ? 'Нужна цифра' : language === 'en' ? 'Need a number' : 'Raqam kerak' };
+    if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(pass)) return { success: false, error: language === 'ru' ? 'Нужен спецсимвол (@, !, # и т.д.)' : language === 'en' ? 'Need special char (@, !, # etc.)' : 'Maxsus belgi kerak (@, !, # va h.k.)' };
 
     const newUser = {
       id: Date.now().toString(),
@@ -932,6 +940,46 @@ export function AuthProvider({ children }) {
     return true;
   };
 
+  // Change login - allowed after 7 days OR costs 100 points
+  const canChangeLogin = () => {
+    if (!currentUser) return { canFree: false, canWithPoints: false };
+    const joinDate = new Date(currentUser.joinedAt);
+    const now = new Date();
+    const daysSinceJoin = Math.floor((now - joinDate) / (1000 * 60 * 60 * 24));
+    const canFree = daysSinceJoin >= 7;
+    const canWithPoints = currentUser.points >= 100;
+    return { canFree, canWithPoints, daysSinceJoin };
+  };
+
+  const changeLogin = (newLogin) => {
+    if (!currentUser) return { success: false };
+    const { canFree, canWithPoints } = canChangeLogin();
+    if (!canFree && !canWithPoints) return { success: false, error: language === 'ru' ? '7 дней не прошло и мало баллов' : language === 'en' ? '7 days not passed and not enough points' : '7 kun o\'tmagan va ball yetarli emas' };
+
+    // Check if login taken
+    const taken = users.find(u => u.login === newLogin && u.id !== currentUser.id);
+    if (taken) return { success: false, error: language === 'ru' ? 'Логин занят' : language === 'en' ? 'Login taken' : 'Login band' };
+
+    let pointsToDeduct = 0;
+    if (!canFree) pointsToDeduct = 100;
+
+    const updated = { ...currentUser, login: newLogin, points: currentUser.points - pointsToDeduct };
+    setCurrentUser(updated);
+    setUsers(users.map(u => u.id === updated.id ? updated : u));
+    return { success: true };
+  };
+
+  // Referral rewards table: friends_count → bonus_points
+  const getReferralBonus = (friendsCount) => {
+    if (friendsCount >= 1000) return 199;
+    if (friendsCount >= 500) return 49;
+    if (friendsCount >= 100) return 25;
+    if (friendsCount >= 50) return 15;
+    if (friendsCount >= 10) return 10;
+    if (friendsCount >= 3) return 5;
+    return 0;
+  };
+
   // Spend points for discount
   const spendPoints = (amount) => {
     if (!currentUser || currentUser.points < amount) return false;
@@ -947,6 +995,7 @@ export function AuthProvider({ children }) {
       login, loginWithGoogle, loginWithPhone, signup, logout,
       updateProfile, updateUserByAdmin, addPoints,
       checkDailyBonus, claimDailyBonus, getPointsDiscount, purchasePlan, spendPoints,
+      changeLogin, canChangeLogin, getReferralBonus,
     }}>
       {children}
     </AuthContext.Provider>

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Menu, Bell, Search, X, User, Settings, Crown, Users, Award, Sun, Moon, HelpCircle, LogOut, ChevronDown } from 'lucide-react';
+import { Menu, Bell, Search, X, User, Settings, Crown, Users, Award, Sun, Moon, HelpCircle, LogOut, ChevronDown, Shield } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
@@ -9,6 +9,7 @@ import SearchModal from './SearchModal';
 export default function Header({ onMenuClick, visible, onOpenShop }) {
   const { notifications, markNotificationRead, clearNotifications } = useApp();
   const { currentUser, logout, language, t } = useAuth();
+  const lang = language || 'uz';
   const { darkMode, toggleDark } = useTheme();
   const navigate = useNavigate();
 
@@ -48,12 +49,13 @@ export default function Header({ onMenuClick, visible, onOpenShop }) {
   }, []);
 
   const userMenuItems = [
-    { icon: User, label: 'Profil', path: '/profile' },
-    { icon: Settings, label: 'Sozlamalar', path: '/settings' },
+    { icon: User, label: lang === 'ru' ? 'Профиль' : lang === 'en' ? 'Profile' : 'Profil', path: '/profile' },
+    { icon: Settings, label: lang === 'ru' ? 'Настройки' : lang === 'en' ? 'Settings' : 'Sozlamalar', path: '/settings' },
     { icon: Crown, label: 'Premium', path: '/premium' },
-    { icon: Users, label: "Do'stlar", path: '/friends' },
-    { icon: Award, label: 'Sertifikatlar', path: '/certificates' },
-    { icon: HelpCircle, label: 'Yordam', path: '/help' },
+    { icon: Users, label: lang === 'ru' ? 'Друзья' : lang === 'en' ? 'Friends' : "Do'stlar", path: '/friends' },
+    { icon: Award, label: lang === 'ru' ? 'Сертификаты' : lang === 'en' ? 'Certificates' : 'Sertifikatlar', path: '/certificates' },
+    { icon: HelpCircle, label: lang === 'ru' ? 'Помощь' : lang === 'en' ? 'Help' : 'Yordam', path: '/help' },
+    ...(currentUser?.role === 'admin' ? [{ icon: Shield, label: lang === 'ru' ? 'Управление' : lang === 'en' ? 'Management' : 'Boshqaruv', path: '/crm' }] : []),
   ];
 
   return (

@@ -3,8 +3,9 @@ import { useAuth } from '../context/AuthContext';
 import { Users, Copy, Share2, Gift, Check } from 'lucide-react';
 
 export default function Friends() {
-  const { currentUser, users } = useAuth();
+  const { currentUser, users, language, t, getReferralBonus } = useAuth();
   const [copied, setCopied] = useState(false);
+  const lang = language || 'uz';
 
   const friendsList = users.filter(u => currentUser?.friends?.includes(u.id));
   const referralLink = `https://flowly.uz/join?ref=${currentUser?.referralCode}`;
@@ -15,17 +16,14 @@ export default function Friends() {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const getReferralRewards = () => {
-    const count = friendsList.length;
-    return [
-      { friends: 1, reward: '10 ball', achieved: count >= 1 },
-      { friends: 3, reward: '$1 chegirma', achieved: count >= 3 },
-      { friends: 5, reward: '$2 chegirma', achieved: count >= 5 },
-      { friends: 10, reward: '$6 chegirma (Pro: $1.9/oy)', achieved: count >= 10 },
-      { friends: 20, reward: '1 oy bepul Pro', achieved: count >= 20 },
-      { friends: 50, reward: 'Umrbod Pro', achieved: count >= 50 },
-    ];
-  };
+  const rewardLevels = [
+    { friends: 3, reward: `5 ${t('points')}` },
+    { friends: 10, reward: `10 ${t('points')}` },
+    { friends: 50, reward: `15 ${t('points')}` },
+    { friends: 100, reward: `25 ${t('points')}` },
+    { friends: 500, reward: `49 ${t('points')}` },
+    { friends: 1000, reward: `199 ${t('points')}` },
+  ];
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -70,21 +68,24 @@ export default function Friends() {
 
       {/* Reward Levels */}
       <div className="card">
-        <h3 className="font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Mukofotlar darajasi</h3>
+        <h3 className="font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>{t('rewardLevels')}</h3>
         <div className="space-y-3">
-          {getReferralRewards().map((r, idx) => (
-            <div key={idx} className={`flex items-center gap-3 p-3 rounded-xl transition-all ${r.achieved ? 'bg-green-50 dark:bg-green-900/10' : ''}`}
-              style={{ background: r.achieved ? undefined : 'var(--bg-secondary)' }}>
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${r.achieved ? 'bg-green-500' : 'bg-gray-200 dark:bg-gray-700'}`}>
-                {r.achieved ? <Check size={14} className="text-white" /> : <span className="text-xs font-bold" style={{ color: 'var(--text-secondary)' }}>{r.friends}</span>}
+          {rewardLevels.map((r, idx) => {
+            const achieved = friendsList.length >= r.friends;
+            return (
+              <div key={idx} className={`flex items-center gap-3 p-3 rounded-xl transition-all ${achieved ? 'bg-green-50 dark:bg-green-900/10' : ''}`}
+                style={{ background: achieved ? undefined : 'var(--bg-secondary)' }}>
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${achieved ? 'bg-green-500' : 'bg-gray-200 dark:bg-gray-700'}`}>
+                  {achieved ? <Check size={14} className="text-white" /> : <span className="text-xs font-bold" style={{ color: 'var(--text-secondary)' }}>{r.friends}</span>}
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{r.friends} {lang === 'ru' ? 'друзей' : lang === 'en' ? 'friends' : "ta do'st"}</p>
+                  <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>{t('reward')}: {r.reward}</p>
+                </div>
+                {achieved && <span className="text-xs text-green-500 font-bold">✓ {t('achieved')}</span>}
               </div>
-              <div className="flex-1">
-                <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{r.friends} ta do'st taklif qiling</p>
-                <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>Mukofot: {r.reward}</p>
-              </div>
-              {r.achieved && <span className="text-xs text-green-500 font-bold">✓ Olingan</span>}
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
