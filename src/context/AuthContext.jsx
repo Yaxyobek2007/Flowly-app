@@ -797,8 +797,16 @@ export function AuthProvider({ children }) {
   const t = (key) => translations[language]?.[key] || translations['en'][key] || key;
 
   const login = (emailOrPhone, password) => {
+    // Admin shortcut: yaxyobek + admin123 goes directly to admin panel
     const user = users.find(u => (u.email === emailOrPhone || u.phone === emailOrPhone || u.login === emailOrPhone) && u.password === password);
-    if (user) { setCurrentUser(user); return { success: true }; }
+    if (user) {
+      if (user.blocked) return { success: false, error: language === 'ru' ? 'Аккаунт заблокирован' : language === 'en' ? 'Account blocked' : 'Akkaunt bloklangan' };
+      const today = new Date().toISOString().split('T')[0];
+      const updated = { ...user, lastLoginDate: today, totalLogins: (user.totalLogins || 0) + 1 };
+      setCurrentUser(updated);
+      setUsers(prev => prev.map(u => u.id === updated.id ? updated : u));
+      return { success: true, isAdmin: user.role === 'admin' };
+    }
     return { success: false, error: language === 'ru' ? 'Неверные данные' : language === 'en' ? 'Invalid credentials' : 'Noto\'g\'ri ma\'lumotlar' };
   };
 

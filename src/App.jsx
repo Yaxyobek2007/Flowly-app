@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { useEffect } from 'react';
 import { AppProvider } from './context/AppContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -23,19 +24,56 @@ import LocationMap from './pages/LocationMap';
 import CrmErp from './pages/CrmErp';
 import HelpSupport from './pages/HelpSupport';
 
+// Session timeout: 100 hours
+const SESSION_TIMEOUT = 100 * 60 * 60 * 1000;
+
 function ProtectedRoute({ children }) {
   const { currentUser } = useAuth();
   if (!currentUser) return <Navigate to="/auth" replace />;
   return children;
 }
 
+function AdminRedirect({ children }) {
+  const { currentUser } = useAuth();
+  if (!currentUser) return <Navigate to="/auth" replace />;
+  // Admin (yaxyobek/admin123) goes to CRM
+  if (currentUser.role === 'admin' && window.location.pathname === '/') {
+    return <Navigate to="/crm" replace />;
+  }
+  return children;
+}
+
 function AuthRoute({ children }) {
   const { currentUser } = useAuth();
-  if (currentUser) return <Navigate to="/" replace />;
+  if (currentUser) {
+    // Admin goes to CRM, regular user to main
+    if (currentUser.role === 'admin') return <Navigate to="/crm" replace />;
+    return <Navigate to="/" replace />;
+  }
   return children;
 }
 
 function AppRoutes() {
+  const { currentUser, logout } = useAuth();
+
+  // Auto-logout after 100 hours of inactivity
+  useEffect(() => {
+    if (!currentUser) return;
+    const lastActivity = localStorage.getItem('flowly-last-activity');
+    const now = Date.now();
+    if (lastActivity && (now - parseInt(lastActivity)) > SESSION_TIMEOUT) {
+      logout();
+      return;
+    }
+    localStorage.setItem('flowly-last-activity', now.toString());
+
+    const interval = setInterval(() => {
+      localStorage.setItem('flowly-last-activity', Date.now().toString());
+    }, 60000); // update every minute
+
+    return () => clearInterval(interval);
+  }, [currentUser]);
+
   return (
     <Routes>
       <Route path="/auth" element={<AuthRoute><Auth /></AuthRoute>} />
