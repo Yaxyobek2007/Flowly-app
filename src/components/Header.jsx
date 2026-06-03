@@ -13,19 +13,19 @@ export default function Header({ onMenuClick, visible, onOpenShop }) {
   const { darkMode, toggleDark } = useTheme();
   const navigate = useNavigate();
 
+  // Date display (no clock) - Year, Month Day
+  const tashkent = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Tashkent" }));
+  const monthNames = {
+    uz: ['Yanvar','Fevral','Mart','Aprel','May','Iyun','Iyul','Avgust','Sentyabr','Oktyabr','Noyabr','Dekabr'],
+    ru: ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'],
+    en: ['January','February','March','April','May','June','July','August','September','October','November','December'],
+  };
+  const dateDisplay = `${tashkent.getFullYear()}, ${monthNames[lang]?.[tashkent.getMonth()] || monthNames.en[tashkent.getMonth()]} ${tashkent.getDate()}`;
+
   const [showSearch, setShowSearch] = useState(false);
   const [showNotifs, setShowNotifs] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const menuRef = useRef(null);
-
-  const [now, setNow] = useState(new Date());
-  useEffect(() => {
-    const timer = setInterval(() => setNow(new Date()), 1000);
-    return () => clearInterval(timer);
-  }, []);
-
-  const tashkent = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Tashkent" }));
-  const timeStr = tashkent.toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' });
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
@@ -61,12 +61,12 @@ export default function Header({ onMenuClick, visible, onOpenShop }) {
   return (
     <>
       <header className={`sticky top-0 z-30 glass px-4 py-3 flex items-center justify-between transition-transform duration-300 ${visible ? 'translate-y-0' : '-translate-y-full'}`}>
-        {/* Left: Menu + Time */}
+        {/* Left: Menu + Date */}
         <div className="flex items-center gap-3">
           <button className="lg:hidden p-1" onClick={onMenuClick}>
             <Menu size={22} style={{ color: 'var(--text-primary)' }} />
           </button>
-          <span className="text-sm font-bold font-mono hidden sm:block" style={{ color: 'var(--text-primary)' }}>{timeStr}</span>
+          <span className="text-sm font-medium hidden sm:block" style={{ color: 'var(--text-primary)' }}>{dateDisplay}</span>
         </div>
 
         {/* Center: Search */}
@@ -124,9 +124,13 @@ export default function Header({ onMenuClick, visible, onOpenShop }) {
           <div className="relative" ref={menuRef}>
             <button onClick={() => { setShowUserMenu(!showUserMenu); setShowNotifs(false); }}
               className="flex items-center gap-2 p-1 rounded-xl transition-colors hover:bg-blue-50 dark:hover:bg-blue-900/20">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center">
-                <span className="text-white font-bold text-xs">{(currentUser?.name?.[0] || 'U').toUpperCase()}{(currentUser?.surname?.[0] || '').toUpperCase()}</span>
-              </div>
+              {currentUser?.avatar ? (
+                <img src={currentUser.avatar} alt="" className="w-8 h-8 rounded-full object-cover ring-2 ring-blue-500/30" />
+              ) : (
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center">
+                  <span className="text-white font-bold text-xs">{(currentUser?.name?.[0] || 'U').toUpperCase()}{(currentUser?.surname?.[0] || '').toUpperCase()}</span>
+                </div>
+              )}
               <ChevronDown size={14} style={{ color: 'var(--text-secondary)' }} className={`transition-transform ${showUserMenu ? 'rotate-180' : ''}`} />
             </button>
 

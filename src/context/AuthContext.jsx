@@ -930,11 +930,17 @@ export function AuthProvider({ children }) {
   };
 
   // Purchase plan with card
-  const purchasePlan = (planType, months) => {
+  const purchasePlan = (planType, months, paymentRecord) => {
     if (!currentUser) return false;
     const expiry = new Date();
     expiry.setMonth(expiry.getMonth() + months);
-    const updated = { ...currentUser, plan: planType, planExpiry: expiry.toISOString() };
+    const payments = currentUser.payments || [];
+    const updated = {
+      ...currentUser,
+      plan: planType,
+      planExpiry: expiry.toISOString(),
+      payments: [...payments, paymentRecord].filter(Boolean),
+    };
     setCurrentUser(updated);
     setUsers(users.map(u => u.id === updated.id ? updated : u));
     return true;

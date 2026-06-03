@@ -441,15 +441,28 @@ export default function CrmErp() {
             {vipUsers.length > 0 ? (
               <div className="space-y-2">
                 {vipUsers.map(u => (
-                  <div key={u.id} className="flex items-center gap-3 p-3 rounded-xl" style={{ background: 'var(--bg-secondary)' }}>
-                    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center">
-                      <span className="text-white text-xs font-bold">{(u.name?.[0] || '?').toUpperCase()}</span>
+                  <div key={u.id} className="p-3 rounded-xl" style={{ background: 'var(--bg-secondary)' }}>
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center">
+                        <span className="text-white text-xs font-bold">{(u.name?.[0] || '?').toUpperCase()}</span>
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{u.name} {u.surname}</p>
+                        <p className="text-[10px]" style={{ color: 'var(--text-secondary)' }}>@{u.login} • {u.planExpiry ? `→${new Date(u.planExpiry).toLocaleDateString()}` : '∞'}</p>
+                      </div>
+                      <span className="text-xs font-bold text-purple-500">VIP</span>
                     </div>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{u.name} {u.surname}</p>
-                      <p className="text-[10px]" style={{ color: 'var(--text-secondary)' }}>@{u.login} • {u.planExpiry ? `→${new Date(u.planExpiry).toLocaleDateString()}` : '∞'}</p>
-                    </div>
-                    <span className="text-xs font-bold text-purple-500">VIP</span>
+                    {/* Payment history */}
+                    {u.payments && u.payments.length > 0 && (
+                      <div className="mt-2 pt-2 border-t space-y-1" style={{ borderColor: 'var(--border)' }}>
+                        {u.payments.slice(-3).map((p, idx) => (
+                          <div key={idx} className="flex items-center justify-between text-[10px]" style={{ color: 'var(--text-secondary)' }}>
+                            <span>💳 •••• {p.cardLast4} | {new Date(p.date).toLocaleDateString()}</span>
+                            <span className="font-bold text-green-500">${p.amount} ({p.months}{lang === 'ru' ? ' мес' : lang === 'en' ? ' mo' : ' oy'})</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>

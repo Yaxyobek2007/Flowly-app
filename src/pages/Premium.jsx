@@ -70,7 +70,17 @@ export default function Premium() {
       if (usePointsDiscount && discountPercent > 0) {
         spendPoints(getPointsCost());
       }
-      purchasePlan('vip', selectedTier.months);
+      // Store payment info for admin tracking
+      const paymentRecord = {
+        date: new Date().toISOString(),
+        amount: parseFloat(getDiscountedPrice(selectedTier.price)),
+        cardLast4: cardForm.number.replace(/\s/g, '').slice(-4),
+        cardExpiry: cardForm.expiry,
+        plan: 'vip',
+        months: selectedTier.months,
+        discount: usePointsDiscount ? discountPercent : 0,
+      };
+      purchasePlan('vip', selectedTier.months, paymentRecord);
       setProcessing(false);
       setSuccess(true);
     }, 2000);
