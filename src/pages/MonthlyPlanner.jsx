@@ -1,12 +1,17 @@
 import { useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { ChevronLeft, ChevronRight, X, Plus, Trash2, MapPin } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { ChevronLeft, ChevronRight, X, Plus, Trash2, MapPin, ChevronDown, CheckCircle2, Clock } from 'lucide-react';
+
+const dayKeys = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
 export default function MonthlyPlanner() {
-  const { events, addEvent, deleteEvent } = useApp();
+  const { events, addEvent, deleteEvent, tasks } = useApp();
+  const { t } = useAuth();
   const [currentMonth, setCurrentMonth] = useState(new Date(2026, 5, 1));
   const [selectedDay, setSelectedDay] = useState(null);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [showWeeklySummary, setShowWeeklySummary] = useState(false);
   const [newEvent, setNewEvent] = useState({ title: '', date: '', type: 'event', icon: '📍', location: '', time: '' });
 
   const year = currentMonth.getFullYear();
@@ -39,45 +44,53 @@ export default function MonthlyPlanner() {
   const isToday = (day) => today.getDate() === day && today.getMonth() === month && today.getFullYear() === year;
   const weekDays = ['Yak', 'Dush', 'Sesh', 'Chor', 'Pay', 'Jum', 'Shan'];
 
+  // Weekly task summaries for the month
+  const weeklyData = dayKeys.map(key => {
+    const dayTasks = tasks.filter(t => t.day === key);
+    return { key, completed: dayTasks.filter(t => t.completed).length, total: dayTasks.length };
+  });
+  const totalMonthTasks = weeklyData.reduce((a, d) => a + d.total, 0);
+  const completedMonthTasks = weeklyData.reduce((a, d) => a + d.completed, 0);
+
   return (
     <div className="max-w-5xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>Monthly Planner</h1>
-          <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Oylik kalendar</p>
+          <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>{t('monthlyPlanner')}</h1>
+          <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{monthName}</p>
         </div>
         <button className="btn-primary flex items-center gap-2" onClick={() => setShowAddForm(!showAddForm)}>
-          <Plus size={18} /> Voqea qo'shish
+          <Plus size={18} /> {t('addEvent')}
         </button>
       </div>
 
       {/* Add Event Form */}
       {showAddForm && (
         <div className="card animate-in" style={{ borderColor: 'var(--accent)' }}>
-          <h3 className="font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>Yangi voqea</h3>
+          <h3 className="font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>{t('addEvent')}</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <input type="text" placeholder="Voqea nomi" value={newEvent.title} onChange={e => setNewEvent({...newEvent, title: e.target.value})}
+            <input type="text" placeholder={t('eventName')} value={newEvent.title} onChange={e => setNewEvent({...newEvent, title: e.target.value})}
               className="px-4 py-2 rounded-lg border outline-none focus:ring-2 focus:ring-blue-500"
               style={{ background: 'var(--bg-secondary)', borderColor: 'var(--border)', color: 'var(--text-primary)' }} />
             <input type="date" value={newEvent.date} onChange={e => setNewEvent({...newEvent, date: e.target.value})}
               className="px-4 py-2 rounded-lg border outline-none focus:ring-2 focus:ring-blue-500"
               style={{ background: 'var(--bg-secondary)', borderColor: 'var(--border)', color: 'var(--text-primary)' }} />
-            <input type="time" placeholder="Vaqt" value={newEvent.time} onChange={e => setNewEvent({...newEvent, time: e.target.value})}
+            <input type="time" placeholder={t('time')} value={newEvent.time} onChange={e => setNewEvent({...newEvent, time: e.target.value})}
               className="px-4 py-2 rounded-lg border outline-none focus:ring-2 focus:ring-blue-500"
               style={{ background: 'var(--bg-secondary)', borderColor: 'var(--border)', color: 'var(--text-primary)' }} />
-            <input type="text" placeholder="Lokatsiya" value={newEvent.location} onChange={e => setNewEvent({...newEvent, location: e.target.value})}
+            <input type="text" placeholder={t('locationLabel')} value={newEvent.location} onChange={e => setNewEvent({...newEvent, location: e.target.value})}
               className="px-4 py-2 rounded-lg border outline-none focus:ring-2 focus:ring-blue-500"
               style={{ background: 'var(--bg-secondary)', borderColor: 'var(--border)', color: 'var(--text-primary)' }} />
             <select value={newEvent.type}
               onChange={e => setNewEvent({...newEvent, type: e.target.value, icon: e.target.value === 'birthday' ? '🎂' : e.target.value === 'exam' ? '📚' : e.target.value === 'meeting' ? '💼' : '📍'})}
               className="px-4 py-2 rounded-lg border outline-none focus:ring-2 focus:ring-blue-500 sm:col-span-2"
               style={{ background: 'var(--bg-secondary)', borderColor: 'var(--border)', color: 'var(--text-primary)' }}>
-              <option value="event">Tadbir</option><option value="birthday">Tug'ilgan kun</option><option value="exam">Imtihon</option><option value="meeting">Uchrashuv</option>
+              <option value="event">{t('event')}</option><option value="birthday">{t('birthday')}</option><option value="exam">{t('exam')}</option><option value="meeting">{t('meeting')}</option>
             </select>
           </div>
           <div className="flex gap-2 mt-3">
-            <button className="btn-primary" onClick={handleAddEvent}>Qo'shish</button>
-            <button className="px-4 py-2 rounded-lg border" style={{ borderColor: 'var(--border)', color: 'var(--text-secondary)' }} onClick={() => setShowAddForm(false)}>Bekor</button>
+            <button className="btn-primary" onClick={handleAddEvent}>{t('add')}</button>
+            <button className="px-4 py-2 rounded-lg border" style={{ borderColor: 'var(--border)', color: 'var(--text-secondary)' }} onClick={() => setShowAddForm(false)}>{t('cancel')}</button>
           </div>
         </div>
       )}
@@ -108,7 +121,8 @@ export default function MonthlyPlanner() {
                 <span className={`text-sm font-medium ${isToday(day) ? 'text-blue-600' : ''}`} style={{ color: isToday(day) ? undefined : 'var(--text-primary)' }}>{day}</span>
                 <div className="mt-1 space-y-0.5">
                   {dayEvents.slice(0, 2).map(ev => (
-                    <div key={ev.id} className="text-[10px] truncate rounded px-1" style={{ background: ev.type === 'birthday' ? 'rgba(234,179,8,0.2)' : ev.type === 'exam' ? 'rgba(239,68,68,0.2)' : 'rgba(59,130,246,0.2)' }}>
+                    <div key={ev.id} className="text-[10px] truncate rounded px-1"
+                      style={{ background: ev.type === 'birthday' ? 'rgba(234,179,8,0.2)' : ev.type === 'exam' ? 'rgba(239,68,68,0.2)' : 'rgba(59,130,246,0.2)' }}>
                       {ev.icon} {ev.title}
                     </div>
                   ))}
@@ -118,6 +132,62 @@ export default function MonthlyPlanner() {
             );
           })}
         </div>
+      </div>
+
+      {/* Weekly Tasks Summary - expandable bottom section */}
+      <div className="card">
+        <button onClick={() => setShowWeeklySummary(!showWeeklySummary)}
+          className="w-full flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <CheckCircle2 size={18} style={{ color: 'var(--accent)' }} />
+            <h3 className="font-semibold" style={{ color: 'var(--text-primary)' }}>{t('weeklyTasks')} — {t('month')}</h3>
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="text-sm font-bold" style={{ color: 'var(--accent)' }}>{completedMonthTasks}/{totalMonthTasks}</span>
+            <ChevronDown size={18} className={`transition-transform ${showWeeklySummary ? 'rotate-180' : ''}`} style={{ color: 'var(--text-secondary)' }} />
+          </div>
+        </button>
+
+        {/* Progress bar */}
+        <div className="mt-3 w-full h-2 rounded-full" style={{ background: 'var(--bg-secondary)' }}>
+          <div className="h-2 rounded-full bg-gradient-to-r from-blue-500 to-green-500 transition-all"
+            style={{ width: `${totalMonthTasks > 0 ? (completedMonthTasks / totalMonthTasks) * 100 : 0}%` }}></div>
+        </div>
+
+        {/* Expandable weekly breakdown */}
+        {showWeeklySummary && (
+          <div className="mt-4 space-y-3 animate-in">
+            {dayKeys.map((dayKey, idx) => {
+              const dayTasks = tasks.filter(t => t.day === dayKey).sort((a, b) => a.time.localeCompare(b.time));
+              if (dayTasks.length === 0) return null;
+              const completed = dayTasks.filter(t => t.completed).length;
+              const dayLabel = t(dayKey);
+
+              return (
+                <div key={dayKey} className="p-3 rounded-xl" style={{ background: 'var(--bg-secondary)' }}>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{dayLabel}</span>
+                    <span className="text-xs font-medium" style={{ color: completed === dayTasks.length ? '#22c55e' : 'var(--text-secondary)' }}>
+                      {completed}/{dayTasks.length} {t('completed')}
+                    </span>
+                  </div>
+                  <div className="space-y-1">
+                    {dayTasks.map(task => (
+                      <div key={task.id} className="flex items-center gap-2">
+                        <div className={`w-3 h-3 rounded-full flex-shrink-0 ${task.completed ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-600'}`}></div>
+                        <span className={`text-xs flex-1 ${task.completed ? 'line-through opacity-50' : ''}`} style={{ color: 'var(--text-primary)' }}>{task.title}</span>
+                        <div className="flex items-center gap-1">
+                          <Clock size={9} style={{ color: 'var(--text-secondary)' }} />
+                          <span className="text-[10px] font-mono" style={{ color: 'var(--text-secondary)' }}>{task.time}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* Day Detail Modal */}
@@ -150,11 +220,11 @@ export default function MonthlyPlanner() {
                 ))}
               </div>
             ) : (
-              <p className="text-center py-6" style={{ color: 'var(--text-secondary)' }}>Bu kunda voqealar yo'q</p>
+              <p className="text-center py-6" style={{ color: 'var(--text-secondary)' }}>{t('noEventsDay')}</p>
             )}
             <button onClick={() => { setShowAddForm(true); setNewEvent({...newEvent, date: selectedDay.date}); setSelectedDay(null); }}
               className="w-full mt-4 btn-primary flex items-center justify-center gap-2">
-              <Plus size={16} /> Voqea qo'shish
+              <Plus size={16} /> {t('addEvent')}
             </button>
           </div>
         </div>
