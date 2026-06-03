@@ -21,6 +21,7 @@ import Certificates from './pages/Certificates';
 import AdminPanel from './pages/AdminPanel';
 import LocationMap from './pages/LocationMap';
 import CrmErp from './pages/CrmErp';
+import HelpSupport from './pages/HelpSupport';
 
 function ProtectedRoute({ children }) {
   const { currentUser } = useAuth();
@@ -55,6 +56,7 @@ function AppRoutes() {
         <Route path="certificates" element={<Certificates />} />
         <Route path="admin" element={<AdminPanel />} />
         <Route path="location" element={<LocationMap />} />
+        <Route path="help" element={<HelpSupport />} />
         <Route path="crm" element={<CrmErp />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
