@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { Plus, Trash2, FileText } from 'lucide-react';
+import { Plus, Trash2, FileText, Edit2, Save, X } from 'lucide-react';
 
 export default function Notes() {
-  const { notes, addNote, deleteNote } = useApp();
+  const { notes, addNote, editNote, deleteNote } = useApp();
   const [showForm, setShowForm] = useState(false);
-  const [newNote, setNewNote] = useState({ title: '', content: '', category: 'general' });
+  const [editId, setEditId] = useState(null);
+  const [form, setForm] = useState({ title: '', content: '', category: 'general' });
   const [activeCategory, setActiveCategory] = useState('all');
 
   const categories = [
@@ -19,12 +20,22 @@ export default function Notes() {
 
   const filteredNotes = activeCategory === 'all' ? notes : notes.filter(n => n.category === activeCategory);
 
-  const handleAdd = () => {
-    if (newNote.title && newNote.content) {
-      addNote(newNote);
-      setNewNote({ title: '', content: '', category: 'general' });
-      setShowForm(false);
+  const handleSubmit = () => {
+    if (!form.title || !form.content) return;
+    if (editId) {
+      editNote(editId, form);
+      setEditId(null);
+    } else {
+      addNote(form);
     }
+    setForm({ title: '', content: '', category: 'general' });
+    setShowForm(false);
+  };
+
+  const handleEdit = (note) => {
+    setForm({ title: note.title, content: note.content, category: note.category });
+    setEditId(note.id);
+    setShowForm(true);
   };
 
   const categoryColors = {
@@ -42,52 +53,42 @@ export default function Notes() {
           <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>Notes</h1>
           <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Muhim yozuvlar va g'oyalar</p>
         </div>
-        <button className="btn-primary flex items-center gap-2" onClick={() => setShowForm(!showForm)}>
+        <button className="btn-primary flex items-center gap-2" onClick={() => { setShowForm(!showForm); setEditId(null); setForm({ title: '', content: '', category: 'general' }); }}>
           <Plus size={18} /> Yangi yozuv
         </button>
       </div>
 
-      {/* Categories Filter */}
+      {/* Categories */}
       <div className="flex gap-2 flex-wrap">
         {categories.map(cat => (
-          <button key={cat.key}
-            onClick={() => setActiveCategory(cat.key)}
-            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
-              activeCategory === cat.key ? 'bg-blue-500 text-white' : ''
-            }`}
+          <button key={cat.key} onClick={() => setActiveCategory(cat.key)}
+            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${activeCategory === cat.key ? 'bg-blue-500 text-white' : ''}`}
             style={activeCategory !== cat.key ? { background: 'var(--bg-secondary)', color: 'var(--text-secondary)' } : {}}>
             {cat.label}
           </button>
         ))}
       </div>
 
-      {/* Add Form */}
+      {/* Form */}
       {showForm && (
         <div className="card animate-in" style={{ borderColor: 'var(--accent)' }}>
-          <h3 className="font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>Yangi yozuv</h3>
+          <h3 className="font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>{editId ? 'Tahrirlash' : 'Yangi yozuv'}</h3>
           <div className="space-y-3">
-            <input type="text" placeholder="Sarlavha" value={newNote.title}
-              onChange={e => setNewNote({...newNote, title: e.target.value})}
+            <input type="text" placeholder="Sarlavha" value={form.title} onChange={e => setForm({...form, title: e.target.value})}
               className="w-full px-4 py-2 rounded-lg border outline-none focus:ring-2 focus:ring-blue-500"
               style={{ background: 'var(--bg-secondary)', borderColor: 'var(--border)', color: 'var(--text-primary)' }} />
-            <textarea placeholder="Matn..." value={newNote.content}
-              onChange={e => setNewNote({...newNote, content: e.target.value})} rows={5}
+            <textarea placeholder="Matn..." value={form.content} onChange={e => setForm({...form, content: e.target.value})} rows={5}
               className="w-full px-4 py-2 rounded-lg border outline-none focus:ring-2 focus:ring-blue-500"
               style={{ background: 'var(--bg-secondary)', borderColor: 'var(--border)', color: 'var(--text-primary)' }} />
-            <select value={newNote.category}
-              onChange={e => setNewNote({...newNote, category: e.target.value})}
+            <select value={form.category} onChange={e => setForm({...form, category: e.target.value})}
               className="w-full px-4 py-2 rounded-lg border outline-none focus:ring-2 focus:ring-blue-500"
               style={{ background: 'var(--bg-secondary)', borderColor: 'var(--border)', color: 'var(--text-primary)' }}>
-              <option value="general">Umumiy</option>
-              <option value="finance">Moliya</option>
-              <option value="business">Biznes</option>
-              <option value="tech">Texnologiya</option>
-              <option value="personal">Shaxsiy</option>
+              <option value="general">Umumiy</option><option value="finance">Moliya</option><option value="business">Biznes</option><option value="tech">Texnologiya</option><option value="personal">Shaxsiy</option>
             </select>
           </div>
           <div className="flex gap-2 mt-3">
-            <button className="btn-primary" onClick={handleAdd}>Saqlash</button>
-            <button className="px-4 py-2 rounded-lg border" style={{ borderColor: 'var(--border)', color: 'var(--text-secondary)' }} onClick={() => setShowForm(false)}>Bekor qilish</button>
+            <button className="btn-primary flex items-center gap-1" onClick={handleSubmit}><Save size={16} /> {editId ? 'Saqlash' : 'Qo\'shish'}</button>
+            <button className="px-4 py-2 rounded-lg border" style={{ borderColor: 'var(--border)', color: 'var(--text-secondary)' }} onClick={() => { setShowForm(false); setEditId(null); }}>Bekor</button>
           </div>
         </div>
       )}
@@ -101,9 +102,14 @@ export default function Notes() {
                 <FileText size={16} style={{ color: 'var(--accent)' }} />
                 <h3 className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>{note.title}</h3>
               </div>
-              <button onClick={() => deleteNote(note.id)} className="p-1 rounded hover:bg-red-50 dark:hover:bg-red-900/20">
-                <Trash2 size={14} className="text-red-400" />
-              </button>
+              <div className="flex gap-1">
+                <button onClick={() => handleEdit(note)} className="p-1 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20">
+                  <Edit2 size={13} className="text-blue-500" />
+                </button>
+                <button onClick={() => deleteNote(note.id)} className="p-1 rounded hover:bg-red-50 dark:hover:bg-red-900/20">
+                  <Trash2 size={13} className="text-red-400" />
+                </button>
+              </div>
             </div>
             <p className="text-sm whitespace-pre-line mb-3" style={{ color: 'var(--text-secondary)' }}>{note.content}</p>
             <div className="flex items-center justify-between">

@@ -21,12 +21,13 @@ const defaultTasks = [
 ];
 
 const defaultHabits = [
-  { id: 1, name: "Sport", icon: "💪", streak: 30, completedDays: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30], todayDone: true },
-  { id: 2, name: "Kitob o'qish", icon: "📚", streak: 15, completedDays: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15], todayDone: true },
-  { id: 3, name: "Ingliz tili", icon: "🇬🇧", streak: 22, completedDays: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22], todayDone: false },
-  { id: 4, name: "Trading", icon: "📈", streak: 10, completedDays: [1,2,3,4,5,6,7,8,9,10], todayDone: false },
-  { id: 5, name: "Erta uyg'onish", icon: "⏰", streak: 45, completedDays: Array.from({length: 45}, (_, i) => i+1), todayDone: true },
-  { id: 6, name: "Meditatsiya", icon: "🧘", streak: 7, completedDays: [1,2,3,4,5,6,7], todayDone: false },
+  { id: 1, name: "Sport", icon: "💪", streak: 30, completedDays: Array.from({length: 30}, (_, i) => i+1), todayDone: true, dailyTarget: 1 },
+  { id: 2, name: "Kitob o'qish", icon: "📚", streak: 15, completedDays: Array.from({length: 15}, (_, i) => i+1), todayDone: true, dailyTarget: 1 },
+  { id: 3, name: "Ingliz tili", icon: "🇬🇧", streak: 22, completedDays: Array.from({length: 22}, (_, i) => i+1), todayDone: false, dailyTarget: 1 },
+  { id: 4, name: "Trading", icon: "📈", streak: 10, completedDays: Array.from({length: 10}, (_, i) => i+1), todayDone: false, dailyTarget: 1 },
+  { id: 5, name: "Erta uyg'onish", icon: "⏰", streak: 45, completedDays: Array.from({length: 45}, (_, i) => i+1), todayDone: true, dailyTarget: 1 },
+  { id: 6, name: "Meditatsiya", icon: "🧘", streak: 7, completedDays: Array.from({length: 7}, (_, i) => i+1), todayDone: false, dailyTarget: 1 },
+  { id: 7, name: "Yugurish", icon: "🏃", streak: 12, completedDays: Array.from({length: 12}, (_, i) => i+1), todayDone: false, dailyTarget: 2 },
 ];
 
 const defaultGoals = [
@@ -44,7 +45,7 @@ const defaultNotes = [
 ];
 
 const defaultEvents = [
-  { id: 1, title: "Tug'ilgan kun", date: "2026-07-07", type: "birthday", icon: "🎂" },
+  { id: 1, title: "Tug'ilgan kun", date: "2026-07-07", type: "birthday", icon: "🎂", location: "Andijon" },
   { id: 2, title: "Konferensiya", date: "2026-07-23", type: "event", icon: "📍", location: "Tashkent City", time: "14:00" },
   { id: 3, title: "Imtihon", date: "2026-06-15", type: "exam", icon: "📚" },
   { id: 4, title: "Ish uchrashuvi", date: "2026-06-10", type: "meeting", icon: "💼", location: "Ofis", time: "10:00" },
@@ -86,11 +87,41 @@ export function AppProvider({ children }) {
 
   const [achievements] = useState(defaultAchievements);
 
+  const [notifications, setNotifications] = useState(() => {
+    const saved = localStorage.getItem('flowly-notifications');
+    return saved ? JSON.parse(saved) : [];
+  });
+
   useEffect(() => { localStorage.setItem('flowly-tasks', JSON.stringify(tasks)); }, [tasks]);
   useEffect(() => { localStorage.setItem('flowly-habits', JSON.stringify(habits)); }, [habits]);
   useEffect(() => { localStorage.setItem('flowly-goals', JSON.stringify(goals)); }, [goals]);
   useEffect(() => { localStorage.setItem('flowly-notes', JSON.stringify(notes)); }, [notes]);
   useEffect(() => { localStorage.setItem('flowly-events', JSON.stringify(events)); }, [events]);
+  useEffect(() => { localStorage.setItem('flowly-notifications', JSON.stringify(notifications)); }, [notifications]);
+
+  // Check notifications for upcoming events
+  useEffect(() => {
+    const now = new Date();
+    const upcoming = events.filter(e => {
+      const eventDate = new Date(e.date);
+      const diff = eventDate - now;
+      return diff > 0 && diff < 7 * 24 * 60 * 60 * 1000; // within 7 days
+    });
+    if (upcoming.length > 0) {
+      const newNotifs = upcoming.map(e => ({
+        id: `event-${e.id}`,
+        title: `${e.icon} ${e.title}`,
+        message: `${e.date} da bo'lib o'tadi`,
+        read: false,
+        date: now.toISOString(),
+      }));
+      setNotifications(prev => {
+        const existingIds = prev.map(n => n.id);
+        const filtered = newNotifs.filter(n => !existingIds.includes(n.id));
+        return [...filtered, ...prev].slice(0, 20);
+      });
+    }
+  }, [events]);
 
   const toggleTask = (id) => {
     setTasks(tasks.map(t => t.id === id ? { ...t, completed: !t.completed } : t));
@@ -98,6 +129,10 @@ export function AppProvider({ children }) {
 
   const addTask = (task) => {
     setTasks([...tasks, { ...task, id: Date.now() }]);
+  };
+
+  const editTask = (id, updatedData) => {
+    setTasks(tasks.map(t => t.id === id ? { ...t, ...updatedData } : t));
   };
 
   const deleteTask = (id) => {
@@ -112,8 +147,24 @@ export function AppProvider({ children }) {
     setHabits([...habits, { ...habit, id: Date.now(), streak: 0, completedDays: [], todayDone: false }]);
   };
 
+  const editHabit = (id, updatedData) => {
+    setHabits(habits.map(h => h.id === id ? { ...h, ...updatedData } : h));
+  };
+
+  const deleteHabit = (id) => {
+    setHabits(habits.filter(h => h.id !== id));
+  };
+
   const addGoal = (goal) => {
     setGoals([...goals, { ...goal, id: Date.now(), progress: 0, status: 'planned', completedSteps: [] }]);
+  };
+
+  const editGoal = (id, updatedData) => {
+    setGoals(goals.map(g => g.id === id ? { ...g, ...updatedData } : g));
+  };
+
+  const deleteGoal = (id) => {
+    setGoals(goals.filter(g => g.id !== id));
   };
 
   const updateGoalProgress = (id, stepIndex) => {
@@ -133,12 +184,32 @@ export function AppProvider({ children }) {
     setNotes([...notes, { ...note, id: Date.now(), date: new Date().toISOString().split('T')[0] }]);
   };
 
+  const editNote = (id, updatedData) => {
+    setNotes(notes.map(n => n.id === id ? { ...n, ...updatedData } : n));
+  };
+
   const deleteNote = (id) => {
     setNotes(notes.filter(n => n.id !== id));
   };
 
   const addEvent = (event) => {
     setEvents([...events, { ...event, id: Date.now() }]);
+  };
+
+  const editEvent = (id, updatedData) => {
+    setEvents(events.map(e => e.id === id ? { ...e, ...updatedData } : e));
+  };
+
+  const deleteEvent = (id) => {
+    setEvents(events.filter(e => e.id !== id));
+  };
+
+  const markNotificationRead = (id) => {
+    setNotifications(notifications.map(n => n.id === id ? { ...n, read: true } : n));
+  };
+
+  const clearNotifications = () => {
+    setNotifications([]);
   };
 
   // Life Score calculation
@@ -160,12 +231,13 @@ export function AppProvider({ children }) {
 
   return (
     <AppContext.Provider value={{
-      tasks, toggleTask, addTask, deleteTask,
-      habits, toggleHabit, addHabit,
-      goals, addGoal, updateGoalProgress,
-      notes, addNote, deleteNote,
-      events, addEvent,
+      tasks, toggleTask, addTask, editTask, deleteTask,
+      habits, toggleHabit, addHabit, editHabit, deleteHabit,
+      goals, addGoal, editGoal, deleteGoal, updateGoalProgress,
+      notes, addNote, editNote, deleteNote,
+      events, addEvent, editEvent, deleteEvent,
       achievements,
+      notifications, markNotificationRead, clearNotifications,
       calculateLifeScore,
     }}>
       {children}

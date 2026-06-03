@@ -1,5 +1,6 @@
+import { useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { CheckCircle2, Clock } from 'lucide-react';
+import { CheckCircle2, Plus, Edit2, Save, X } from 'lucide-react';
 
 const days = [
   { key: 'monday', label: 'Dushanba', date: '02-Iyun' },
@@ -12,7 +13,17 @@ const days = [
 ];
 
 export default function WeeklyPlanner() {
-  const { tasks, toggleTask } = useApp();
+  const { tasks, toggleTask, addTask, editTask, deleteTask } = useApp();
+  const [editingDay, setEditingDay] = useState(null);
+  const [newTask, setNewTask] = useState({ title: '', time: '' });
+
+  const handleAddToDay = (dayKey) => {
+    if (newTask.title && newTask.time) {
+      addTask({ title: newTask.title, time: newTask.time, priority: 'medium', day: dayKey, category: 'personal', completed: false });
+      setNewTask({ title: '', time: '' });
+      setEditingDay(null);
+    }
+  };
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
@@ -25,7 +36,7 @@ export default function WeeklyPlanner() {
         {days.map((day, idx) => {
           const dayTasks = tasks.filter(t => t.day === day.key).sort((a, b) => a.time.localeCompare(b.time));
           const completed = dayTasks.filter(t => t.completed).length;
-          const isToday = idx === 0;
+          const isToday = idx === 1; // Seshanba = bugun (June 3)
 
           return (
             <div key={day.key} className={`card ${isToday ? 'ring-2 ring-blue-500' : ''}`}>
@@ -34,8 +45,31 @@ export default function WeeklyPlanner() {
                   <p className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>{day.label}</p>
                   <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>{day.date}</p>
                 </div>
-                {isToday && <span className="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 font-medium">Bugun</span>}
+                <div className="flex items-center gap-1">
+                  {isToday && <span className="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 font-medium">Bugun</span>}
+                  <button onClick={() => setEditingDay(editingDay === day.key ? null : day.key)}
+                    className="p-1 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20">
+                    <Plus size={14} className="text-blue-500" />
+                  </button>
+                </div>
               </div>
+
+              {/* Add task form for this day */}
+              {editingDay === day.key && (
+                <div className="mb-3 p-2 rounded-lg animate-in" style={{ background: 'var(--bg-secondary)' }}>
+                  <input type="text" placeholder="Vazifa" value={newTask.title} onChange={e => setNewTask({...newTask, title: e.target.value})}
+                    className="w-full px-2 py-1 mb-1 rounded border text-xs outline-none"
+                    style={{ background: 'var(--bg-primary)', borderColor: 'var(--border)', color: 'var(--text-primary)' }} />
+                  <div className="flex gap-1">
+                    <input type="time" value={newTask.time} onChange={e => setNewTask({...newTask, time: e.target.value})}
+                      className="flex-1 px-2 py-1 rounded border text-xs outline-none"
+                      style={{ background: 'var(--bg-primary)', borderColor: 'var(--border)', color: 'var(--text-primary)' }} />
+                    <button onClick={() => handleAddToDay(day.key)} className="px-2 py-1 rounded bg-blue-500 text-white text-xs">+</button>
+                    <button onClick={() => setEditingDay(null)} className="px-2 py-1 rounded border text-xs" style={{ borderColor: 'var(--border)', color: 'var(--text-secondary)' }}>✕</button>
+                  </div>
+                </div>
+              )}
+
               <div className="space-y-2">
                 {dayTasks.length > 0 ? dayTasks.map(task => (
                   <div key={task.id} className="flex items-center gap-2 p-2 rounded-lg" style={{ background: 'var(--bg-secondary)' }}>
@@ -60,7 +94,7 @@ export default function WeeklyPlanner() {
                     <div className="h-2 rounded-full bg-gradient-to-r from-blue-500 to-green-500 transition-all"
                       style={{ width: `${(completed / dayTasks.length) * 100}%` }}></div>
                   </div>
-                  <p className="text-xs mt-1 text-center" style={{ color: 'var(--text-secondary)' }}>{completed}/{dayTasks.length} bajarildi</p>
+                  <p className="text-xs mt-1 text-center" style={{ color: 'var(--text-secondary)' }}>{completed}/{dayTasks.length}</p>
                 </div>
               )}
             </div>

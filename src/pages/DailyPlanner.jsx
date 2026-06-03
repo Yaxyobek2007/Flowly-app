@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { Plus, Trash2, CheckCircle2, Clock, MapPin } from 'lucide-react';
+import { Plus, Trash2, CheckCircle2, Clock, Edit2, Save, X } from 'lucide-react';
 
 export default function DailyPlanner() {
-  const { tasks, toggleTask, addTask, deleteTask } = useApp();
+  const { tasks, toggleTask, addTask, editTask, deleteTask } = useApp();
   const [showForm, setShowForm] = useState(false);
+  const [editingId, setEditingId] = useState(null);
   const [newTask, setNewTask] = useState({ title: '', time: '', priority: 'medium', day: 'monday', category: 'personal' });
+  const [editForm, setEditForm] = useState({});
 
   const todayTasks = tasks.filter(t => t.day === 'monday').sort((a, b) => a.time.localeCompare(b.time));
   const completed = todayTasks.filter(t => t.completed).length;
@@ -17,6 +19,16 @@ export default function DailyPlanner() {
       setNewTask({ title: '', time: '', priority: 'medium', day: 'monday', category: 'personal' });
       setShowForm(false);
     }
+  };
+
+  const handleEdit = (task) => {
+    setEditingId(task.id);
+    setEditForm({ title: task.title, time: task.time, priority: task.priority, category: task.category });
+  };
+
+  const handleSaveEdit = () => {
+    editTask(editingId, editForm);
+    setEditingId(null);
   };
 
   return (
@@ -56,23 +68,15 @@ export default function DailyPlanner() {
               onChange={e => setNewTask({...newTask, time: e.target.value})}
               className="px-4 py-2 rounded-lg border outline-none focus:ring-2 focus:ring-blue-500"
               style={{ background: 'var(--bg-secondary)', borderColor: 'var(--border)', color: 'var(--text-primary)' }} />
-            <select value={newTask.priority}
-              onChange={e => setNewTask({...newTask, priority: e.target.value})}
+            <select value={newTask.priority} onChange={e => setNewTask({...newTask, priority: e.target.value})}
               className="px-4 py-2 rounded-lg border outline-none focus:ring-2 focus:ring-blue-500"
               style={{ background: 'var(--bg-secondary)', borderColor: 'var(--border)', color: 'var(--text-primary)' }}>
-              <option value="high">Yuqori</option>
-              <option value="medium">O'rtacha</option>
-              <option value="low">Past</option>
+              <option value="high">Yuqori</option><option value="medium">O'rtacha</option><option value="low">Past</option>
             </select>
-            <select value={newTask.category}
-              onChange={e => setNewTask({...newTask, category: e.target.value})}
+            <select value={newTask.category} onChange={e => setNewTask({...newTask, category: e.target.value})}
               className="px-4 py-2 rounded-lg border outline-none focus:ring-2 focus:ring-blue-500"
               style={{ background: 'var(--bg-secondary)', borderColor: 'var(--border)', color: 'var(--text-primary)' }}>
-              <option value="personal">Shaxsiy</option>
-              <option value="education">Ta'lim</option>
-              <option value="health">Sog'liq</option>
-              <option value="work">Ish</option>
-              <option value="finance">Moliya</option>
+              <option value="personal">Shaxsiy</option><option value="education">Ta'lim</option><option value="health">Sog'liq</option><option value="work">Ish</option><option value="finance">Moliya</option>
             </select>
           </div>
           <div className="flex gap-2 mt-4">
@@ -85,29 +89,61 @@ export default function DailyPlanner() {
       {/* Tasks Timeline */}
       <div className="space-y-3">
         {todayTasks.map((task, idx) => (
-          <div key={task.id} className="card flex items-center gap-4 animate-in" style={{ animationDelay: `${idx * 50}ms` }}>
-            <button onClick={() => toggleTask(task.id)}
-              className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
-                task.completed ? 'bg-green-500 border-green-500' : 'border-gray-300 hover:border-blue-500'
-              }`}>
-              {task.completed && <CheckCircle2 size={14} className="text-white" />}
-            </button>
-            <div className="flex items-center gap-2 min-w-[70px]">
-              <Clock size={14} style={{ color: 'var(--text-secondary)' }} />
-              <span className="text-sm font-mono" style={{ color: 'var(--text-secondary)' }}>{task.time}</span>
-            </div>
-            <div className="flex-1">
-              <p className={`font-medium ${task.completed ? 'line-through opacity-50' : ''}`} style={{ color: 'var(--text-primary)' }}>{task.title}</p>
-              <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>{task.category}</p>
-            </div>
-            <span className={`text-xs px-2 py-1 rounded-full font-medium ${
-              task.priority === 'high' ? 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' :
-              task.priority === 'medium' ? 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400' :
-              'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400'
-            }`}>{task.priority}</span>
-            <button onClick={() => deleteTask(task.id)} className="p-1 rounded hover:bg-red-50 dark:hover:bg-red-900/20">
-              <Trash2 size={16} className="text-red-400" />
-            </button>
+          <div key={task.id} className="card animate-in" style={{ animationDelay: `${idx * 50}ms` }}>
+            {editingId === task.id ? (
+              <div className="space-y-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <input type="text" value={editForm.title} onChange={e => setEditForm({...editForm, title: e.target.value})}
+                    className="px-3 py-2 rounded-lg border outline-none focus:ring-2 focus:ring-blue-500"
+                    style={{ background: 'var(--bg-secondary)', borderColor: 'var(--border)', color: 'var(--text-primary)' }} />
+                  <input type="time" value={editForm.time} onChange={e => setEditForm({...editForm, time: e.target.value})}
+                    className="px-3 py-2 rounded-lg border outline-none focus:ring-2 focus:ring-blue-500"
+                    style={{ background: 'var(--bg-secondary)', borderColor: 'var(--border)', color: 'var(--text-primary)' }} />
+                  <select value={editForm.priority} onChange={e => setEditForm({...editForm, priority: e.target.value})}
+                    className="px-3 py-2 rounded-lg border outline-none"
+                    style={{ background: 'var(--bg-secondary)', borderColor: 'var(--border)', color: 'var(--text-primary)' }}>
+                    <option value="high">Yuqori</option><option value="medium">O'rtacha</option><option value="low">Past</option>
+                  </select>
+                  <select value={editForm.category} onChange={e => setEditForm({...editForm, category: e.target.value})}
+                    className="px-3 py-2 rounded-lg border outline-none"
+                    style={{ background: 'var(--bg-secondary)', borderColor: 'var(--border)', color: 'var(--text-primary)' }}>
+                    <option value="personal">Shaxsiy</option><option value="education">Ta'lim</option><option value="health">Sog'liq</option><option value="work">Ish</option><option value="finance">Moliya</option>
+                  </select>
+                </div>
+                <div className="flex gap-2">
+                  <button onClick={handleSaveEdit} className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-green-500 text-white text-sm"><Save size={14} /> Saqlash</button>
+                  <button onClick={() => setEditingId(null)} className="flex items-center gap-1 px-3 py-1.5 rounded-lg border text-sm" style={{ borderColor: 'var(--border)', color: 'var(--text-secondary)' }}><X size={14} /> Bekor</button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center gap-4">
+                <button onClick={() => toggleTask(task.id)}
+                  className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all flex-shrink-0 ${
+                    task.completed ? 'bg-green-500 border-green-500' : 'border-gray-300 hover:border-blue-500'
+                  }`}>
+                  {task.completed && <CheckCircle2 size={14} className="text-white" />}
+                </button>
+                <div className="flex items-center gap-2 min-w-[70px]">
+                  <Clock size={14} style={{ color: 'var(--text-secondary)' }} />
+                  <span className="text-sm font-mono" style={{ color: 'var(--text-secondary)' }}>{task.time}</span>
+                </div>
+                <div className="flex-1">
+                  <p className={`font-medium ${task.completed ? 'line-through opacity-50' : ''}`} style={{ color: 'var(--text-primary)' }}>{task.title}</p>
+                  <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>{task.category}</p>
+                </div>
+                <span className={`text-xs px-2 py-1 rounded-full font-medium ${
+                  task.priority === 'high' ? 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' :
+                  task.priority === 'medium' ? 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400' :
+                  'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400'
+                }`}>{task.priority}</span>
+                <button onClick={() => handleEdit(task)} className="p-1.5 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20">
+                  <Edit2 size={15} className="text-blue-500" />
+                </button>
+                <button onClick={() => deleteTask(task.id)} className="p-1.5 rounded hover:bg-red-50 dark:hover:bg-red-900/20">
+                  <Trash2 size={15} className="text-red-400" />
+                </button>
+              </div>
+            )}
           </div>
         ))}
       </div>
