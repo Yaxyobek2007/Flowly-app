@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useApp } from '../context/AppContext';
 import { useAuth } from '../context/AuthContext';
-import { MapPin, Navigation, Plus, Trash2, Search, ExternalLink, X, Map } from 'lucide-react';
+import { MapPin, Navigation, Plus, Trash2, Search, ExternalLink, X, Save } from 'lucide-react';
 
 const defaultLocations = [
   { id: 1, name: "TTPU Universitet", address: "Toshkent", lat: 41.3111, lng: 69.2797, type: "education", icon: "🏫" },
@@ -13,6 +13,7 @@ export default function LocationMap() {
   const { events } = useApp();
   const { t, language } = useAuth();
   const lang = language || 'uz';
+  const mapRef = useRef(null);
 
   const [locations, setLocations] = useState(() => {
     const saved = localStorage.getItem('flowly-locations');
@@ -23,6 +24,8 @@ export default function LocationMap() {
   const [newLoc, setNewLoc] = useState({ name: '', address: '', type: 'personal', lat: null, lng: null });
   const [selectedLoc, setSelectedLoc] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [mapPin, setMapPin] = useState(null); // temporary pin position
+  const [pinSaved, setPinSaved] = useState(false);
 
   const saveLocations = (locs) => {
     setLocations(locs);
@@ -30,25 +33,37 @@ export default function LocationMap() {
   };
 
   const handleAdd = () => {
-    if (!newLoc.name || !newLoc.address) return;
+    if (!newLoc.name || !newLoc.address || !newLoc.lat) return;
     const icons = { personal: '📍', education: '🏫', work: '🏢', meeting: '💼', event: '📍', birthday: '🎂' };
-    // If user didn't pick on map, use a default Tashkent location
-    const lat = newLoc.lat || (41.30 + Math.random() * 0.03);
-    const lng = newLoc.lng || (69.27 + Math.random() * 0.02);
-    const loc = { ...newLoc, lat, lng, id: Date.now(), icon: icons[newLoc.type] || '📍' };
+    const loc = { ...newLoc, id: Date.now(), icon: icons[newLoc.type] || '📍' };
     saveLocations([...locations, loc]);
     setNewLoc({ name: '', address: '', type: 'personal', lat: null, lng: null });
     setShowForm(false);
+    setMapPin(null);
+    setPinSaved(false);
   };
 
-  // Open map picker modal - user clicks on iframe map to select location
-  const openMapPicker = () => {
-    setShowMapPicker(true);
+  // Handle click on map canvas to place pin
+  const handleMapCanvasClick = (e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const w = rect.width;
+    const h = rect.height;
+
+    // Convert pixel position to approximate lat/lng (Tashkent area: lat 41.2-41.4, lng 69.1-69.4)
+    const lat = 41.4 - (y / h) * 0.2;
+    const lng = 69.1 + (x / w) * 0.3;
+
+    setMapPin({ x, y, lat: parseFloat(lat.toFixed(5)), lng: parseFloat(lng.toFixed(5)) });
+    setPinSaved(false);
   };
 
-  const handleMapSelect = (lat, lng) => {
-    setNewLoc(prev => ({ ...prev, lat, lng }));
-    setShowMapPicker(false);
+  // Save pin - confirm the selected location
+  const handleSavePin = () => {
+    if (!mapPin) return;
+    setNewLoc(prev => ({ ...prev, lat: mapPin.lat, lng: mapPin.lng }));
+    setPinSaved(true);
   };
 
   const handleDelete = (id) => {
@@ -77,7 +92,7 @@ export default function LocationMap() {
           <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>{t('locationTitle')}</h1>
           <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{t('locationDesc')}</p>
         </div>
-        <button className="btn-primary flex items-center gap-2" onClick={() => setShowForm(!showForm)}>
+        <button className="btn-primary flex items-center gap-2" onClick={() => { setShowForm(true); setShowMapPicker(true); setMapPin(null); setPinSaved(false); }}>
           <Plus size={18} /> {t('addPlace')}
         </button>
       </div>
@@ -91,92 +106,149 @@ export default function LocationMap() {
         </div>
       </div>
 
-      {/* Add Form */}
-      {showForm && (
-        <div className="card animate-in" style={{ borderColor: 'var(--accent)' }}>
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="font-semibold" style={{ color: 'var(--text-primary)' }}>{t('addPlace')}</h3>
-            <button onClick={() => setShowForm(false)} className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">
-              <X size={16} style={{ color: 'var(--text-secondary)' }} />
-            </button>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <input type="text" placeholder={t('placeName')} value={newLoc.name} onChange={e => setNewLoc({...newLoc, name: e.target.value})}
-              className="px-4 py-2 rounded-lg border outline-none focus:ring-2 focus:ring-blue-500"
-              style={{ background: 'var(--bg-secondary)', borderColor: 'var(--border)', color: 'var(--text-primary)' }} />
-            <input type="text" placeholder={t('placeAddress')} value={newLoc.address} onChange={e => setNewLoc({...newLoc, address: e.target.value})}
-              className="px-4 py-2 rounded-lg border outline-none focus:ring-2 focus:ring-blue-500"
-              style={{ background: 'var(--bg-secondary)', borderColor: 'var(--border)', color: 'var(--text-primary)' }} />
-            <select value={newLoc.type} onChange={e => setNewLoc({...newLoc, type: e.target.value})}
-              className="px-4 py-2 rounded-lg border outline-none focus:ring-2 focus:ring-blue-500"
-              style={{ background: 'var(--bg-secondary)', borderColor: 'var(--border)', color: 'var(--text-primary)' }}>
-              <option value="personal">{t('personal')}</option>
-              <option value="education">{t('education')}</option>
-              <option value="work">{t('work')}</option>
-              <option value="meeting">{t('meeting')}</option>
-              <option value="event">{t('event')}</option>
-              <option value="birthday">{t('birthday')}</option>
-            </select>
-            {/* Map button to open picker */}
-            <button onClick={openMapPicker} type="button"
-              className={`px-4 py-2 rounded-lg border flex items-center justify-center gap-2 transition-all ${newLoc.lat ? 'ring-2 ring-green-400 bg-green-50 dark:bg-green-900/10' : 'hover:ring-2 hover:ring-blue-300'}`}
-              style={{ borderColor: newLoc.lat ? 'rgba(34,197,94,0.5)' : 'var(--border)', color: newLoc.lat ? '#22c55e' : 'var(--text-secondary)' }}>
-              <Map size={16} />
-              {newLoc.lat
-                ? `✓ ${newLoc.lat.toFixed(4)}, ${newLoc.lng.toFixed(4)}`
-                : (lang === 'ru' ? 'Выбрать на карте' : lang === 'en' ? 'Pick on Map' : 'Xaritadan tanlash')
-              }
-            </button>
-          </div>
-          <button className="btn-primary mt-3 w-full flex items-center justify-center gap-2" onClick={handleAdd} disabled={!newLoc.name || !newLoc.address}>
-            <Plus size={16} /> {t('add')}
-          </button>
-        </div>
-      )}
-
-      {/* Map Picker Modal */}
+      {/* MAP PICKER MODAL - Full screen shadow overlay */}
       {showMapPicker && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" onClick={() => setShowMapPicker(false)}>
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
-          <div className="relative w-full max-w-2xl h-[70vh] rounded-2xl shadow-2xl overflow-hidden animate-in" onClick={e => e.stopPropagation()}
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => { setShowMapPicker(false); setShowForm(false); }}></div>
+          <div className="relative w-full max-w-3xl rounded-2xl shadow-2xl overflow-hidden animate-in"
             style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
+            
             {/* Header */}
-            <div className="absolute top-0 left-0 right-0 z-10 p-4 flex items-center justify-between"
-              style={{ background: 'linear-gradient(to bottom, var(--bg-card), transparent)' }}>
-              <h3 className="font-bold" style={{ color: 'var(--text-primary)' }}>
-                📍 {lang === 'ru' ? 'Выберите место на карте' : lang === 'en' ? 'Select location on map' : 'Xaritadan joy tanlang'}
-              </h3>
-              <button onClick={() => setShowMapPicker(false)} className="p-2 rounded-xl" style={{ background: 'var(--bg-secondary)' }}>
-                <X size={18} style={{ color: 'var(--text-primary)' }} />
+            <div className="p-4 border-b flex items-center justify-between" style={{ borderColor: 'var(--border)' }}>
+              <div>
+                <h3 className="font-bold" style={{ color: 'var(--text-primary)' }}>
+                  📍 {lang === 'ru' ? 'Выберите место' : lang === 'en' ? 'Select Location' : 'Joy tanlang'}
+                </h3>
+                <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+                  {lang === 'ru' ? 'Нажмите на карту для установки метки, затем сохраните' : lang === 'en' ? 'Click on map to place pin, then save' : "Xaritaga bosib metka qo'ying, keyin saqlang"}
+                </p>
+              </div>
+              <button onClick={() => { setShowMapPicker(false); setShowForm(false); }} className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800">
+                <X size={20} style={{ color: 'var(--text-secondary)' }} />
               </button>
             </div>
 
-            {/* Embedded OpenStreetMap */}
-            <iframe
-              src={`https://www.openstreetmap.org/export/embed.html?bbox=69.1%2C41.2%2C69.4%2C41.4&layer=mapnik&marker=41.311%2C69.279`}
-              className="w-full h-full border-0"
-              title="Map Picker"
-            ></iframe>
+            {/* Interactive Map Canvas */}
+            <div ref={mapRef} className="relative w-full h-[400px] cursor-crosshair select-none overflow-hidden"
+              onClick={handleMapCanvasClick}
+              style={{ background: 'linear-gradient(135deg, #e0f2fe 0%, #dbeafe 30%, #bfdbfe 60%, #93c5fd 100%)' }}>
+              
+              {/* Grid overlay */}
+              <div className="absolute inset-0 opacity-15">
+                <svg width="100%" height="100%">
+                  <defs>
+                    <pattern id="mapgrid" width="50" height="50" patternUnits="userSpaceOnUse">
+                      <path d="M 50 0 L 0 0 0 50" fill="none" stroke="#3b82f6" strokeWidth="0.5"/>
+                    </pattern>
+                  </defs>
+                  <rect width="100%" height="100%" fill="url(#mapgrid)"/>
+                </svg>
+              </div>
+
+              {/* Roads simulation */}
+              <div className="absolute inset-0 opacity-20">
+                <div className="absolute top-1/3 left-0 right-0 h-[2px] bg-gray-600"></div>
+                <div className="absolute top-2/3 left-0 right-0 h-[2px] bg-gray-600"></div>
+                <div className="absolute left-1/4 top-0 bottom-0 w-[2px] bg-gray-600"></div>
+                <div className="absolute left-1/2 top-0 bottom-0 w-[2px] bg-gray-600"></div>
+                <div className="absolute left-3/4 top-0 bottom-0 w-[2px] bg-gray-600"></div>
+              </div>
+
+              {/* Existing location markers */}
+              {locations.map((loc, idx) => {
+                const px = ((loc.lng - 69.1) / 0.3) * 100;
+                const py = ((41.4 - loc.lat) / 0.2) * 100;
+                return (
+                  <div key={loc.id} className="absolute transform -translate-x-1/2 -translate-y-full pointer-events-none"
+                    style={{ left: `${Math.max(5, Math.min(95, px))}%`, top: `${Math.max(5, Math.min(95, py))}%` }}>
+                    <div className="flex flex-col items-center">
+                      <span className="text-xl drop-shadow-lg">{loc.icon}</span>
+                      <span className="text-[8px] font-bold px-1 rounded bg-white/80 text-gray-800 mt-0.5 whitespace-nowrap shadow">{loc.name}</span>
+                    </div>
+                  </div>
+                );
+              })}
+
+              {/* User-placed pin (clickable metka) */}
+              {mapPin && (
+                <div className="absolute transform -translate-x-1/2 -translate-y-full z-20 animate-bounce"
+                  style={{ left: `${mapPin.x}px`, top: `${mapPin.y}px` }}>
+                  <div className="flex flex-col items-center">
+                    <div className="text-3xl drop-shadow-xl">📍</div>
+                    <div className="px-2 py-0.5 rounded-lg bg-blue-600 text-white text-[10px] font-bold shadow-lg mt-1 whitespace-nowrap">
+                      {mapPin.lat.toFixed(4)}, {mapPin.lng.toFixed(4)}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* City label */}
+              <div className="absolute bottom-3 right-3 px-2 py-1 rounded-lg text-xs font-medium shadow"
+                style={{ background: 'rgba(255,255,255,0.9)', color: '#1e293b' }}>
+                🏙️ Toshkent, O'zbekiston
+              </div>
+
+              {/* Click hint */}
+              {!mapPin && (
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
+                  <div className="px-4 py-2 rounded-xl bg-black/50 text-white text-sm font-medium backdrop-blur-sm animate-pulse">
+                    {lang === 'ru' ? '👆 Нажмите здесь' : lang === 'en' ? '👆 Click here' : '👆 Shu yerga bosing'}
+                  </div>
+                </div>
+              )}
+            </div>
 
             {/* Bottom controls */}
-            <div className="absolute bottom-0 left-0 right-0 p-4" style={{ background: 'linear-gradient(to top, var(--bg-card), transparent)' }}>
-              <p className="text-xs text-center mb-3" style={{ color: 'var(--text-secondary)' }}>
-                {lang === 'ru' ? 'Введите координаты или используйте карту для навигации' : lang === 'en' ? 'Enter coordinates or use map for navigation' : 'Koordinatalarni kiriting yoki xaritadan foydalaning'}
-              </p>
-              <div className="flex gap-2">
-                <input type="number" step="0.0001" placeholder="Lat (41.xxxx)" value={newLoc.lat || ''}
-                  onChange={e => setNewLoc(prev => ({...prev, lat: parseFloat(e.target.value) || null}))}
-                  className="flex-1 px-3 py-2 rounded-xl border text-sm outline-none focus:ring-2 focus:ring-blue-500"
-                  style={{ background: 'var(--bg-secondary)', borderColor: 'var(--border)', color: 'var(--text-primary)' }} />
-                <input type="number" step="0.0001" placeholder="Lng (69.xxxx)" value={newLoc.lng || ''}
-                  onChange={e => setNewLoc(prev => ({...prev, lng: parseFloat(e.target.value) || null}))}
-                  className="flex-1 px-3 py-2 rounded-xl border text-sm outline-none focus:ring-2 focus:ring-blue-500"
-                  style={{ background: 'var(--bg-secondary)', borderColor: 'var(--border)', color: 'var(--text-primary)' }} />
-                <button onClick={() => setShowMapPicker(false)}
-                  className="btn-primary px-4 text-sm whitespace-nowrap">
-                  {newLoc.lat ? '✓ OK' : (lang === 'ru' ? 'Готово' : lang === 'en' ? 'Done' : 'Tayyor')}
+            <div className="p-4 border-t space-y-3" style={{ borderColor: 'var(--border)' }}>
+              {/* Save pin button */}
+              {mapPin && !pinSaved && (
+                <button onClick={handleSavePin}
+                  className="w-full py-3 rounded-xl bg-gradient-to-r from-green-500 to-emerald-500 text-white font-bold flex items-center justify-center gap-2 shadow-lg hover:from-green-600 hover:to-emerald-600 transition-all">
+                  <Save size={18} />
+                  {lang === 'ru' ? 'Сохранить метку' : lang === 'en' ? 'Save Pin' : 'Metkani saqlash'}
                 </button>
-              </div>
+              )}
+
+              {/* After pin saved - show form */}
+              {pinSaved && (
+                <div className="space-y-3 animate-in">
+                  <div className="flex items-center gap-2 p-2 rounded-lg bg-green-50 dark:bg-green-900/10">
+                    <span className="text-green-500">✓</span>
+                    <span className="text-sm text-green-700 dark:text-green-400 font-medium">
+                      {lang === 'ru' ? 'Метка сохранена!' : lang === 'en' ? 'Pin saved!' : 'Metka saqlandi!'} ({newLoc.lat?.toFixed(4)}, {newLoc.lng?.toFixed(4)})
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <input type="text" placeholder={t('placeName')} value={newLoc.name} onChange={e => setNewLoc({...newLoc, name: e.target.value})}
+                      className="px-4 py-2.5 rounded-xl border outline-none focus:ring-2 focus:ring-blue-500"
+                      style={{ background: 'var(--bg-secondary)', borderColor: 'var(--border)', color: 'var(--text-primary)' }} />
+                    <input type="text" placeholder={t('placeAddress')} value={newLoc.address} onChange={e => setNewLoc({...newLoc, address: e.target.value})}
+                      className="px-4 py-2.5 rounded-xl border outline-none focus:ring-2 focus:ring-blue-500"
+                      style={{ background: 'var(--bg-secondary)', borderColor: 'var(--border)', color: 'var(--text-primary)' }} />
+                    <select value={newLoc.type} onChange={e => setNewLoc({...newLoc, type: e.target.value})}
+                      className="px-4 py-2.5 rounded-xl border outline-none focus:ring-2 focus:ring-blue-500"
+                      style={{ background: 'var(--bg-secondary)', borderColor: 'var(--border)', color: 'var(--text-primary)' }}>
+                      <option value="personal">{t('personal')}</option>
+                      <option value="education">{t('education')}</option>
+                      <option value="work">{t('work')}</option>
+                      <option value="meeting">{t('meeting')}</option>
+                      <option value="event">{t('event')}</option>
+                      <option value="birthday">{t('birthday')}</option>
+                    </select>
+                    <button onClick={handleAdd} disabled={!newLoc.name || !newLoc.address}
+                      className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 text-white font-semibold disabled:opacity-50 flex items-center justify-center gap-2">
+                      <Plus size={16} /> {t('add')}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Cancel if no pin */}
+              {!pinSaved && !mapPin && (
+                <p className="text-center text-sm" style={{ color: 'var(--text-secondary)' }}>
+                  {lang === 'ru' ? 'Нажмите на карту для установки метки' : lang === 'en' ? 'Click on map to place a pin' : "Xaritaga bosib metka qo'ying"}
+                </p>
+              )}
             </div>
           </div>
         </div>
@@ -185,9 +257,9 @@ export default function LocationMap() {
       {/* Selected Location Detail */}
       {selectedLoc && (
         <div className="card animate-in" style={{ borderColor: 'var(--accent)' }}>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 flex-wrap">
             <span className="text-3xl">{selectedLoc.icon}</span>
-            <div className="flex-1">
+            <div className="flex-1 min-w-[150px]">
               <h3 className="text-lg font-bold" style={{ color: 'var(--text-primary)' }}>{selectedLoc.name}</h3>
               <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{selectedLoc.address}</p>
             </div>

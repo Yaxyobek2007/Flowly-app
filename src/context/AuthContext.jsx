@@ -27,6 +27,8 @@ const defaultUsers = [
     loginStreak: 7,
     lastLoginDate: '2026-06-02',
     totalLogins: 120,
+    blocked: false,
+    deleted: false,
   }
 ];
 
@@ -758,6 +760,22 @@ const translations = {
 };
 
 export function AuthProvider({ children }) {
+  // Force reset all data to clean state (version bump clears old data)
+  const DATA_VERSION = 'v3';
+  if (localStorage.getItem('flowly-data-version') !== DATA_VERSION) {
+    localStorage.removeItem('flowly-users');
+    localStorage.removeItem('flowly-current-user');
+    localStorage.removeItem('flowly-tasks');
+    localStorage.removeItem('flowly-habits');
+    localStorage.removeItem('flowly-goals');
+    localStorage.removeItem('flowly-notes');
+    localStorage.removeItem('flowly-events');
+    localStorage.removeItem('flowly-notifications');
+    localStorage.removeItem('flowly-certificates');
+    localStorage.removeItem('flowly-locations');
+    localStorage.setItem('flowly-data-version', DATA_VERSION);
+  }
+
   const [users, setUsers] = useState(() => {
     const saved = localStorage.getItem('flowly-users');
     return saved ? JSON.parse(saved) : defaultUsers;

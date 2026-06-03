@@ -9,7 +9,6 @@ export default function Settings() {
   const navigate = useNavigate();
 
   const handleLogout = () => { logout(); };
-  const handleSwitchAccount = () => { logout(); };
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
@@ -83,12 +82,7 @@ export default function Settings() {
           <User size={18} style={{ color: 'var(--text-secondary)' }} />
           <span className="text-sm" style={{ color: 'var(--text-primary)' }}>{t('viewProfile')}</span>
         </button>
-        <button onClick={handleSwitchAccount}
-          className="w-full flex items-center gap-3 p-3 rounded-xl transition-colors hover:bg-yellow-50 dark:hover:bg-yellow-900/10"
-          style={{ background: 'var(--bg-secondary)' }}>
-          <User size={18} className="text-yellow-500" />
-          <span className="text-sm" style={{ color: 'var(--text-primary)' }}>{t('switchAccount')}</span>
-        </button>
+
         <button onClick={handleLogout}
           className="w-full flex items-center gap-3 p-3 rounded-xl transition-colors hover:bg-red-50 dark:hover:bg-red-900/10"
           style={{ background: 'var(--bg-secondary)' }}>
