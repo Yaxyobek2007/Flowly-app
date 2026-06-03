@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { User, Mail, Phone, MapPin, Calendar, Edit2, Save, X, Shield, Star, Key, AtSign } from 'lucide-react';
+import { User, Mail, Phone, MapPin, Calendar, Edit2, Save, X, Shield, Star, Key, AtSign, Camera } from 'lucide-react';
 
 export default function Profile() {
   const { currentUser, updateProfile, t, language } = useAuth();
@@ -20,6 +20,16 @@ export default function Profile() {
   const handleSave = () => {
     updateProfile(form);
     setEditing(false);
+  };
+
+  const handleAvatarUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      updateProfile({ avatar: ev.target.result });
+    };
+    reader.readAsDataURL(file);
   };
 
   if (!currentUser) return null;
@@ -59,8 +69,19 @@ export default function Profile() {
         {/* Gradient background effect */}
         <div className="absolute inset-0 opacity-10" style={{ background: 'linear-gradient(135deg, #3b82f6, #8b5cf6, #ec4899)' }}></div>
         <div className="relative flex flex-col items-center py-8">
-          <div className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center shadow-xl shadow-purple-500/30 ring-4 ring-white/20">
-            <span className="text-white font-bold text-3xl">{(currentUser.name?.[0] || 'U').toUpperCase()}{(currentUser.surname?.[0] || '').toUpperCase()}</span>
+          <div className="relative">
+            {currentUser.avatar ? (
+              <img src={currentUser.avatar} alt="Avatar" className="w-24 h-24 rounded-full object-cover shadow-xl ring-4 ring-white/20" />
+            ) : (
+              <div className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center shadow-xl shadow-purple-500/30 ring-4 ring-white/20">
+                <span className="text-white font-bold text-3xl">{(currentUser.name?.[0] || 'U').toUpperCase()}{(currentUser.surname?.[0] || '').toUpperCase()}</span>
+              </div>
+            )}
+            {/* Upload button */}
+            <label className="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center cursor-pointer shadow-lg hover:bg-blue-600 transition-colors">
+              <Camera size={14} className="text-white" />
+              <input type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
+            </label>
           </div>
           <h2 className="text-xl font-bold mt-4" style={{ color: 'var(--text-primary)' }}>{currentUser.name} {currentUser.surname}</h2>
           <p className="text-sm flex items-center gap-1 mt-1" style={{ color: 'var(--text-secondary)' }}>

@@ -814,7 +814,7 @@ export function AuthProvider({ children }) {
       role: 'user',
       plan: 'free',
       planExpiry: null,
-      points: 0,
+      points: 10,
       trialEndsAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
       joinedAt: new Date().toISOString().split('T')[0],
       referralCode: 'FL' + Date.now().toString(36).toUpperCase(),

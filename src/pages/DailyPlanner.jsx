@@ -8,7 +8,8 @@ const dayLabelsUz = ['Yakshanba', 'Dushanba', 'Seshanba', 'Chorshanba', 'Payshan
 
 export default function DailyPlanner() {
   const { tasks, toggleTask, addTask, editTask, deleteTask } = useApp();
-  const { t } = useAuth();
+  const { t, language } = useAuth();
+  const lang = language || 'uz';
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [editForm, setEditForm] = useState({});
@@ -103,8 +104,8 @@ export default function DailyPlanner() {
         <div className="card flex items-center gap-3" style={{ background: 'rgba(239,68,68,0.05)', borderColor: 'rgba(239,68,68,0.3)' }}>
           <AlertTriangle size={20} className="text-red-500" />
           <div>
-            <p className="text-sm font-semibold text-red-600 dark:text-red-400">{missedCount} ta vazifa vaqti o'tib ketdi!</p>
-            <p className="text-xs text-red-500/70">Bu vazifalarni endi tahrirlash mumkin emas</p>
+            <p className="text-sm font-semibold text-red-600 dark:text-red-400">{missedCount} {lang === 'ru' ? 'задач просрочено!' : lang === 'en' ? 'tasks missed!' : 'ta vazifa vaqti o\'tib ketdi!'}</p>
+            <p className="text-xs text-red-500/70">{lang === 'ru' ? 'Эти задачи нельзя редактировать' : lang === 'en' ? 'These tasks can no longer be edited' : 'Bu vazifalarni endi tahrirlash mumkin emas'}</p>
           </div>
         </div>
       )}
@@ -228,7 +229,7 @@ export default function DailyPlanner() {
       {todayTasks.length === 0 && (
         <div className="card text-center py-12">
           <p className="text-lg" style={{ color: 'var(--text-secondary)' }}>🎉 {t('noTasks')}</p>
-          <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>Yangi vazifa qo'shing!</p>
+          <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>{lang === 'ru' ? 'Добавьте задачу!' : lang === 'en' ? 'Add a new task!' : "Yangi vazifa qo'shing!"}</p>
         </div>
       )}
     </div>

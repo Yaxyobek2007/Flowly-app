@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 
 export default function Auth() {
-  const { login, loginWithGoogle, loginWithPhone, signup, language, setLanguage, t, users } = useAuth();
+  const { login, loginWithGoogle, loginWithPhone, signup, language, setLanguage, t, users, updateUserByAdmin } = useAuth();
   const [mode, setMode] = useState('login');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -14,6 +14,25 @@ export default function Auth() {
   const [phone, setPhone] = useState('');
   const [code, setCode] = useState('');
   const [signupData, setSignupData] = useState({ name: '', surname: '', email: '', phone: '', password: '', age: '', address: '', login: '' });
+
+  // Staff/Admin panel state
+  const [staffLoggedIn, setStaffLoggedIn] = useState(false);
+  const [staffLogin, setStaffLogin] = useState('');
+  const [staffPass, setStaffPass] = useState('');
+  const [staffError, setStaffError] = useState('');
+  const [staffSearch, setStaffSearch] = useState('');
+  const [staffEditId, setStaffEditId] = useState(null);
+  const [staffEditForm, setStaffEditForm] = useState({});
+
+  const handleStaffLogin = () => {
+    const admin = users.find(u => u.role === 'admin' && (u.login === staffLogin || u.email === staffLogin) && u.password === staffPass);
+    if (admin) {
+      setStaffLoggedIn(true);
+      setStaffError('');
+    } else {
+      setStaffError(language === 'ru' ? 'Неверный логин или пароль' : language === 'en' ? 'Invalid login or password' : "Login yoki parol noto'g'ri");
+    }
+  };
 
   const LANGUAGES = [
     { code: 'uz', label: "O'zbekcha", flag: '🇺🇿' },
@@ -241,34 +260,128 @@ export default function Auth() {
             </form>
           )}
 
-          {/* STAFF ANALYTICS */}
+          {/* STAFF ANALYTICS / ADMIN PANEL */}
           {mode === 'staff' && (
             <div className="space-y-3">
-              <h2 className="text-lg font-bold text-white text-center">
-                {language === 'ru' ? 'Аналитика' : language === 'en' ? 'Staff Analytics' : 'Xodimlar Analizi'}
-              </h2>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="p-3 rounded-xl bg-white/10 text-center">
-                  <p className="text-2xl font-bold text-blue-300">{users.length}</p>
-                  <p className="text-[10px] text-white/50">{language === 'ru' ? 'Всего пользователей' : language === 'en' ? 'Total users' : 'Jami foydalanuvchilar'}</p>
-                </div>
-                <div className="p-3 rounded-xl bg-white/10 text-center">
-                  <p className="text-2xl font-bold text-green-300">{users.filter(u => u.plan !== 'free').length}</p>
-                  <p className="text-[10px] text-white/50">Premium</p>
-                </div>
-              </div>
-              <div className="max-h-40 overflow-y-auto space-y-1">
-                {users.map(u => (
-                  <div key={u.id} className="flex items-center justify-between p-2 rounded-lg bg-white/5">
-                    <div>
-                      <p className="text-xs text-white/80 font-medium">{u.name} {u.surname}</p>
-                      <p className="text-[10px] text-white/40">{u.email}</p>
-                    </div>
-                    <span className={`text-[10px] px-2 py-0.5 rounded-full ${u.plan === 'vip' ? 'bg-purple-500/30 text-purple-300' : 'bg-white/10 text-white/50'}`}>{u.plan}</span>
+              {!staffLoggedIn ? (
+                <>
+                  <h2 className="text-lg font-bold text-white text-center">
+                    {language === 'ru' ? 'Панель администратора' : language === 'en' ? 'Admin Panel' : 'Administrator Paneli'}
+                  </h2>
+                  <p className="text-xs text-center text-white/50">
+                    {language === 'ru' ? 'Войдите для доступа' : language === 'en' ? 'Login to access' : 'Kirish uchun login va parol kiriting'}
+                  </p>
+                  <input type="text" placeholder="Login" value={staffLogin}
+                    onChange={e => setStaffLogin(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/40 outline-none focus:ring-2 focus:ring-blue-500" />
+                  <input type="password" placeholder={t('password')} value={staffPass}
+                    onChange={e => setStaffPass(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/40 outline-none focus:ring-2 focus:ring-blue-500" />
+                  {staffError && <p className="text-red-400 text-xs text-center">{staffError}</p>}
+                  <button onClick={handleStaffLogin}
+                    className="w-full py-3 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold shadow-lg">
+                    {language === 'ru' ? 'Войти' : language === 'en' ? 'Login' : 'Kirish'}
+                  </button>
+                  <button type="button" onClick={() => setMode('login')} className="w-full text-xs text-white/40">{t('back')}</button>
+                </>
+              ) : (
+                <>
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-base font-bold text-white">
+                      {language === 'ru' ? '🛡️ Админ панель' : language === 'en' ? '🛡️ Admin Panel' : '🛡️ Admin Paneli'}
+                    </h2>
+                    <button onClick={() => { setStaffLoggedIn(false); setMode('login'); }} className="text-[10px] text-white/40 hover:text-white/70">
+                      {language === 'ru' ? 'Выйти' : language === 'en' ? 'Logout' : 'Chiqish'}
+                    </button>
                   </div>
-                ))}
-              </div>
-              <button type="button" onClick={() => setMode('login')} className="w-full text-xs text-white/40">{t('back')}</button>
+
+                  {/* Stats */}
+                  <div className="grid grid-cols-3 gap-2">
+                    <div className="p-2 rounded-xl bg-white/10 text-center">
+                      <p className="text-lg font-bold text-blue-300">{users.length}</p>
+                      <p className="text-[9px] text-white/50">{language === 'ru' ? 'Всего' : 'Jami'}</p>
+                    </div>
+                    <div className="p-2 rounded-xl bg-white/10 text-center">
+                      <p className="text-lg font-bold text-green-300">{users.filter(u => u.plan === 'vip').length}</p>
+                      <p className="text-[9px] text-white/50">VIP</p>
+                    </div>
+                    <div className="p-2 rounded-xl bg-white/10 text-center">
+                      <p className="text-lg font-bold text-yellow-300">${(users.filter(u => u.plan === 'vip').length * 2.9).toFixed(1)}</p>
+                      <p className="text-[9px] text-white/50">MRR</p>
+                    </div>
+                  </div>
+
+                  {/* Search */}
+                  <input type="text" placeholder={language === 'ru' ? 'Поиск...' : language === 'en' ? 'Search...' : 'Qidirish...'}
+                    value={staffSearch} onChange={e => setStaffSearch(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/40 outline-none text-sm" />
+
+                  {/* Users list */}
+                  <div className="max-h-[300px] overflow-y-auto space-y-2 scrollbar-hide">
+                    {users.filter(u => {
+                      if (!staffSearch) return true;
+                      const q = staffSearch.toLowerCase();
+                      return u.name?.toLowerCase().includes(q) || u.email?.toLowerCase().includes(q) || u.login?.toLowerCase().includes(q) || u.phone?.includes(q);
+                    }).map(u => (
+                      <div key={u.id} className="p-3 rounded-xl bg-white/5 border border-white/10">
+                        {staffEditId === u.id ? (
+                          <div className="space-y-2">
+                            <div className="grid grid-cols-2 gap-2">
+                              <input type="text" value={staffEditForm.name} onChange={e => setStaffEditForm({...staffEditForm, name: e.target.value})} placeholder="Ism"
+                                className="px-2 py-1 rounded-lg bg-white/10 border border-white/20 text-white text-xs outline-none" />
+                              <input type="text" value={staffEditForm.surname} onChange={e => setStaffEditForm({...staffEditForm, surname: e.target.value})} placeholder="Familya"
+                                className="px-2 py-1 rounded-lg bg-white/10 border border-white/20 text-white text-xs outline-none" />
+                              <input type="text" value={staffEditForm.email} onChange={e => setStaffEditForm({...staffEditForm, email: e.target.value})} placeholder="Email"
+                                className="px-2 py-1 rounded-lg bg-white/10 border border-white/20 text-white text-xs outline-none" />
+                              <input type="text" value={staffEditForm.phone} onChange={e => setStaffEditForm({...staffEditForm, phone: e.target.value})} placeholder="Telefon"
+                                className="px-2 py-1 rounded-lg bg-white/10 border border-white/20 text-white text-xs outline-none" />
+                              <select value={staffEditForm.plan} onChange={e => setStaffEditForm({...staffEditForm, plan: e.target.value})}
+                                className="px-2 py-1 rounded-lg bg-white/10 border border-white/20 text-white text-xs outline-none">
+                                <option value="free">Free</option><option value="vip">VIP</option>
+                              </select>
+                              <input type="number" value={staffEditForm.points} onChange={e => setStaffEditForm({...staffEditForm, points: parseInt(e.target.value) || 0})} placeholder="Ball"
+                                className="px-2 py-1 rounded-lg bg-white/10 border border-white/20 text-white text-xs outline-none" />
+                            </div>
+                            <div className="flex gap-2">
+                              <button onClick={() => { updateUserByAdmin(u.id, staffEditForm); setStaffEditId(null); }}
+                                className="flex-1 py-1.5 rounded-lg bg-green-500/80 text-white text-xs font-medium">💾 {language === 'ru' ? 'Сохранить' : 'Saqlash'}</button>
+                              <button onClick={() => setStaffEditId(null)}
+                                className="flex-1 py-1.5 rounded-lg bg-white/10 text-white/60 text-xs">✕ {language === 'ru' ? 'Отмена' : 'Bekor'}</button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div>
+                            <div className="flex items-center justify-between mb-1">
+                              <div className="flex items-center gap-2">
+                                <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-400 to-purple-400 flex items-center justify-center">
+                                  <span className="text-white text-[9px] font-bold">{(u.name?.[0] || '?').toUpperCase()}</span>
+                                </div>
+                                <div>
+                                  <p className="text-xs text-white font-medium">{u.name} {u.surname}</p>
+                                  <p className="text-[9px] text-white/40">@{u.login}</p>
+                                </div>
+                              </div>
+                              <button onClick={() => { setStaffEditId(u.id); setStaffEditForm({ name: u.name, surname: u.surname, email: u.email, phone: u.phone, plan: u.plan, points: u.points || 0 }); }}
+                                className="text-[9px] px-2 py-0.5 rounded bg-white/10 text-white/60 hover:text-white hover:bg-white/20">✏️</button>
+                            </div>
+                            <div className="grid grid-cols-2 gap-1 mt-2 text-[9px] text-white/50">
+                              <span>📧 {u.email}</span>
+                              <span>📱 {u.phone || '—'}</span>
+                              <span>📅 {u.joinedAt}</span>
+                              <span>⭐ {u.points || 0} ball</span>
+                              <span>🔥 {u.loginStreak || 0} streak</span>
+                              <span className={u.plan === 'vip' ? 'text-purple-300' : ''}>💎 {u.plan?.toUpperCase()}</span>
+                            </div>
+                            {u.planExpiry && <p className="text-[8px] text-yellow-300/60 mt-1">VIP gacha: {new Date(u.planExpiry).toLocaleDateString()}</p>}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+
+                  <button type="button" onClick={() => { setStaffLoggedIn(false); setMode('login'); }} className="w-full text-xs text-white/40 mt-2">{t('back')}</button>
+                </>
+              )}
             </div>
           )}
         </div>
@@ -279,7 +392,7 @@ export default function Auth() {
         <div className="text-center mt-3">
           <button onClick={() => setMode('staff')}
             className="text-[11px] text-white/30 hover:text-white/60 transition-colors underline">
-            {language === 'ru' ? 'Аналитика (для сотрудников)' : language === 'en' ? 'Analytics (staff)' : 'Analiz (xodimlar uchun)'}
+            {language === 'ru' ? 'Панель администратора' : language === 'en' ? 'Admin Panel' : 'Administrator paneli'}
           </button>
         </div>
       </div>

@@ -1,7 +1,9 @@
 import { useState } from 'react';
+import { useAuth } from '../context/AuthContext';
 import { Award, Plus, Trash2, ExternalLink, Calendar, Edit2, Save, X } from 'lucide-react';
 
 export default function Certificates() {
+  const { t } = useAuth();
   const [certificates, setCertificates] = useState(() => {
     const saved = localStorage.getItem('flowly-certificates');
     return saved ? JSON.parse(saved) : [
@@ -57,14 +59,14 @@ export default function Certificates() {
           <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Diplomlar, mukofotlar, erishgan natijalatingiz</p>
         </div>
         <button className="btn-primary flex items-center gap-2" onClick={() => { setShowForm(!showForm); setEditId(null); setForm({ title: '', issuer: '', date: '', category: 'tech', description: '', link: '' }); }}>
-          <Plus size={18} /> Qo'shish
+          <Plus size={18} /> {t('add')}
         </button>
       </div>
 
       {/* Add/Edit Form */}
       {showForm && (
         <div className="card animate-in" style={{ borderColor: 'var(--accent)' }}>
-          <h3 className="font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>{editId ? 'Tahrirlash' : 'Yangi sertifikat'}</h3>
+          <h3 className="font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>{editId ? t('edit') : t('add')}</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <input type="text" placeholder="Nomi" value={form.title} onChange={e => setForm({...form, title: e.target.value})}
               className="px-4 py-2 rounded-lg border outline-none focus:ring-2 focus:ring-blue-500"
@@ -94,9 +96,9 @@ export default function Certificates() {
           </div>
           <div className="flex gap-2 mt-3">
             <button className="btn-primary flex items-center gap-1" onClick={handleAdd}>
-              <Save size={16} /> {editId ? 'Saqlash' : 'Qo\'shish'}
+              <Save size={16} /> {editId ? t('save') : t('add')}
             </button>
-            <button className="px-4 py-2 rounded-lg border" style={{ borderColor: 'var(--border)', color: 'var(--text-secondary)' }} onClick={() => { setShowForm(false); setEditId(null); }}>Bekor</button>
+            <button className="px-4 py-2 rounded-lg border" style={{ borderColor: 'var(--border)', color: 'var(--text-secondary)' }} onClick={() => { setShowForm(false); setEditId(null); }}>{t('cancel')}</button>
           </div>
         </div>
       )}

@@ -195,8 +195,8 @@ export default function CrmErp() {
                       </select>
                     </div>
                     <div className="flex gap-2">
-                      <button onClick={handleSave} className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-green-500 text-white text-sm"><Save size={14} /> Saqlash</button>
-                      <button onClick={() => setEditingUser(null)} className="flex items-center gap-1 px-3 py-1.5 rounded-lg border text-sm" style={{ borderColor: 'var(--border)', color: 'var(--text-secondary)' }}><X size={14} /> Bekor</button>
+                      <button onClick={handleSave} className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-green-500 text-white text-sm"><Save size={14} /> {t('save')}</button>
+                      <button onClick={() => setEditingUser(null)} className="flex items-center gap-1 px-3 py-1.5 rounded-lg border text-sm" style={{ borderColor: 'var(--border)', color: 'var(--text-secondary)' }}><X size={14} /> {t('cancel')}</button>
                     </div>
                   </div>
                 ) : (
@@ -220,7 +220,7 @@ export default function CrmErp() {
                         <Eye size={15} className="text-blue-500" />
                       </button>
                       <button onClick={() => handleEdit(user)}
-                        className="p-2 rounded-lg hover:bg-green-50 dark:hover:bg-green-900/20" title="Tahrirlash">
+                        className="p-2 rounded-lg hover:bg-green-50 dark:hover:bg-green-900/20" title={t('edit')}>
                         <Edit2 size={15} className="text-green-500" />
                       </button>
                     </div>

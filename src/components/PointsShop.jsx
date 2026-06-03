@@ -45,9 +45,10 @@ export default function PointsShop({ isOpen, onClose }) {
 
   const handleRedeem = (item) => {
     if (userPoints < item.points) return;
-    // Don't actually spend here - discount is applied at Premium checkout
+    // Spend points and activate discount for Premium checkout
+    spendPoints(item.points);
     setRedeemed(item.id);
-    setTimeout(() => setRedeemed(null), 2000);
+    setTimeout(() => setRedeemed(null), 3000);
   };
 
   return (

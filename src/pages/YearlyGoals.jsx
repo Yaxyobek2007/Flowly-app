@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { useApp } from '../context/AppContext';
+import { useAuth } from '../context/AuthContext';
 import { Plus, Target, CheckCircle2, ChevronDown, ChevronRight, Trash2, Edit2, Save, X } from 'lucide-react';
 
 export default function YearlyGoals() {
   const { goals, addGoal, deleteGoal, editGoal, updateGoalProgress } = useApp();
+  const { t } = useAuth();
   const [expandedGoal, setExpandedGoal] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState(null);
@@ -57,9 +59,9 @@ export default function YearlyGoals() {
       {/* Form */}
       {showForm && (
         <div className="card animate-in" style={{ borderColor: 'var(--accent)' }}>
-          <h3 className="font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>{editId ? 'Tahrirlash' : 'Yangi maqsad'}</h3>
+          <h3 className="font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>{editId ? t('edit') : t('newGoal')}</h3>
           <div className="space-y-3">
-            <input type="text" placeholder="Maqsad nomi" value={form.title} onChange={e => setForm({...form, title: e.target.value})}
+            <input type="text" placeholder={t('goalName')} value={form.title} onChange={e => setForm({...form, title: e.target.value})}
               className="w-full px-4 py-2 rounded-lg border outline-none focus:ring-2 focus:ring-blue-500"
               style={{ background: 'var(--bg-secondary)', borderColor: 'var(--border)', color: 'var(--text-primary)' }} />
             <input type="date" value={form.deadline} onChange={e => setForm({...form, deadline: e.target.value})}
@@ -70,8 +72,8 @@ export default function YearlyGoals() {
               style={{ background: 'var(--bg-secondary)', borderColor: 'var(--border)', color: 'var(--text-primary)' }} />
           </div>
           <div className="flex gap-2 mt-3">
-            <button className="btn-primary flex items-center gap-1" onClick={handleSubmit}><Save size={16} /> {editId ? 'Saqlash' : 'Qo\'shish'}</button>
-            <button className="px-4 py-2 rounded-lg border" style={{ borderColor: 'var(--border)', color: 'var(--text-secondary)' }} onClick={() => { setShowForm(false); setEditId(null); }}>Bekor</button>
+            <button className="btn-primary flex items-center gap-1" onClick={handleSubmit}><Save size={16} /> {editId ? t('save') : t('add')}</button>
+            <button className="px-4 py-2 rounded-lg border" style={{ borderColor: 'var(--border)', color: 'var(--text-secondary)' }} onClick={() => { setShowForm(false); setEditId(null); }}>{t('cancel')}</button>
           </div>
         </div>
       )}
