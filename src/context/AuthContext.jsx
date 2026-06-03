@@ -8,6 +8,7 @@ const defaultUsers = [
     email: 'admin@flowly.uz',
     phone: '+998930057077',
     password: 'admin123',
+    login: 'yaxyobek',
     name: 'Yaxyobek',
     surname: 'Nematillaev',
     age: 18,
@@ -15,6 +16,7 @@ const defaultUsers = [
     avatar: null,
     role: 'admin',
     plan: 'vip',
+    planExpiry: null,
     points: 500,
     trialEndsAt: null,
     joinedAt: '2026-01-01',
@@ -22,6 +24,9 @@ const defaultUsers = [
     referredBy: null,
     friends: [],
     language: 'uz',
+    loginStreak: 7,
+    lastLoginDate: '2026-06-02',
+    totalLogins: 120,
   }
 ];
 
@@ -774,7 +779,7 @@ export function AuthProvider({ children }) {
   const t = (key) => translations[language]?.[key] || translations['en'][key] || key;
 
   const login = (emailOrPhone, password) => {
-    const user = users.find(u => (u.email === emailOrPhone || u.phone === emailOrPhone) && u.password === password);
+    const user = users.find(u => (u.email === emailOrPhone || u.phone === emailOrPhone || u.login === emailOrPhone) && u.password === password);
     if (user) { setCurrentUser(user); return { success: true }; }
     return { success: false, error: language === 'ru' ? 'Неверные данные' : language === 'en' ? 'Invalid credentials' : 'Noto\'g\'ri ma\'lumotlar' };
   };
@@ -800,6 +805,7 @@ export function AuthProvider({ children }) {
       email: userData.email,
       phone: userData.phone,
       password: userData.password,
+      login: userData.login || userData.email.split('@')[0],
       name: userData.name || '',
       surname: userData.surname || '',
       age: userData.age || '',
@@ -807,6 +813,7 @@ export function AuthProvider({ children }) {
       avatar: null,
       role: 'user',
       plan: 'free',
+      planExpiry: null,
       points: 0,
       trialEndsAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
       joinedAt: new Date().toISOString().split('T')[0],
@@ -814,6 +821,9 @@ export function AuthProvider({ children }) {
       referredBy: userData.referralCode || null,
       friends: [],
       language: language,
+      loginStreak: 1,
+      lastLoginDate: new Date().toISOString().split('T')[0],
+      totalLogins: 1,
     };
 
     setUsers([...users, newUser]);
@@ -841,11 +851,76 @@ export function AuthProvider({ children }) {
     }
   };
 
+  // Daily bonus check - returns bonus info if applicable
+  const checkDailyBonus = () => {
+    if (!currentUser) return null;
+    const today = new Date().toISOString().split('T')[0];
+    if (currentUser.lastLoginDate === today) return null; // already claimed today
+
+    const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+    const isConsecutive = currentUser.lastLoginDate === yesterday;
+    const newStreak = isConsecutive ? (currentUser.loginStreak || 0) + 1 : 1;
+
+    // Bonus table: day 1=1, 2=2, 3=5, 4=7, 5=8, 6=12, 7=15
+    const bonusTable = [0, 1, 2, 5, 7, 8, 12, 15];
+    const dayIndex = Math.min(newStreak, 7);
+    const bonus = bonusTable[dayIndex];
+
+    return { streak: newStreak, bonus, dayIndex };
+  };
+
+  const claimDailyBonus = () => {
+    const bonusInfo = checkDailyBonus();
+    if (!bonusInfo || !currentUser) return null;
+
+    const today = new Date().toISOString().split('T')[0];
+    const updated = {
+      ...currentUser,
+      points: currentUser.points + bonusInfo.bonus,
+      loginStreak: bonusInfo.streak,
+      lastLoginDate: today,
+      totalLogins: (currentUser.totalLogins || 0) + 1,
+    };
+    setCurrentUser(updated);
+    setUsers(users.map(u => u.id === updated.id ? updated : u));
+    return bonusInfo;
+  };
+
+  // Points shop - discount calculation
+  const getPointsDiscount = (points) => {
+    if (points >= 1000) return 50;
+    if (points >= 250) return 10;
+    if (points >= 100) return 3;
+    if (points >= 50) return 1;
+    return 0;
+  };
+
+  // Purchase plan with card
+  const purchasePlan = (planType, months) => {
+    if (!currentUser) return false;
+    const expiry = new Date();
+    expiry.setMonth(expiry.getMonth() + months);
+    const updated = { ...currentUser, plan: planType, planExpiry: expiry.toISOString() };
+    setCurrentUser(updated);
+    setUsers(users.map(u => u.id === updated.id ? updated : u));
+    return true;
+  };
+
+  // Spend points for discount
+  const spendPoints = (amount) => {
+    if (!currentUser || currentUser.points < amount) return false;
+    const updated = { ...currentUser, points: currentUser.points - amount };
+    setCurrentUser(updated);
+    setUsers(users.map(u => u.id === updated.id ? updated : u));
+    return true;
+  };
+
   return (
     <AuthContext.Provider value={{
       currentUser, users, language, setLanguage, t,
       login, loginWithGoogle, loginWithPhone, signup, logout,
       updateProfile, updateUserByAdmin, addPoints,
+      checkDailyBonus, claimDailyBonus, getPointsDiscount, purchasePlan, spendPoints,
     }}>
       {children}
     </AuthContext.Provider>

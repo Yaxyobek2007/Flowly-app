@@ -48,7 +48,7 @@ export default function Settings() {
           {[
             { code: 'uz', label: "O'zbekcha", flag: '🇺🇿' },
             { code: 'ru', label: 'Русский', flag: '🇷🇺' },
-            { code: 'en', label: 'English', flag: '🇬🇧' },
+            { code: 'en', label: 'English', flag: '🇺🇸' },
           ].map(lang => (
             <button key={lang.code} onClick={() => setLanguage(lang.code)}
               className={`p-3 rounded-xl border text-center transition-all ${language === lang.code ? 'ring-2 ring-blue-500 bg-blue-50 dark:bg-blue-900/20' : ''}`}

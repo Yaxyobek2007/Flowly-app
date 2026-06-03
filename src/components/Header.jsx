@@ -6,7 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import SearchModal from './SearchModal';
 
-export default function Header({ onMenuClick, visible }) {
+export default function Header({ onMenuClick, visible, onOpenShop }) {
   const { notifications, markNotificationRead, clearNotifications } = useApp();
   const { currentUser, logout, language, t } = useAuth();
   const { darkMode, toggleDark } = useTheme();
@@ -78,6 +78,13 @@ export default function Header({ onMenuClick, visible }) {
 
         {/* Right: Notifications + Theme + User menu */}
         <div className="flex items-center gap-2">
+          {/* Points/Shop button */}
+          <button onClick={onOpenShop} className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl transition-colors hover:bg-yellow-50 dark:hover:bg-yellow-900/20"
+            style={{ border: '1px solid var(--border)' }}>
+            <span className="text-sm">⭐</span>
+            <span className="text-xs font-bold" style={{ color: 'var(--text-primary)' }}>{currentUser?.points || 0}</span>
+          </button>
+
           {/* Theme toggle */}
           <button onClick={toggleDark} className="p-2 rounded-xl transition-colors hover:bg-blue-50 dark:hover:bg-blue-900/20">
             {darkMode ? <Sun size={18} className="text-yellow-400" /> : <Moon size={18} style={{ color: 'var(--text-secondary)' }} />}

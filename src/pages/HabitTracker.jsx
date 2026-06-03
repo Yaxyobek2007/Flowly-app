@@ -3,7 +3,7 @@ import { useApp } from '../context/AppContext';
 import { useAuth } from '../context/AuthContext';
 import { Plus, Flame, Edit2, Trash2, Save, X } from 'lucide-react';
 
-const ICONS = ['💪','📚','🇬🇧','📈','⏰','🧘','💻','🏃','💧','🎯','🎨','🎵','✍️','🧠','🌱','🏋️','🚴','🧹','📝','😴'];
+const ICONS = ['💪','📚','🇺🇸','📈','⏰','🧘','💻','🏃','💧','🎯','🎨','🎵','✍️','🧠','🌱','🏋️','🚴','🧹','📝','😴'];
 
 export default function HabitTracker() {
   const { habits, toggleHabit, addHabit, editHabit, deleteHabit } = useApp();
