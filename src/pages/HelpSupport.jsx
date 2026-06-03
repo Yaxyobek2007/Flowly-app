@@ -1,57 +1,120 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { HelpCircle, MessageCircle, Phone, Send, ChevronDown, ChevronRight } from 'lucide-react';
+import { HelpCircle, MessageCircle, Phone, Send, ChevronDown, ChevronRight, BookOpen, Shield, Zap, Users, Star, Calendar, Target, Bell } from 'lucide-react';
 
 const faqs = [
+  // Ilova haqida umumiy
   {
-    q: { uz: "Nechta til bor?", ru: "Сколько языков?", en: "How many languages?" },
-    a: { uz: "Flowly'da 3 ta til mavjud: O'zbek, Rus va Ingliz tillari. Tilni Settings yoki Auth sahifasidan o'zgartirish mumkin.", ru: "В Flowly 3 языка: узбекский, русский и английский. Язык можно изменить в Настройках или на странице входа.", en: "Flowly has 3 languages: Uzbek, Russian, and English. You can change it in Settings or on the Auth page." }
+    category: 'general',
+    q: { uz: "Flowly nima va u qanday ishlaydi?", ru: "Что такое Flowly и как он работает?", en: "What is Flowly and how does it work?" },
+    a: { uz: "Flowly — bu shaxsiy hayotni boshqarish platformasi. Siz kunlik, haftalik, oylik va yillik rejalarni tuzasiz. Ilova ularni kuzatib boradi, eslatmalar yuboradi va statistika ko'rsatadi. Qisqacha: Plan → Act → Achieve!", ru: "Flowly — платформа управления жизнью. Вы создаёте планы (ежедневные, недельные, месячные, годовые). Приложение отслеживает их, отправляет напоминания и показывает статистику. Кратко: Plan → Act → Achieve!", en: "Flowly is a life management platform. You create plans (daily, weekly, monthly, yearly). The app tracks them, sends reminders, and shows statistics. Simply: Plan → Act → Achieve!" }
   },
   {
-    q: { uz: "Premium narxlari qanday?", ru: "Какие цены Premium?", en: "What are Premium prices?" },
-    a: { uz: "VIP: 1 oylik — $2.9, 3 oylik — $6.9, 1 yillik — $15. Referral orqali chegirma olish mumkin.", ru: "VIP: 1 месяц — $2.9, 3 месяца — $6.9, 1 год — $15. Скидки через реферальную программу.", en: "VIP: 1 month — $2.9, 3 months — $6.9, 1 year — $15. Discounts available through referral program." }
+    category: 'general',
+    q: { uz: "Ilova qanday tillarda ishlaydi?", ru: "На каких языках работает приложение?", en: "What languages does the app support?" },
+    a: { uz: "Flowly 3 tilda ishlaydi: O'zbek 🇺🇿, Rus 🇷🇺 va Ingliz 🇺🇸. Tilni o'zgartirish uchun: Sozlamalar → Til bo'limiga o'ting va kerakli tilni tanlang. Barcha matn, tugmalar va sahifalar darhol o'zgaradi.", ru: "Flowly работает на 3 языках: Узбекский 🇺🇿, Русский 🇷🇺 и Английский 🇺🇸. Для смены: Настройки → Язык → выберите нужный. Все тексты, кнопки и страницы сразу изменятся.", en: "Flowly supports 3 languages: Uzbek 🇺🇿, Russian 🇷🇺, English 🇺🇸. To change: Settings → Language → select. All text, buttons, and pages will change immediately." }
+  },
+  // Rejalar va vazifalar
+  {
+    category: 'tasks',
+    q: { uz: "Kunlik vazifa qanday qo'shiladi?", ru: "Как добавить ежедневную задачу?", en: "How to add a daily task?" },
+    a: { uz: "Kunlik reja → 'Yangi vazifa' tugmasini bosing → Vazifa nomi, vaqti, prioriteti va kategoriyasini kiriting → 'Qo'shish' bosing. Vazifa avtomatik haftalik rejaga ham qo'shiladi.", ru: "Дневной план → нажмите 'Новая задача' → введите название, время, приоритет и категорию → нажмите 'Добавить'. Задача автоматически появится и в недельном плане.", en: "Daily Plan → click 'New task' → enter name, time, priority and category → click 'Add'. The task automatically appears in the weekly plan too." }
   },
   {
-    q: { uz: "Do'stni qanday taklif qilaman?", ru: "Как пригласить друга?", en: "How to invite a friend?" },
-    a: { uz: "Do'stlar bo'limiga o'ting → Taklif havolasini nusxalang → Do'stingizga yuboring. Har bir yangi foydalanuvchi uchun 10 ball olasiz.", ru: "Перейдите в раздел Друзья → Скопируйте ссылку → Отправьте другу. За каждого нового пользователя вы получаете 10 баллов.", en: "Go to Friends section → Copy invite link → Send to friend. You get 10 points for each new user." }
+    category: 'tasks',
+    q: { uz: "Nima uchun vazifani tahrirlash tugmasi yo'qolib qoldi?", ru: "Почему исчезла кнопка редактирования?", en: "Why did the edit button disappear?" },
+    a: { uz: "Xavfsizlik va intizom uchun: agar vazifa vaqti o'tib ketgan bo'lsa (masalan, bugun soat 10:00 da qilish kerak edi, hozir 11:00), uni endi tahrirlash MUMKIN EMAS. Bu siz uchun motivatsiya — rejaga amal qiling! Bajarilmagan vazifalar qizil rangda ko'rinadi.", ru: "Для дисциплины: если время задачи прошло (например, нужно было в 10:00, а сейчас 11:00), редактировать НЕЛЬЗЯ. Это мотивирует следовать плану! Просроченные задачи отображаются красным.", en: "For discipline: if the task time has passed (e.g., was due at 10:00, now 11:00), editing is DISABLED. This motivates you to follow your plan! Missed tasks appear in red." }
   },
   {
-    q: { uz: "7 kunlik VIP sinov nima?", ru: "Что такое 7-дневный VIP?", en: "What is the 7-day VIP trial?" },
-    a: { uz: "Har bir yangi foydalanuvchi 7 kun bepul VIP paketda ishlata oladi. 7 kundan keyin bepul rejaga o'tadi yoki pullik tarif sotib oladi.", ru: "Каждый новый пользователь получает 7 дней VIP. После переходит на бесплатный план или покупает подписку.", en: "Every new user gets 7 days of free VIP. After that, they switch to free plan or purchase a subscription." }
+    category: 'tasks',
+    q: { uz: "Haftalik va oylik rejalar qanday bog'langan?", ru: "Как связаны недельный и месячный планы?", en: "How are weekly and monthly plans connected?" },
+    a: { uz: "Kunlik reja → avtomatik haftalikda ko'rinadi. Oylik kalendarda har bir kunga bosganda, o'sha kunning vazifalari va voqealari ko'rinadi. Barchasi bir-biriga bog'langan — bir joyda qo'shsangiz, boshqasida ham ko'rinadi.", ru: "Дневной план → автоматически виден в недельном. В месячном календаре при нажатии на день видны задачи и события. Всё связано — добавляете в одном месте, видите в другом.", en: "Daily plan → automatically shows in weekly. In monthly calendar, clicking a day shows its tasks and events. Everything is connected — add in one place, see it everywhere." }
+  },
+  // Premium va to'lov
+  {
+    category: 'premium',
+    q: { uz: "Premium (VIP) reja nimalar beradi?", ru: "Что даёт Premium (VIP) план?", en: "What does Premium (VIP) plan include?" },
+    a: { uz: "VIP beradi: ✅ Cheksiz vazifalar va odatlar ✅ To'liq statistika ✅ AI tavsiyalar ✅ Geolokatsiya va xarita ✅ Sertifikatlar bo'limi ✅ SMS bildirishnomalar. Narxlar: 1 oy — $2.9 | 3 oy — $6.9 | 1 yil — $15", ru: "VIP включает: ✅ Безлимит задач и привычек ✅ Полная статистика ✅ ИИ рекомендации ✅ Геолокация и карта ✅ Сертификаты ✅ SMS уведомления. Цены: 1 мес — $2.9 | 3 мес — $6.9 | 1 год — $15", en: "VIP includes: ✅ Unlimited tasks & habits ✅ Full analytics ✅ AI recommendations ✅ Geolocation & map ✅ Certificates ✅ SMS notifications. Prices: 1 month — $2.9 | 3 months — $6.9 | 1 year — $15" }
   },
   {
-    q: { uz: "Odatlarni qanday belgilayman?", ru: "Как отмечать привычки?", en: "How to mark habits?" },
-    a: { uz: "Habit Tracker bo'limida odat ustiga bosing. Agar kunlik maqsad 2x bo'lsa, 2 marta bajarilganini belgilang.", ru: "В разделе Привычки нажмите на привычку. Если дневная цель 2x, отметьте 2 раза.", en: "In Habit Tracker, click on the habit. If daily target is 2x, mark it twice." }
+    category: 'premium',
+    q: { uz: "To'lovni qanday amalga oshiraman?", ru: "Как оплатить?", en: "How to make a payment?" },
+    a: { uz: "Premium → Tarifni tanlang → 'Sotib olish' bosing → Karta raqami, amal qilish muddati va CVV kiriting → 'To'lash' bosing. To'lov xavfsiz (SSL). Agar ballaringiz bo'lsa, chegirma qo'llashingiz mumkin.", ru: "Premium → выберите тариф → нажмите 'Купить' → введите номер карты, срок и CVV → нажмите 'Оплатить'. Оплата безопасна (SSL). Если есть баллы, можно применить скидку.", en: "Premium → select plan → click 'Buy' → enter card number, expiry and CVV → click 'Pay'. Payment is secure (SSL). If you have points, you can apply a discount." }
   },
   {
-    q: { uz: "Bildirishnomalar qanday ishlaydi?", ru: "Как работают уведомления?", en: "How do notifications work?" },
-    a: { uz: "Har bir vazifa vaqtidan 5 daqiqa oldin eslatma keladi. Muhim voqealar uchun 1 kun, 1 soat va 5 daqiqa oldin bildirishnoma yuboriladi.", ru: "За 5 минут до задачи приходит напоминание. Для важных событий — за 1 день, 1 час и 5 минут.", en: "Reminders come 5 minutes before each task. For important events — 1 day, 1 hour, and 5 minutes before." }
+    category: 'premium',
+    q: { uz: "7 kunlik bepul VIP sinov nima?", ru: "Что такое 7-дневный бесплатный VIP?", en: "What is the 7-day free VIP trial?" },
+    a: { uz: "Har bir YANGI ro'yxatdan o'tgan foydalanuvchi 7 kun davomida VIP paketning BARCHA funksiyalaridan bepul foydalanadi. 7 kundan keyin avtomatik bepul rejaga o'tadi. Davom ettirish uchun VIP tarif sotib oling.", ru: "Каждый НОВЫЙ зарегистрированный пользователь получает ВСЕ функции VIP на 7 дней БЕСПЛАТНО. Через 7 дней автоматически переходит на бесплатный план. Чтобы продолжить — купите VIP тариф.", en: "Every NEW registered user gets ALL VIP features for 7 days FREE. After 7 days, it automatically switches to free plan. To continue — purchase a VIP plan." }
+  },
+  // Ballar va chegirmalar
+  {
+    category: 'points',
+    q: { uz: "Ballarni qanday to'playman?", ru: "Как копить баллы?", en: "How to earn points?" },
+    a: { uz: "Ballar 2 usulda to'planadi:\n1️⃣ Kunlik kirish (streak): 1-kun=1 ball, 2-kun=2, 3-kun=5, 4-kun=7, 5-kun=8, 6-kun=12, 7-kun=15 ball\n2️⃣ Do'stlarni taklif qilish: 3 do'st=5 ball, 10=10, 50=15, 100=25, 500=49, 1000=199 ball\n\nHar kuni ilova ochilganda bonus popup chiqadi!", ru: "Баллы копятся 2 способами:\n1️⃣ Ежедневный вход (стрик): 1-день=1, 2=2, 3=5, 4=7, 5=8, 6=12, 7=15 баллов\n2️⃣ Приглашение друзей: 3 друга=5, 10=10, 50=15, 100=25, 500=49, 1000=199 баллов\n\nКаждый день при входе появляется бонус!", en: "Points earned 2 ways:\n1️⃣ Daily login (streak): Day 1=1, 2=2, 3=5, 4=7, 5=8, 6=12, 7=15 points\n2️⃣ Invite friends: 3 friends=5, 10=10, 50=15, 100=25, 500=49, 1000=199 points\n\nBonus popup appears every day when you open the app!" }
   },
   {
-    q: { uz: "Geolokatsiya qanday ishlaydi?", ru: "Как работает геолокация?", en: "How does geolocation work?" },
-    a: { uz: "Xarita bo'limida joylarni saqlang. Voqea vaqti kelganda, Google Maps orqali yo'l ko'rsatish olasiz.", ru: "Сохраняйте места на Карте. Когда придёт время, получите маршрут через Google Maps.", en: "Save places in Map. When event time comes, get directions via Google Maps." }
+    category: 'points',
+    q: { uz: "Ballarni nimaga ishlataman?", ru: "На что тратить баллы?", en: "What can I spend points on?" },
+    a: { uz: "Ballar VIP tarifdan CHEGIRMA olish uchun ishlatiladi:\n⭐ 50 ball = 1% chegirma\n⭐ 100 ball = 3% chegirma\n⭐ 250 ball = 10% chegirma\n⭐ 1000 ball = 50% chegirma!\n\nPremium sahifasida tarif tanlaganda 'Ballarni ishlatish' tugmasini yoqing.", ru: "Баллы используются для СКИДКИ на VIP тариф:\n⭐ 50 = 1% скидка\n⭐ 100 = 3%\n⭐ 250 = 10%\n⭐ 1000 = 50%!\n\nНа странице Premium при выборе тарифа включите 'Использовать баллы'.", en: "Points are used for DISCOUNTS on VIP plans:\n⭐ 50 = 1% off\n⭐ 100 = 3% off\n⭐ 250 = 10% off\n⭐ 1000 = 50% off!\n\nOn Premium page when selecting a plan, toggle 'Use points' on." }
   },
+  // Profil va akkaunt
+  {
+    category: 'account',
+    q: { uz: "Loginni qanday o'zgartiraman?", ru: "Как изменить логин?", en: "How to change my login?" },
+    a: { uz: "Profil sahifasiga o'ting → Login yonidagi 'O'zgartirish' bosing → Yangi login kiriting → Saqlang.\n\n⏳ Qoidalar: Ro'yxatdan o'tganingizdan 7 kun keyin BEPUL o'zgartiriladi. 7 kun o'tmagan bo'lsa — 100 ball evaziga o'zgartirish mumkin.", ru: "Профиль → нажмите 'Изменить' рядом с логином → введите новый → Сохранить.\n\n⏳ Правила: Через 7 дней после регистрации меняется БЕСПЛАТНО. До 7 дней — за 100 баллов.", en: "Profile → click 'Change' next to login → enter new one → Save.\n\n⏳ Rules: After 7 days from registration, change is FREE. Before 7 days — costs 100 points." }
+  },
+  {
+    category: 'account',
+    q: { uz: "Parol qanday bo'lishi kerak?", ru: "Какой должен быть пароль?", en: "What should my password be?" },
+    a: { uz: "Kuchli parol talablari:\n✅ Kamida 8 ta belgi\n✅ Katta harf (A-Z)\n✅ Kichik harf (a-z)\n✅ Raqam (0-9)\n✅ Maxsus belgi (@, !, #, $ va h.k.)\n\nMisol: Mening1@Parol", ru: "Требования к паролю:\n✅ Минимум 8 символов\n✅ Заглавная буква (A-Z)\n✅ Строчная буква (a-z)\n✅ Цифра (0-9)\n✅ Спецсимвол (@, !, #, $ и т.д.)\n\nПример: Moy1@Parol", en: "Password requirements:\n✅ Minimum 8 characters\n✅ Uppercase letter (A-Z)\n✅ Lowercase letter (a-z)\n✅ Number (0-9)\n✅ Special character (@, !, #, $ etc.)\n\nExample: My1@Password" }
+  },
+  // Odatlar
+  {
+    category: 'habits',
+    q: { uz: "Odat streak nima va qanday ishlaydi?", ru: "Что такое стрик привычки?", en: "What is a habit streak and how does it work?" },
+    a: { uz: "Streak — bu odatni ketma-ket necha KUN bajargningiz. Har kuni odatni belgilasangiz streak oshadi. 1 kun o'tkazib yuborsangiz — streak 0 ga qaytadi!\n\nRanglar: 🟢 80%+ = Ajoyib | 🟡 50-79% = O'rtacha | 🔴 <50% = Yaxshilash kerak\n\nMishka olib borganda foiz ko'rinadi.", ru: "Стрик — это сколько ДНЕЙ подряд вы выполняли привычку. Каждый день отмечаете — стрик растёт. Пропустили 1 день — стрик обнуляется!\n\nЦвета: 🟢 80%+ = Отлично | 🟡 50-79% = Средне | 🔴 <50% = Нужно улучшить\n\nПри наведении мыши виден процент.", en: "Streak is how many consecutive DAYS you've completed a habit. Mark it daily — streak grows. Miss 1 day — streak resets to 0!\n\nColors: 🟢 80%+ = Excellent | 🟡 50-79% = Average | 🔴 <50% = Needs improvement\n\nHover over to see percentage." }
+  },
+  // Xarita
+  {
+    category: 'location',
+    q: { uz: "Xaritaga joy qanday qo'shiladi?", ru: "Как добавить место на карту?", en: "How to add a place to the map?" },
+    a: { uz: "Xarita → 'Joy qo'shish' bosing → Xarita ochiladi → Kerakli joyga BOSING (📍 metka qo'yiladi) → 'Metkani saqlash' → Nom va manzilni kiriting → 'Qo'shish'. Saqlangan joyga yo'l ko'rsatish uchun 🟢 tugmani bosing.", ru: "Карта → 'Добавить место' → откроется карта → НАЖМИТЕ на нужное место (появится 📍) → 'Сохранить метку' → введите имя и адрес → 'Добавить'. Для навигации к месту нажмите 🟢 кнопку.", en: "Map → 'Add place' → map opens → CLICK on desired location (📍 pin appears) → 'Save pin' → enter name and address → 'Add'. To get directions to a saved place, click the 🟢 button." }
+  },
+];
+
+const categories = [
+  { key: 'all', icon: BookOpen, label: { uz: 'Barchasi', ru: 'Все', en: 'All' } },
+  { key: 'general', icon: HelpCircle, label: { uz: 'Umumiy', ru: 'Общее', en: 'General' } },
+  { key: 'tasks', icon: Calendar, label: { uz: 'Vazifalar', ru: 'Задачи', en: 'Tasks' } },
+  { key: 'premium', icon: Star, label: { uz: 'Premium', ru: 'Премиум', en: 'Premium' } },
+  { key: 'points', icon: Zap, label: { uz: 'Ballar', ru: 'Баллы', en: 'Points' } },
+  { key: 'account', icon: Shield, label: { uz: 'Akkaunt', ru: 'Аккаунт', en: 'Account' } },
+  { key: 'habits', icon: Target, label: { uz: 'Odatlar', ru: 'Привычки', en: 'Habits' } },
+  { key: 'location', icon: Bell, label: { uz: 'Xarita', ru: 'Карта', en: 'Map' } },
 ];
 
 export default function HelpSupport() {
   const { t, language } = useAuth();
   const [expandedFaq, setExpandedFaq] = useState(null);
+  const [activeCategory, setActiveCategory] = useState('all');
   const [chatMessage, setChatMessage] = useState('');
   const [chatHistory, setChatHistory] = useState([
     { from: 'bot', text: language === 'ru' ? 'Здравствуйте! Чем могу помочь?' : language === 'en' ? 'Hello! How can I help you?' : 'Salom! Flowly yordam xizmatiga xush kelibsiz. Qanday yordam bera olaman?' }
   ]);
 
+  const lang = language || 'uz';
+
   const handleSendChat = () => {
     if (!chatMessage.trim()) return;
     setChatHistory([...chatHistory, { from: 'user', text: chatMessage }]);
     setTimeout(() => {
-      const reply = language === 'ru' ? 'Спасибо! Сообщение принято. Оператор скоро ответит.' : language === 'en' ? 'Thank you! Message received. An operator will respond shortly.' : 'Rahmat! Xabaringiz qabul qilindi. Operator tez orada javob beradi.';
+      const reply = lang === 'ru' ? 'Спасибо! Сообщение принято. Оператор скоро ответит.' : lang === 'en' ? 'Thank you! Message received. An operator will respond shortly.' : 'Rahmat! Xabaringiz qabul qilindi. Operator tez orada javob beradi.';
       setChatHistory(prev => [...prev, { from: 'bot', text: reply }]);
     }, 1000);
     setChatMessage('');
   };
 
-  const lang = language || 'uz';
+  const filteredFaqs = activeCategory === 'all' ? faqs : faqs.filter(f => f.category === activeCategory);
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -64,36 +127,48 @@ export default function HelpSupport() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <a href="https://t.me/flowly_support" target="_blank" rel="noopener noreferrer"
           className="card flex items-center gap-3 hover:ring-2 hover:ring-blue-300 transition-all cursor-pointer">
-          <div className="p-2 rounded-xl bg-blue-50 dark:bg-blue-900/20"><Send size={22} className="text-blue-500" /></div>
-          <div><p className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>{t('telegram')}</p><p className="text-xs" style={{ color: 'var(--text-secondary)' }}>@flowly_support</p></div>
+          <div className="p-2.5 rounded-xl bg-blue-50 dark:bg-blue-900/20"><Send size={22} className="text-blue-500" /></div>
+          <div><p className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>Telegram</p><p className="text-xs" style={{ color: 'var(--text-secondary)' }}>@flowly_support</p></div>
         </a>
         <div className="card flex items-center gap-3">
-          <div className="p-2 rounded-xl bg-green-50 dark:bg-green-900/20"><Phone size={22} className="text-green-500" /></div>
+          <div className="p-2.5 rounded-xl bg-green-50 dark:bg-green-900/20"><Phone size={22} className="text-green-500" /></div>
           <div><p className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>{t('phoneSupport')}</p><p className="text-xs" style={{ color: 'var(--text-secondary)' }}>+998 98 765 43 21</p></div>
         </div>
         <div className="card flex items-center gap-3">
-          <div className="p-2 rounded-xl bg-purple-50 dark:bg-purple-900/20"><MessageCircle size={22} className="text-purple-500" /></div>
+          <div className="p-2.5 rounded-xl bg-purple-50 dark:bg-purple-900/20"><MessageCircle size={22} className="text-purple-500" /></div>
           <div><p className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>{t('liveChat')}</p><p className="text-xs" style={{ color: 'var(--text-secondary)' }}>24/7 online</p></div>
         </div>
+      </div>
+
+      {/* FAQ Categories */}
+      <div className="flex gap-2 flex-wrap">
+        {categories.map(cat => (
+          <button key={cat.key} onClick={() => setActiveCategory(cat.key)}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${activeCategory === cat.key ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/30' : ''}`}
+            style={activeCategory !== cat.key ? { background: 'var(--bg-secondary)', color: 'var(--text-secondary)' } : {}}>
+            <cat.icon size={13} />
+            {cat.label[lang]}
+          </button>
+        ))}
       </div>
 
       {/* FAQ */}
       <div className="card">
         <div className="flex items-center gap-2 mb-4">
           <HelpCircle size={20} style={{ color: 'var(--accent)' }} />
-          <h3 className="font-semibold" style={{ color: 'var(--text-primary)' }}>{t('faq')}</h3>
+          <h3 className="font-semibold" style={{ color: 'var(--text-primary)' }}>{t('faq')} ({filteredFaqs.length})</h3>
         </div>
         <div className="space-y-2">
-          {faqs.map((faq, idx) => (
-            <div key={idx} className="rounded-xl overflow-hidden" style={{ border: '1px solid var(--border)' }}>
+          {filteredFaqs.map((faq, idx) => (
+            <div key={idx} className="rounded-xl overflow-hidden transition-all" style={{ border: '1px solid var(--border)' }}>
               <button onClick={() => setExpandedFaq(expandedFaq === idx ? null : idx)}
                 className="w-full flex items-center justify-between p-4 text-left transition-colors hover:bg-blue-50/50 dark:hover:bg-blue-900/10">
-                <span className="font-medium text-sm" style={{ color: 'var(--text-primary)' }}>{faq.q[lang]}</span>
-                {expandedFaq === idx ? <ChevronDown size={16} style={{ color: 'var(--text-secondary)' }} /> : <ChevronRight size={16} style={{ color: 'var(--text-secondary)' }} />}
+                <span className="font-medium text-sm pr-4" style={{ color: 'var(--text-primary)' }}>{faq.q[lang]}</span>
+                {expandedFaq === idx ? <ChevronDown size={16} className="flex-shrink-0" style={{ color: 'var(--text-secondary)' }} /> : <ChevronRight size={16} className="flex-shrink-0" style={{ color: 'var(--text-secondary)' }} />}
               </button>
               {expandedFaq === idx && (
                 <div className="px-4 pb-4 animate-in">
-                  <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{faq.a[lang]}</p>
+                  <p className="text-sm whitespace-pre-line leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{faq.a[lang]}</p>
                 </div>
               )}
             </div>
@@ -107,11 +182,12 @@ export default function HelpSupport() {
           <MessageCircle size={20} style={{ color: 'var(--accent)' }} />
           <h3 className="font-semibold" style={{ color: 'var(--text-primary)' }}>{t('liveChat')}</h3>
           <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+          <span className="text-[10px] text-green-500 font-medium">Online</span>
         </div>
-        <div className="h-48 overflow-y-auto mb-3 space-y-2 p-3 rounded-xl" style={{ background: 'var(--bg-secondary)' }}>
+        <div className="h-52 overflow-y-auto mb-3 space-y-2 p-3 rounded-xl scrollbar-hide" style={{ background: 'var(--bg-secondary)' }}>
           {chatHistory.map((msg, idx) => (
-            <div key={idx} className={`flex ${msg.from === 'user' ? 'justify-end' : 'justify-start'}`}>
-              <div className={`max-w-[80%] px-3 py-2 rounded-xl text-sm ${msg.from === 'user' ? 'bg-blue-500 text-white' : ''}`}
+            <div key={idx} className={`flex ${msg.from === 'user' ? 'justify-end' : 'justify-start'} animate-in`} style={{ animationDelay: `${idx * 50}ms` }}>
+              <div className={`max-w-[80%] px-3 py-2 rounded-xl text-sm ${msg.from === 'user' ? 'bg-blue-500 text-white rounded-br-sm' : 'rounded-bl-sm'}`}
                 style={msg.from === 'bot' ? { background: 'var(--bg-card)', color: 'var(--text-primary)', border: '1px solid var(--border)' } : {}}>
                 {msg.text}
               </div>
@@ -119,10 +195,10 @@ export default function HelpSupport() {
           ))}
         </div>
         <div className="flex gap-2">
-          <input type="text" placeholder={language === 'ru' ? 'Напишите сообщение...' : language === 'en' ? 'Type a message...' : 'Xabar yozing...'}
+          <input type="text" placeholder={lang === 'ru' ? 'Напишите сообщение...' : lang === 'en' ? 'Type a message...' : 'Xabar yozing...'}
             value={chatMessage} onChange={e => setChatMessage(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && handleSendChat()}
-            className="flex-1 px-4 py-2 rounded-xl border outline-none focus:ring-2 focus:ring-blue-500"
+            className="flex-1 px-4 py-2.5 rounded-xl border outline-none focus:ring-2 focus:ring-blue-500"
             style={{ background: 'var(--bg-secondary)', borderColor: 'var(--border)', color: 'var(--text-primary)' }} />
           <button onClick={handleSendChat} className="btn-primary px-4"><Send size={16} /></button>
         </div>

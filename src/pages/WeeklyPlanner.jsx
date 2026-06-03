@@ -17,7 +17,15 @@ export default function WeeklyPlanner() {
   };
 
   const dayDates = ['02-Iyun', '03-Iyun', '04-Iyun', '05-Iyun', '06-Iyun', '07-Iyun', '08-Iyun'];
-  const todayIdx = 1; // Tuesday = today (June 3)
+  
+  // Determine which day is today (based on real date)
+  const now = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Tashkent" }));
+  const todayDow = now.getDay(); // 0=Sun
+  const dayOfWeekMap = [6, 0, 1, 2, 3, 4, 5]; // Sun=6, Mon=0, Tue=1...
+  const todayIdx = dayOfWeekMap[todayDow];
+
+  // Check if a day is in the past (edit should be locked)
+  const isDayPast = (idx) => idx < todayIdx;
 
   const handleAddToDay = (dayKey) => {
     if (newTask.title && newTask.time) {
@@ -74,10 +82,13 @@ export default function WeeklyPlanner() {
                 </div>
                 <div className="flex items-center gap-1">
                   {isToday && <span className="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 font-medium">{t('today')}</span>}
-                  <button onClick={() => setEditingDay(editingDay === dayKey ? null : dayKey)}
-                    className="p-1 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20">
-                    <Plus size={14} className="text-blue-500" />
-                  </button>
+                  {isDayPast(idx) && <span className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400 font-medium">🔒</span>}
+                  {!isDayPast(idx) && (
+                    <button onClick={() => setEditingDay(editingDay === dayKey ? null : dayKey)}
+                      className="p-1 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20">
+                      <Plus size={14} className="text-blue-500" />
+                    </button>
+                  )}
                 </div>
               </div>
 
