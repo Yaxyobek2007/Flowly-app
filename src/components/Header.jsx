@@ -52,15 +52,51 @@ export default function Header({ onMenuClick, visible, onOpenShop }) {
   return (
     <>
       <header className={`sticky top-0 z-30 glass px-4 py-3 flex items-center justify-between transition-transform duration-300 ${visible ? 'translate-y-0' : '-translate-y-full'}`}>
-        {/* Left: Menu + Save */}
+        {/* Left: Menu + Save (export data) */}
         <div className="flex items-center gap-2">
           <button className="lg:hidden p-1" onClick={onMenuClick}>
             <Menu size={22} style={{ color: 'var(--text-primary)' }} />
           </button>
-          <button onClick={() => { localStorage.setItem('flowly-last-save', Date.now().toString()); navigate('/'); }}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all hover:bg-green-50 dark:hover:bg-green-900/20"
+          <button onClick={() => {
+            // Play save sound
+            try {
+              const ctx = new (window.AudioContext || window.webkitAudioContext)();
+              const osc = ctx.createOscillator(); const g = ctx.createGain();
+              osc.connect(g); g.connect(ctx.destination);
+              osc.frequency.setValueAtTime(600, ctx.currentTime);
+              osc.frequency.setValueAtTime(900, ctx.currentTime + 0.05);
+              g.gain.setValueAtTime(0.2, ctx.currentTime);
+              g.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
+              osc.start(); osc.stop(ctx.currentTime + 0.15);
+            } catch(e) {}
+
+            // Export user data as JSON file
+            const exportData = {
+              exportDate: new Date().toISOString(),
+              user: currentUser,
+              tasks: JSON.parse(localStorage.getItem('flowly-tasks') || '[]'),
+              habits: JSON.parse(localStorage.getItem('flowly-habits') || '[]'),
+              goals: JSON.parse(localStorage.getItem('flowly-goals') || '[]'),
+              notes: JSON.parse(localStorage.getItem('flowly-notes') || '[]'),
+              events: JSON.parse(localStorage.getItem('flowly-events') || '[]'),
+              certificates: JSON.parse(localStorage.getItem('flowly-certificates') || '[]'),
+              locations: JSON.parse(localStorage.getItem('flowly-locations') || '[]'),
+              notifications: JSON.parse(localStorage.getItem('flowly-notifications') || '[]'),
+              settings: JSON.parse(localStorage.getItem('flowly-notif-settings') || '{}'),
+            };
+            const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `flowly-backup-${currentUser?.login || 'user'}-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+          }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all hover:bg-green-50 dark:hover:bg-green-900/20 active:scale-95"
             style={{ border: '1px solid var(--border)', color: 'var(--text-secondary)' }}
-            title={lang === 'ru' ? 'Сохранить' : lang === 'en' ? 'Save' : 'Saqlash'}>
+            title={lang === 'ru' ? 'Сохранить (скачать файл)' : lang === 'en' ? 'Save (download file)' : 'Saqlash (fayl yuklash)'}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
             <span className="hidden sm:inline">{lang === 'ru' ? 'Сохранить' : lang === 'en' ? 'Save' : 'Saqlash'}</span>
           </button>

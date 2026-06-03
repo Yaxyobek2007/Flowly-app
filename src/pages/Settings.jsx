@@ -58,18 +58,48 @@ export default function Settings() {
     }
   };
 
-  // Send test notification
+  // Play sound effect
+  const playSound = (type) => {
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      const g = ctx.createGain();
+      osc.connect(g);
+      g.connect(ctx.destination);
+      if (type === 'default') {
+        osc.frequency.setValueAtTime(880, ctx.currentTime);
+        osc.frequency.setValueAtTime(1100, ctx.currentTime + 0.1);
+        g.gain.setValueAtTime(0.3, ctx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+        osc.start(); osc.stop(ctx.currentTime + 0.5);
+      } else if (type === 'success') {
+        osc.frequency.setValueAtTime(523, ctx.currentTime);
+        osc.frequency.setValueAtTime(659, ctx.currentTime + 0.1);
+        osc.frequency.setValueAtTime(784, ctx.currentTime + 0.2);
+        g.gain.setValueAtTime(0.25, ctx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
+        osc.start(); osc.stop(ctx.currentTime + 0.4);
+      } else if (type === 'warning') {
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(440, ctx.currentTime);
+        g.gain.setValueAtTime(0.15, ctx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+        osc.start(); osc.stop(ctx.currentTime + 0.3);
+      }
+    } catch(e) {}
+  };
+
+  // Send test notification with sound
   const sendTestNotification = () => {
+    if (notifSettings.sound) playSound('default');
+    if (notifSettings.vibration && 'vibrate' in navigator) navigator.vibrate([200, 100, 200]);
+
     if (permissionStatus === 'granted') {
       new Notification('Flowly — Test ✅', {
         body: lang === 'ru' ? 'Это тестовое уведомление! Всё работает.' : lang === 'en' ? 'This is a test notification! Everything works.' : 'Bu test bildirishnomasi! Hammasi ishlayapti.',
         icon: '/favicon.svg',
         tag: 'test-notif',
       });
-      // Vibrate if supported
-      if (notifSettings.vibration && 'vibrate' in navigator) {
-        navigator.vibrate([200, 100, 200]);
-      }
       setTestSent(true);
       setTimeout(() => setTestSent(false), 3000);
     } else {
@@ -87,6 +117,7 @@ export default function Settings() {
     { key: 'weeklyReport', icon: Calendar, label: t('weeklyReport'), desc: lang === 'ru' ? 'Еженедельный отчёт по воскресеньям' : lang === 'en' ? 'Weekly report on Sundays' : 'Yakshanba kuni haftalik hisobot' },
     { key: 'taskReminder', icon: Bell, label: lang === 'ru' ? 'Напоминание о задачах' : lang === 'en' ? 'Task reminders' : 'Vazifa eslatmalari', desc: lang === 'ru' ? 'Звук и вибрация при напоминании' : lang === 'en' ? 'Sound and vibration for reminders' : 'Eslatmada tovush va vibratsiya' },
     { key: 'vibration', icon: Vibrate, label: lang === 'ru' ? 'Вибрация' : lang === 'en' ? 'Vibration' : 'Vibratsiya', desc: lang === 'ru' ? 'Вибрировать при уведомлениях' : lang === 'en' ? 'Vibrate on notifications' : 'Bildirishnomada tebranish' },
+    { key: 'sound', icon: BellRing, label: lang === 'ru' ? 'Звук' : lang === 'en' ? 'Sound' : 'Tovush', desc: lang === 'ru' ? 'Звуковой эффект при уведомлении' : lang === 'en' ? 'Sound effect on notification' : 'Bildirishnomada ovoz effekti' },
   ];
 
   return (
