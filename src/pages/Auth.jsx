@@ -48,7 +48,11 @@ export default function Auth() {
 
   const handleGoogleLogin = () => {
     setLoading(true);
-    setTimeout(() => { loginWithGoogle(); setLoading(false); }, 800);
+    setTimeout(() => {
+      const result = loginWithGoogle();
+      if (!result.success) setError(result.error);
+      setLoading(false);
+    }, 500);
   };
 
   const handlePhoneSubmit = (e) => {

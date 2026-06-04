@@ -840,9 +840,8 @@ export function AuthProvider({ children }) {
   };
 
   const loginWithGoogle = () => {
-    const gUser = users.find(u => u.email === 'admin@flowly.uz') || users[0];
-    if (gUser) { setCurrentUser(gUser); return { success: true }; }
-    return { success: false };
+    // Google/iCloud tugmasi - foydalanuvchi avval ro'yxatdan o'tishi kerak
+    return { success: false, error: language === 'ru' ? 'Сначала зарегистрируйтесь через форму' : language === 'en' ? 'Please register via form first' : "Avval forma orqali ro'yxatdan o'ting" };
   };
 
   const loginWithPhone = (phone, code) => {
