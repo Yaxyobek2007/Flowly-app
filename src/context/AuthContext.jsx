@@ -890,17 +890,14 @@ export function AuthProvider({ children }) {
 
     // Save new user
     const updatedUsers = [...users, newUser];
-    setUsers(updatedUsers);
-    setCurrentUser(newUser);
-
+    
     // Referral bonus: if signed up via referral, reward the referrer
     if (userData.referralCode) {
       const referrer = updatedUsers.find(u => u.referralCode === userData.referralCode);
       if (referrer) {
         const referrerFriends = [...(referrer.friends || []), newUser.id];
         const friendCount = referrerFriends.length;
-        // Bonus based on milestones: 3→5, 10→10, 50→15, 100→25, 500→49, 1000→199
-        let bonus = 2; // default per-friend bonus
+        let bonus = 2;
         if (friendCount >= 1000) bonus = 199;
         else if (friendCount >= 500) bonus = 49;
         else if (friendCount >= 100) bonus = 25;
@@ -908,14 +905,20 @@ export function AuthProvider({ children }) {
         else if (friendCount >= 10) bonus = 10;
         else if (friendCount >= 3) bonus = 5;
 
-        setUsers(prev => prev.map(u => u.id === referrer.id ? {
+        const finalUsers = updatedUsers.map(u => u.id === referrer.id ? {
           ...u,
           friends: referrerFriends,
           points: (u.points || 0) + bonus,
-        } : u));
+        } : u);
+        setUsers(finalUsers);
+      } else {
+        setUsers(updatedUsers);
       }
+    } else {
+      setUsers(updatedUsers);
     }
 
+    setCurrentUser(newUser);
     return { success: true };
   };
 

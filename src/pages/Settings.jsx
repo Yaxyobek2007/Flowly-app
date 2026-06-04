@@ -17,10 +17,10 @@ export default function Settings() {
       push: true,
       email: true,
       reminders: true,
-      weeklyReport: true,
-      taskReminder: true,
-      vibration: true,
-      sound: true,
+      weeklyReport: false,
+      taskReminder: false,
+      vibration: false,
+      sound: false,
       reminderMinutes: 5,
     };
   });
