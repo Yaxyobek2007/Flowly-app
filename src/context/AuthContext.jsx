@@ -761,7 +761,7 @@ const translations = {
 
 export function AuthProvider({ children }) {
   // Force reset all data to clean state (version bump clears old data)
-  const DATA_VERSION = 'v4';
+  const DATA_VERSION = 'v5';
   if (localStorage.getItem('flowly-data-version') !== DATA_VERSION) {
     localStorage.removeItem('flowly-users');
     localStorage.removeItem('flowly-current-user');
