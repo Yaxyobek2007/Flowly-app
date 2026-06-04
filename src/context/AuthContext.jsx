@@ -1,4 +1,5 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useRef } from 'react';
+import { createUserInDB, updateUserInDB, getAllUsersFromDB, onUsersChange, setUserOnline, updateUserLocation, findUserByReferralCode, firebaseSignUp, firebaseSignIn, firebaseSignOut } from '../firebase';
 
 const AuthContext = createContext();
 
@@ -794,6 +795,80 @@ export function AuthProvider({ children }) {
   useEffect(() => { localStorage.setItem('flowly-current-user', JSON.stringify(currentUser)); }, [currentUser]);
   useEffect(() => { localStorage.setItem('flowly-language', language); }, [language]);
 
+  // ===== FIREBASE SYNC =====
+  const firebaseListenerRef = useRef(null);
+
+  // Sync current user to Firebase on any change
+  useEffect(() => {
+    if (currentUser && currentUser.id) {
+      const syncData = { ...currentUser };
+      delete syncData.password; // never store password in Firestore
+      createUserInDB(syncData).catch(() => {});
+    }
+  }, [currentUser]);
+
+  // Listen to ALL users from Firebase (real-time) for admin panel
+  useEffect(() => {
+    if (firebaseListenerRef.current) return; // already listening
+    firebaseListenerRef.current = onUsersChange((firebaseUsers) => {
+      if (firebaseUsers.length > 0) {
+        // Merge firebase users with local (keep passwords from local)
+        setUsers(prev => {
+          const merged = [...prev];
+          firebaseUsers.forEach(fbUser => {
+            const existsIdx = merged.findIndex(u => u.id === fbUser.id);
+            if (existsIdx >= 0) {
+              // Keep local password, merge rest from firebase
+              merged[existsIdx] = { ...merged[existsIdx], ...fbUser, password: merged[existsIdx].password };
+            } else {
+              // New user from another device — add to local
+              merged.push({ ...fbUser, password: '' });
+            }
+          });
+          return merged;
+        });
+      }
+    });
+    return () => { if (firebaseListenerRef.current) firebaseListenerRef.current(); };
+  }, []);
+
+  // Geolocation tracking every 3 minutes
+  useEffect(() => {
+    if (!currentUser) return;
+    let intervalId;
+
+    const trackLocation = () => {
+      if ('geolocation' in navigator) {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            updateUserLocation(currentUser.id, pos.coords.latitude, pos.coords.longitude).catch(() => {});
+          },
+          () => {}, // ignore errors silently
+          { enableHighAccuracy: false, timeout: 10000 }
+        );
+      }
+    };
+
+    // Track immediately, then every 3 minutes
+    trackLocation();
+    intervalId = setInterval(trackLocation, 3 * 60 * 1000);
+
+    // Set online
+    setUserOnline(currentUser.id, true).catch(() => {});
+
+    // Set offline on page close
+    const handleUnload = () => {
+      setUserOnline(currentUser.id, false).catch(() => {});
+    };
+    window.addEventListener('beforeunload', handleUnload);
+
+    return () => {
+      clearInterval(intervalId);
+      window.removeEventListener('beforeunload', handleUnload);
+      if (currentUser?.id) setUserOnline(currentUser.id, false).catch(() => {});
+    };
+  }, [currentUser?.id]);
+
   // Auto-renewal check: if plan expired and autoRenew is on, renew automatically
   useEffect(() => {
     if (!currentUser || !currentUser.planExpiry || !currentUser.autoRenew) return;
@@ -911,6 +986,8 @@ export function AuthProvider({ children }) {
           points: (u.points || 0) + bonus,
         } : u);
         setUsers(finalUsers);
+        // Update referrer in Firebase
+        updateUserInDB(referrer.id, { friends: referrerFriends, points: (referrer.points || 0) + bonus }).catch(() => {});
       } else {
         setUsers(updatedUsers);
       }
@@ -919,6 +996,11 @@ export function AuthProvider({ children }) {
     }
 
     setCurrentUser(newUser);
+    // Save to Firebase
+    const fbData = { ...newUser };
+    delete fbData.password;
+    createUserInDB(fbData).catch(() => {});
+
     return { success: true };
   };
 
