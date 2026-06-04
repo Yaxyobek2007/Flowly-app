@@ -109,15 +109,10 @@ export default function Settings() {
 
   const handleLogout = () => { logout(); };
 
-  // Notification items config
+  // Notification items config - only essential ones
   const notifItems = [
-    { key: 'push', icon: BellRing, label: t('pushNotifs'), desc: lang === 'ru' ? 'Всплывающие уведомления в браузере' : lang === 'en' ? 'Browser push notifications' : 'Brauzerda popup bildirishnomalar' },
     { key: 'email', icon: Mail, label: t('emailNotifs'), desc: lang === 'ru' ? 'Важные события на email' : lang === 'en' ? 'Important events to email' : 'Muhim voqealar emailga' },
     { key: 'reminders', icon: Clock, label: t('reminders'), desc: lang === 'ru' ? 'Напоминание за 5 мин до задачи' : lang === 'en' ? 'Remind 5 min before task' : 'Vazifadan 5 daqiqa oldin eslatma' },
-    { key: 'weeklyReport', icon: Calendar, label: t('weeklyReport'), desc: lang === 'ru' ? 'Еженедельный отчёт по воскресеньям' : lang === 'en' ? 'Weekly report on Sundays' : 'Yakshanba kuni haftalik hisobot' },
-    { key: 'taskReminder', icon: Bell, label: lang === 'ru' ? 'Напоминание о задачах' : lang === 'en' ? 'Task reminders' : 'Vazifa eslatmalari', desc: lang === 'ru' ? 'Звук и вибрация при напоминании' : lang === 'en' ? 'Sound and vibration for reminders' : 'Eslatmada tovush va vibratsiya' },
-    { key: 'vibration', icon: Vibrate, label: lang === 'ru' ? 'Вибрация' : lang === 'en' ? 'Vibration' : 'Vibratsiya', desc: lang === 'ru' ? 'Вибрировать при уведомлениях' : lang === 'en' ? 'Vibrate on notifications' : 'Bildirishnomada tebranish' },
-    { key: 'sound', icon: BellRing, label: lang === 'ru' ? 'Звук' : lang === 'en' ? 'Sound' : 'Tovush', desc: lang === 'ru' ? 'Звуковой эффект при уведомлении' : lang === 'en' ? 'Sound effect on notification' : 'Bildirishnomada ovoz effekti' },
   ];
 
   return (
