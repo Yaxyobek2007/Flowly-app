@@ -25,7 +25,10 @@ export default function Auth() {
   useState(() => {
     const params = new URLSearchParams(window.location.search);
     const ref = params.get('ref');
-    if (ref) setSignupData(prev => ({ ...prev, referralCode: ref }));
+    if (ref) {
+      setSignupData(prev => ({ ...prev, referralCode: ref }));
+      setMode('signup'); // auto-switch to signup if referral link
+    }
   });
 
   const LANGUAGES = [

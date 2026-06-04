@@ -54,6 +54,13 @@ function AuthRoute({ children }) {
   return children;
 }
 
+// Redirect /join?ref=CODE → /auth?ref=CODE (for referral links)
+function JoinRedirect() {
+  const params = new URLSearchParams(window.location.search);
+  const ref = params.get('ref') || '';
+  return <Navigate to={`/auth?ref=${ref}`} replace />;
+}
+
 function AppRoutes() {
   const { currentUser, logout } = useAuth();
 
@@ -78,6 +85,7 @@ function AppRoutes() {
   return (
     <Routes>
       <Route path="/auth" element={<AuthRoute><Auth /></AuthRoute>} />
+      <Route path="/join" element={<JoinRedirect />} />
       <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
         <Route index element={<Dashboard />} />
         <Route path="daily" element={<DailyPlanner />} />

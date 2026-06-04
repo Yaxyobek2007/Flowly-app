@@ -8,7 +8,10 @@ export default function Friends() {
   const lang = language || 'uz';
 
   const friendsList = users.filter(u => currentUser?.friends?.includes(u.id));
-  const referralLink = `https://flowly.uz/join?ref=${currentUser?.referralCode}`;
+  
+  // Use current domain for referral link (works on any deployment)
+  const currentDomain = typeof window !== 'undefined' ? window.location.origin : '';
+  const referralLink = `${currentDomain}/auth?ref=${currentUser?.referralCode}`;
 
   const copyCode = () => {
     navigator.clipboard.writeText(referralLink);
