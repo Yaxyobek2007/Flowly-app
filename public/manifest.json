@@ -1,12 +1,14 @@
 {
-  "name": "Flowly - Smart Life Management",
+  "name": "Flowly — Smart Life Management",
   "short_name": "Flowly",
-  "description": "Plan. Act. Achieve. — Hayotingizni boshqaring",
+  "description": "Plan. Act. Achieve. — Hayotingizni boshqaring. Kunlik, haftalik, oylik va yillik rejalar.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0f172a",
   "theme_color": "#3b82f6",
   "orientation": "any",
+  "categories": ["productivity", "lifestyle", "utilities"],
+  "lang": "uz",
   "icons": [
     {
       "src": "/favicon.svg",
@@ -15,6 +17,6 @@
       "purpose": "any maskable"
     }
   ],
-  "categories": ["productivity", "lifestyle"],
-  "lang": "uz"
+  "screenshots": [],
+  "prefer_related_applications": false
 }
