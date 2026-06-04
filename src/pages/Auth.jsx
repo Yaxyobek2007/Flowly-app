@@ -19,7 +19,14 @@ export default function Auth() {
   const [password, setPassword] = useState('');
   const [phone, setPhone] = useState('');
   const [code, setCode] = useState('');
-  const [signupData, setSignupData] = useState({ name: '', surname: '', email: '', phone: '', password: '', age: '', address: '', login: '' });
+  const [signupData, setSignupData] = useState({ name: '', surname: '', email: '', phone: '', password: '', age: '', address: '', login: '', referralCode: '' });
+
+  // Check URL for referral code on mount
+  useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    const ref = params.get('ref');
+    if (ref) setSignupData(prev => ({ ...prev, referralCode: ref }));
+  });
 
   const LANGUAGES = [
     { code: 'uz', label: "O'zbekcha", flag: '🇺🇿' },
@@ -210,6 +217,9 @@ export default function Auth() {
                 <input type="text" placeholder={t('address')} value={signupData.address} onChange={e => setSignupData({...signupData, address: e.target.value})}
                   className="px-3 py-2.5 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/40 outline-none focus:ring-2 focus:ring-blue-500 text-sm" />
               </div>
+              <input type="text" placeholder={language === 'ru' ? 'Реферальный код (если есть)' : language === 'en' ? 'Referral code (if any)' : 'Referral kod (agar bo\'lsa)'}
+                value={signupData.referralCode} onChange={e => setSignupData({...signupData, referralCode: e.target.value.toUpperCase()})}
+                className="w-full px-3 py-2.5 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/40 outline-none focus:ring-2 focus:ring-blue-500 text-sm" />
               {error && <p className="text-red-400 text-xs text-center">{error}</p>}
               <button type="submit" disabled={loading}
                 className="w-full py-3 rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 text-white font-semibold transition-all shadow-lg disabled:opacity-50">
