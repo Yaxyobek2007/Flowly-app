@@ -27,6 +27,8 @@ const navItems = [
   { path: '/finance', icon: Wallet, label: 'finance' },
   { path: '/quote', icon: Wallet, label: 'quote' },
   { path: '/review', icon: Wallet, label: 'review' },
+  { path: '/pet', icon: Wallet, label: 'pet' },
+  { path: '/leaderboard', icon: Wallet, label: 'leaderboard' },
   { path: '/habits', icon: CheckSquare, label: 'habitTracker' },
   { path: '/achievements', icon: Trophy, label: 'achievements' },
   { path: '/notes', icon: FileText, label: 'notes' },
@@ -35,9 +37,9 @@ const navItems = [
 ];
 
 const labels = {
-  uz: { dashboard: 'Asosiy', dailyPlanner: 'Kunlik reja', weeklyPlanner: 'Haftalik', monthlyPlanner: 'Oylik', yearlyGoals: 'Maqsadlar', habitTracker: 'Odatlar', notes: 'Yozuvlar', analytics: 'Statistika', achievements: 'Yutuqlar', location: 'Xarita', smartPlan: 'Aqlli reja', pomodoro: 'Pomodoro', journal: 'Kundalik', matrix: 'Matritsa', focus: 'Fokus', recurring: 'Takroriy', calendar: 'Kalendar', routines: 'Rutina', sprint: 'Sprint', tags: 'Teglar', water: 'Suv', sleep: 'Uyqu', finance: 'Moliya', quote: 'Iqtibos', review: 'Sharh' },
-  ru: { dashboard: 'Главная', dailyPlanner: 'День', weeklyPlanner: 'Неделя', monthlyPlanner: 'Месяц', yearlyGoals: 'Цели', habitTracker: 'Привычки', notes: 'Заметки', analytics: 'Аналитика', achievements: 'Достижения', location: 'Карта', smartPlan: 'Умный план', pomodoro: 'Помодоро', journal: 'Дневник', matrix: 'Матрица', focus: 'Фокус', recurring: 'Повтор', calendar: 'Календарь', routines: 'Рутина', sprint: 'Спринт', tags: 'Теги', water: 'Вода', sleep: 'Сон', finance: 'Финансы', quote: 'Цитаты', review: 'Обзор' },
-  en: { dashboard: 'Main', dailyPlanner: 'Daily', weeklyPlanner: 'Weekly', monthlyPlanner: 'Monthly', yearlyGoals: 'Goals', habitTracker: 'Habits', notes: 'Notes', analytics: 'Analytics', achievements: 'Achievements', location: 'Map', smartPlan: 'Smart Plan', pomodoro: 'Pomodoro', journal: 'Kundalik', matrix: 'Matritsa', focus: 'Fokus', recurring: 'Takroriy', calendar: 'Kalendar', routines: 'Rutina', sprint: 'Sprint', tags: 'Teglar', water: 'Suv', sleep: 'Uyqu', finance: 'Moliya', quote: 'Iqtibos', review: 'Sharh' },
+  uz: { dashboard: 'Asosiy', dailyPlanner: 'Kunlik reja', weeklyPlanner: 'Haftalik', monthlyPlanner: 'Oylik', yearlyGoals: 'Maqsadlar', habitTracker: 'Odatlar', notes: 'Yozuvlar', analytics: 'Statistika', achievements: 'Yutuqlar', location: 'Xarita', smartPlan: 'Aqlli reja', pomodoro: 'Pomodoro', journal: 'Kundalik', matrix: 'Matritsa', focus: 'Fokus', recurring: 'Takroriy', calendar: 'Kalendar', routines: 'Rutina', sprint: 'Sprint', tags: 'Teglar', water: 'Suv', sleep: 'Uyqu', finance: 'Moliya', quote: 'Iqtibos', review: 'Sharh', pet: 'Pet', leaderboard: 'Top' },
+  ru: { dashboard: 'Главная', dailyPlanner: 'День', weeklyPlanner: 'Неделя', monthlyPlanner: 'Месяц', yearlyGoals: 'Цели', habitTracker: 'Привычки', notes: 'Заметки', analytics: 'Аналитика', achievements: 'Достижения', location: 'Карта', smartPlan: 'Умный план', pomodoro: 'Помодоро', journal: 'Дневник', matrix: 'Матрица', focus: 'Фокус', recurring: 'Повтор', calendar: 'Календарь', routines: 'Рутина', sprint: 'Спринт', tags: 'Теги', water: 'Вода', sleep: 'Сон', finance: 'Финансы', quote: 'Цитаты', review: 'Обзор', pet: 'Питомец', leaderboard: 'Топ' },
+  en: { dashboard: 'Main', dailyPlanner: 'Daily', weeklyPlanner: 'Weekly', monthlyPlanner: 'Monthly', yearlyGoals: 'Goals', habitTracker: 'Habits', notes: 'Notes', analytics: 'Analytics', achievements: 'Achievements', location: 'Map', smartPlan: 'Smart Plan', pomodoro: 'Pomodoro', journal: 'Kundalik', matrix: 'Matritsa', focus: 'Fokus', recurring: 'Takroriy', calendar: 'Kalendar', routines: 'Rutina', sprint: 'Sprint', tags: 'Teglar', water: 'Suv', sleep: 'Uyqu', finance: 'Moliya', quote: 'Iqtibos', review: 'Sharh', pet: 'Pet', leaderboard: 'Top' },
 };
 
 export default function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }) {

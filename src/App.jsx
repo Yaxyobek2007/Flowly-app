@@ -40,6 +40,8 @@ import SleepTracker from './pages/SleepTracker';
 import FinanceTracker from './pages/FinanceTracker';
 import DailyQuote from './pages/DailyQuote';
 import WeeklyReview from './pages/WeeklyReview';
+import VirtualPet from './pages/VirtualPet';
+import Leaderboard from './pages/Leaderboard';
 
 // Session timeout: 100 hours
 const SESSION_TIMEOUT = 100 * 60 * 60 * 1000;
@@ -136,6 +138,8 @@ function AppRoutes() {
         <Route path="finance" element={<FinanceTracker />} />
         <Route path="quote" element={<DailyQuote />} />
         <Route path="review" element={<WeeklyReview />} />
+        <Route path="pet" element={<VirtualPet />} />
+        <Route path="leaderboard" element={<Leaderboard />} />
         <Route path="crm" element={<CrmErp />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
