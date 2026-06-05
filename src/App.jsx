@@ -50,6 +50,7 @@ import InvestmentPlanner from './pages/InvestmentPlanner';
 import VoiceAssistant from './pages/VoiceAssistant';
 import PrivacyPermissions from './pages/PrivacyPermissions';
 import FriendsChat from './pages/FriendsChat';
+import SmartBreakdown from './pages/SmartBreakdown';
 
 // Session timeout: 100 hours
 const SESSION_TIMEOUT = 100 * 60 * 60 * 1000;
@@ -156,6 +157,7 @@ function AppRoutes() {
         <Route path="voice" element={<VoiceAssistant />} />
         <Route path="privacy" element={<PrivacyPermissions />} />
         <Route path="chat" element={<FriendsChat />} />
+        <Route path="breakdown" element={<SmartBreakdown />} />
         <Route path="crm" element={<CrmErp />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
