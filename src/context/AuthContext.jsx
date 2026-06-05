@@ -762,7 +762,7 @@ const translations = {
 
 export function AuthProvider({ children }) {
   // Force reset all data to clean state (version bump clears old data)
-  const DATA_VERSION = 'v5';
+  const DATA_VERSION = 'v6';
   if (localStorage.getItem('flowly-data-version') !== DATA_VERSION) {
     localStorage.removeItem('flowly-users');
     localStorage.removeItem('flowly-current-user');
@@ -774,6 +774,8 @@ export function AuthProvider({ children }) {
     localStorage.removeItem('flowly-notifications');
     localStorage.removeItem('flowly-certificates');
     localStorage.removeItem('flowly-locations');
+    localStorage.removeItem('flowly-notif-settings');
+    localStorage.removeItem('flowly-last-activity');
     localStorage.setItem('flowly-data-version', DATA_VERSION);
   }
 
@@ -905,8 +907,7 @@ export function AuthProvider({ children }) {
     const user = users.find(u => (u.email === emailOrPhone || u.phone === emailOrPhone || u.login === emailOrPhone) && u.password === password);
     if (user) {
       if (user.blocked) return { success: false, error: language === 'ru' ? 'Аккаунт заблокирован' : language === 'en' ? 'Account blocked' : 'Akkaunt bloklangan' };
-      const today = new Date().toISOString().split('T')[0];
-      const updated = { ...user, lastLoginDate: today, totalLogins: (user.totalLogins || 0) + 1 };
+      const updated = { ...user, totalLogins: (user.totalLogins || 0) + 1 };
       setCurrentUser(updated);
       setUsers(prev => prev.map(u => u.id === updated.id ? updated : u));
       return { success: true, isAdmin: user.role === 'admin' };
