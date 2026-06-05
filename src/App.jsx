@@ -29,6 +29,7 @@ import SmartPlanner from './pages/SmartPlanner';
 import PomodoroTimer from './pages/PomodoroTimer';
 import Journal from './pages/Journal';
 import EisenhowerMatrix from './pages/EisenhowerMatrix';
+import FocusMode from './pages/FocusMode';
 
 // Session timeout: 100 hours
 const SESSION_TIMEOUT = 100 * 60 * 60 * 1000;
@@ -114,6 +115,7 @@ function AppRoutes() {
         <Route path="pomodoro" element={<PomodoroTimer />} />
         <Route path="journal" element={<Journal />} />
         <Route path="matrix" element={<EisenhowerMatrix />} />
+        <Route path="focus" element={<FocusMode />} />
         <Route path="crm" element={<CrmErp />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
