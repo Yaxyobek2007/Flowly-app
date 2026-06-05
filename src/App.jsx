@@ -35,6 +35,9 @@ import CalendarView from './pages/CalendarView';
 import Routines from './pages/Routines';
 import SprintMode from './pages/SprintMode';
 import TagsFilters from './pages/TagsFilters';
+import WaterTracker from './pages/WaterTracker';
+import SleepTracker from './pages/SleepTracker';
+import FinanceTracker from './pages/FinanceTracker';
 
 // Session timeout: 100 hours
 const SESSION_TIMEOUT = 100 * 60 * 60 * 1000;
@@ -126,6 +129,9 @@ function AppRoutes() {
         <Route path="routines" element={<Routines />} />
         <Route path="sprint" element={<SprintMode />} />
         <Route path="tags" element={<TagsFilters />} />
+        <Route path="water" element={<WaterTracker />} />
+        <Route path="sleep" element={<SleepTracker />} />
+        <Route path="finance" element={<FinanceTracker />} />
         <Route path="crm" element={<CrmErp />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
