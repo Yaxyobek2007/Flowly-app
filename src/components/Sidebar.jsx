@@ -2,7 +2,7 @@ import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard, CalendarDays, CalendarRange, Calendar,
   Target, CheckSquare, FileText, BarChart3, Trophy, MapPin,
-  ChevronLeft, ChevronRight
+  ChevronLeft, ChevronRight, Bot
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -17,13 +17,14 @@ const navItems = [
   { path: '/analytics', icon: BarChart3, label: 'analytics' },
   { path: '/achievements', icon: Trophy, label: 'achievements' },
   { path: '/location', icon: MapPin, label: 'location' },
+  { path: '/ai', icon: Bot, label: 'ai' },
 ];
 
 // Translation map for sidebar labels
 const labels = {
-  uz: { dashboard: 'Asosiy', dailyPlanner: 'Kunlik reja', weeklyPlanner: 'Haftalik reja', monthlyPlanner: 'Oylik reja', yearlyGoals: 'Yillik maqsadlar', habitTracker: 'Odatlar', notes: 'Yozuvlar', analytics: 'Statistika', achievements: 'Yutuqlar', location: 'Xarita' },
-  ru: { dashboard: 'Главная', dailyPlanner: 'День', weeklyPlanner: 'Неделя', monthlyPlanner: 'Месяц', yearlyGoals: 'Цели', habitTracker: 'Привычки', notes: 'Заметки', analytics: 'Аналитика', achievements: 'Достижения', location: 'Карта' },
-  en: { dashboard: 'Main', dailyPlanner: 'Daily', weeklyPlanner: 'Weekly', monthlyPlanner: 'Monthly', yearlyGoals: 'Goals', habitTracker: 'Habits', notes: 'Notes', analytics: 'Analytics', achievements: 'Achievements', location: 'Map' },
+  uz: { dashboard: 'Asosiy', dailyPlanner: 'Kunlik reja', weeklyPlanner: 'Haftalik reja', monthlyPlanner: 'Oylik reja', yearlyGoals: 'Yillik maqsadlar', habitTracker: 'Odatlar', notes: 'Yozuvlar', analytics: 'Statistika', achievements: 'Yutuqlar', location: 'Xarita', ai: '🤖 AI Chat' },
+  ru: { dashboard: 'Главная', dailyPlanner: 'День', weeklyPlanner: 'Неделя', monthlyPlanner: 'Месяц', yearlyGoals: 'Цели', habitTracker: 'Привычки', notes: 'Заметки', analytics: 'Аналитика', achievements: 'Достижения', location: 'Карта', ai: '🤖 AI Чат' },
+  en: { dashboard: 'Main', dailyPlanner: 'Daily', weeklyPlanner: 'Weekly', monthlyPlanner: 'Monthly', yearlyGoals: 'Goals', habitTracker: 'Habits', notes: 'Notes', analytics: 'Analytics', achievements: 'Achievements', location: 'Map', ai: '🤖 AI Chat' },
 };
 
 export default function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }) {
