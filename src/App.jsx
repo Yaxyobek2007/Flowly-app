@@ -28,6 +28,7 @@ import AiChat from './pages/AiChat';
 import SmartPlanner from './pages/SmartPlanner';
 import PomodoroTimer from './pages/PomodoroTimer';
 import Journal from './pages/Journal';
+import EisenhowerMatrix from './pages/EisenhowerMatrix';
 
 // Session timeout: 100 hours
 const SESSION_TIMEOUT = 100 * 60 * 60 * 1000;
@@ -112,6 +113,7 @@ function AppRoutes() {
         <Route path="smart-plan" element={<SmartPlanner />} />
         <Route path="pomodoro" element={<PomodoroTimer />} />
         <Route path="journal" element={<Journal />} />
+        <Route path="matrix" element={<EisenhowerMatrix />} />
         <Route path="crm" element={<CrmErp />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
