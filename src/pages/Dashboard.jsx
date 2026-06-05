@@ -3,6 +3,7 @@ import { useApp } from '../context/AppContext';
 import { useAuth } from '../context/AuthContext';
 import { CheckCircle2, Clock, Target, Flame, Calendar, TrendingUp, Award } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import XpLevelBar from '../components/XpLevelBar';
 
 function ProgressRing({ score }) {
   const radius = 70;
@@ -88,6 +89,7 @@ export default function Dashboard() {
         </div>
       </div>
 
+      <XpLevelBar />
       {/* Stats Cards */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         <div className="card flex items-center gap-3 cursor-pointer hover:ring-2 hover:ring-blue-300" onClick={() => navigate('/daily')}>
