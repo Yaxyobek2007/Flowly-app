@@ -141,6 +141,7 @@ export default function DailyPlanner() {
           <div className="flex gap-2 mt-4">
             <button className="btn-primary" onClick={handleAdd}>{t('add')}</button>
             <button className="px-4 py-2 rounded-lg border" style={{ borderColor: 'var(--border)', color: 'var(--text-secondary)' }} onClick={() => setShowForm(false)}>{t('cancel')}</button>
+            <button type="button" onClick={() => { if("webkitSpeechRecognition" in window) { const r = new webkitSpeechRecognition(); r.lang = "uz-UZ"; r.onresult = (e) => setNewTask(p => ({...p, title: e.results[0][0].transcript})); r.start(); }}} className="px-3 py-2 rounded-lg border flex items-center gap-1 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all" style={{ borderColor: "var(--border)", color: "var(--accent)" }}><Mic size={16} /></button>
           </div>
         </div>
       )}
