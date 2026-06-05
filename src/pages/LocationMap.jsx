@@ -121,8 +121,8 @@ export default function LocationMap() {
                   {lang === 'ru' ? 'Нажмите на карту для установки метки, затем сохраните' : lang === 'en' ? 'Click on map to place pin, then save' : "Xaritaga bosib metka qo'ying, keyin saqlang"}
                 </p>
               </div>
-              <button onClick={() => { setShowMapPicker(false); setShowForm(false); }} className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800">
-                <X size={20} style={{ color: 'var(--text-secondary)' }} />
+              <button onClick={() => { setShowMapPicker(false); setShowForm(false); }} className="p-2.5 rounded-xl bg-red-500 hover:bg-red-600 transition-colors shadow-lg">
+                <X size={20} className="text-white" />
               </button>
             </div>
 

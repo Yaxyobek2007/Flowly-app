@@ -38,12 +38,12 @@ export default function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }
         
         {/* Logo */}
         <div className={`flex items-center ${collapsed ? 'justify-center' : 'justify-between'} p-4`}>
-          <div className="flex items-center gap-2">
+          <NavLink to="/" onClick={onClose} className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center flex-shrink-0">
               <span className="text-white font-bold text-sm">F</span>
             </div>
             {!collapsed && <h1 className="text-lg font-bold" style={{ color: 'var(--text-primary)' }}>Flowly</h1>}
-          </div>
+          </NavLink>
         </div>
 
         {/* Nav */}
