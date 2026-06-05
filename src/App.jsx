@@ -30,6 +30,7 @@ import PomodoroTimer from './pages/PomodoroTimer';
 import Journal from './pages/Journal';
 import EisenhowerMatrix from './pages/EisenhowerMatrix';
 import FocusMode from './pages/FocusMode';
+import RecurringTasks from './pages/RecurringTasks';
 
 // Session timeout: 100 hours
 const SESSION_TIMEOUT = 100 * 60 * 60 * 1000;
@@ -116,6 +117,7 @@ function AppRoutes() {
         <Route path="journal" element={<Journal />} />
         <Route path="matrix" element={<EisenhowerMatrix />} />
         <Route path="focus" element={<FocusMode />} />
+        <Route path="recurring" element={<RecurringTasks />} />
         <Route path="crm" element={<CrmErp />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
