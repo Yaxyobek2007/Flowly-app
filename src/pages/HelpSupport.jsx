@@ -106,12 +106,51 @@ export default function HelpSupport() {
 
   const handleSendChat = () => {
     if (!chatMessage.trim()) return;
-    setChatHistory([...chatHistory, { from: 'user', text: chatMessage }]);
-    setTimeout(() => {
-      const reply = lang === 'ru' ? 'Спасибо! Сообщение принято. Оператор скоро ответит.' : lang === 'en' ? 'Thank you! Message received. An operator will respond shortly.' : 'Rahmat! Xabaringiz qabul qilindi. Operator tez orada javob beradi.';
-      setChatHistory(prev => [...prev, { from: 'bot', text: reply }]);
-    }, 1000);
+    const msg = chatMessage.toLowerCase().trim();
+    setChatHistory(prev => [...prev, { from: 'user', text: chatMessage }]);
     setChatMessage('');
+
+    setTimeout(() => {
+      let reply = '';
+      if (msg.includes('salom') || msg.includes('hello') || msg.includes('привет') || msg.includes('hi')) {
+        reply = lang === 'ru' ? 'Здравствуйте! 👋 Чем могу помочь?' : lang === 'en' ? 'Hello! 👋 How can I help?' : 'Vaalaykum assalom! 👋 Qanday yordam bera olaman?';
+      } else if (msg.includes('rahmat') || msg.includes('thanks') || msg.includes('спасибо')) {
+        reply = lang === 'ru' ? 'Пожалуйста! 😊' : lang === 'en' ? "You're welcome! 😊" : "Arzimaydi! 😊";
+      } else if (msg.includes('royxat') || msg.includes('register') || msg.includes('регистр') || msg.includes('kirish') || msg.includes('login')) {
+        reply = lang === 'ru' ? '📝 Регистрация: нажмите Sign Up → заполните данные → пароль мин 8 символов с большой буквой и спецсимволом' : lang === 'en' ? '📝 Register: click Sign Up → fill data → password min 8 chars with uppercase and special char' : "📝 Ro'yxatdan o'tish: Sign Up bosing → ma'lumotlarni to'ldiring → parol 8+ belgi, katta harf va @!# kerak";
+      } else if (msg.includes('premium') || msg.includes('tolov') || msg.includes('tarif') || msg.includes('оплат') || msg.includes('vip') || msg.includes('pul')) {
+        reply = lang === 'ru' ? '💳 VIP: 1 мес — $2.9 | 3 мес — $6.9 | 1 год — $15\nPremium → выберите → введите карту → оплатите' : lang === 'en' ? '💳 VIP: 1mo — $2.9 | 3mo — $6.9 | 1yr — $15\nPremium → select → enter card → pay' : "💳 VIP: 1 oy — $2.9 | 3 oy — $6.9 | 1 yil — $15\nPremium → tanlang → karta → to'lang";
+      } else if (msg.includes('bonus') || msg.includes('ball') || msg.includes('бонус') || msg.includes('point')) {
+        reply = lang === 'ru' ? '⭐ Бонусы: Д1=1 | Д2=2 | Д3=5 | Д4=7 | Д5=8 | Д6=12 | Д7=15\nБаллы → скидка: 50=1% | 100=3% | 250=10% | 1000=50%' : lang === 'en' ? '⭐ Bonus: D1=1 | D2=2 | D3=5 | D4=7 | D5=8 | D6=12 | D7=15\nPoints → discount: 50=1% | 100=3% | 250=10% | 1000=50%' : "⭐ Bonus: 1-kun=1 | 2=2 | 3=5 | 4=7 | 5=8 | 6=12 | 7=15\nBall → chegirma: 50=1% | 100=3% | 250=10% | 1000=50%";
+      } else if (msg.includes('dost') || msg.includes('friend') || msg.includes('друг') || msg.includes('taklif') || msg.includes('referral')) {
+        reply = lang === 'ru' ? '👥 Друзья → Скопируйте ссылку → отправьте другу → он регистрируется → вы получаете баллы!' : lang === 'en' ? '👥 Friends → Copy link → send to friend → they register → you get points!' : "👥 Do'stlar → Havola nusxalang → do'stga yuboring → u ro'yxatdan o'tadi → sizga ball tushadi!";
+      } else if (msg.includes('parol') || msg.includes('password') || msg.includes('пароль')) {
+        reply = lang === 'ru' ? '🔑 Пароль: мин 8 символов + большая + маленькая + цифра + спецсимвол (@!#)\nЗабыли? → "Забыл пароль" → email → код (тест: 1234)' : lang === 'en' ? '🔑 Password: min 8 + uppercase + lowercase + number + special (@!#)\nForgot? → "Forgot" → email → code (test: 1234)' : "🔑 Parol: 8+ belgi + katta harf + kichik harf + raqam + @!#\nUnutdingiz? → 'Parolni unutdingizmi?' → email → kod (test: 1234)";
+      } else if (msg.includes('til') || msg.includes('язык') || msg.includes('language')) {
+        reply = lang === 'ru' ? '🌐 Настройки → Язык → выберите (узб/рус/англ)' : lang === 'en' ? '🌐 Settings → Language → select (uz/ru/en)' : "🌐 Sozlamalar → Til → tanlang (uz/ru/en)";
+      } else if (msg.includes('operator') || msg.includes('odam') || msg.includes('человек') || msg.includes('human') || msg.includes('yordam')) {
+        reply = lang === 'ru' ? '👨‍💻 Оператор подключается...\n📱 Telegram: @flowly_support\n📞 +998 98 765 43 21' : lang === 'en' ? '👨‍💻 Connecting to operator...\n📱 Telegram: @flowly_support\n📞 +998 98 765 43 21' : "👨‍💻 Operator ulanmoqda...\n📱 Telegram: @flowly_support\n📞 +998 98 765 43 21";
+      } else if (msg.includes('reja') || msg.includes('vazifa') || msg.includes('task') || msg.includes('план') || msg.includes('задач')) {
+        reply = lang === 'ru' ? '📋 Дневной план → "Новая задача" → заполните → "Добавить"\n⚠️ Просроченные задачи блокируются!' : lang === 'en' ? '📋 Daily → "New task" → fill → "Add"\n⚠️ Past-due tasks get locked!' : "📋 Kunlik reja → 'Yangi vazifa' → to'ldiring → 'Qo'shish'\n⚠️ Vaqti o'tgan vazifalar bloklanadi!";
+      } else {
+        reply = lang === 'ru' ? '🤔 Не понял. Попробуйте:\n• Опишите подробнее\n• 📸 Отправьте скриншот\n• Напишите "оператор" для связи' : lang === 'en' ? "🤔 Didn't understand. Try:\n• Describe in detail\n• 📸 Send screenshot\n• Type 'operator' for human" : "🤔 Tushunmadim. Sinab ko'ring:\n• Batafsilroq yozing\n• 📸 Rasm yuboring\n• 'operator' deb yozing";
+      }
+      setChatHistory(prev => [...prev, { from: 'bot', text: reply }]);
+    }, 800);
+  };
+
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      setChatHistory(prev => [...prev, { from: 'user', text: '📸', image: ev.target.result }]);
+      setTimeout(() => {
+        const reply = lang === 'ru' ? '📸 Скриншот получен! Оператор скоро ответит.' : lang === 'en' ? '📸 Screenshot received! Operator will respond.' : "📸 Rasm qabul qilindi! Operator tez orada javob beradi.";
+        setChatHistory(prev => [...prev, { from: 'bot', text: reply }]);
+      }, 1000);
+    };
+    reader.readAsDataURL(file);
   };
 
   const filteredFaqs = activeCategory === 'all' ? faqs : faqs.filter(f => f.category === activeCategory);
@@ -189,7 +228,8 @@ export default function HelpSupport() {
             <div key={idx} className={`flex ${msg.from === 'user' ? 'justify-end' : 'justify-start'} animate-in`} style={{ animationDelay: `${idx * 50}ms` }}>
               <div className={`max-w-[80%] px-3 py-2 rounded-xl text-sm ${msg.from === 'user' ? 'bg-blue-500 text-white rounded-br-sm' : 'rounded-bl-sm'}`}
                 style={msg.from === 'bot' ? { background: 'var(--bg-card)', color: 'var(--text-primary)', border: '1px solid var(--border)' } : {}}>
-                {msg.text}
+                {msg.image && <img src={msg.image} alt="" className="w-40 h-40 object-cover rounded-lg mb-1" />}
+                <span className="whitespace-pre-line">{msg.text}</span>
               </div>
             </div>
           ))}
@@ -200,6 +240,10 @@ export default function HelpSupport() {
             onKeyDown={e => e.key === 'Enter' && handleSendChat()}
             className="flex-1 px-4 py-2.5 rounded-xl border outline-none focus:ring-2 focus:ring-blue-500"
             style={{ background: 'var(--bg-secondary)', borderColor: 'var(--border)', color: 'var(--text-primary)' }} />
+          <label className="p-2.5 rounded-xl cursor-pointer transition-colors hover:bg-blue-50 dark:hover:bg-blue-900/20" style={{ border: '1px solid var(--border)' }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+            <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
+          </label>
           <button onClick={handleSendChat} className="btn-primary px-4"><Send size={16} /></button>
         </div>
       </div>

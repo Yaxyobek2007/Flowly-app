@@ -234,18 +234,6 @@ export default function Settings() {
           </div>
         </div>
 
-        {/* Test notification button */}
-        <button onClick={sendTestNotification}
-          className={`w-full p-3 rounded-xl font-medium text-sm transition-all flex items-center justify-center gap-2 ${
-            testSent ? 'bg-green-100 text-green-600 dark:bg-green-900/20 dark:text-green-400' : 'bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/30'
-          }`}>
-          {testSent ? (
-            <>✓ {lang === 'ru' ? 'Отправлено!' : lang === 'en' ? 'Sent!' : 'Yuborildi!'}</>
-          ) : (
-            <><BellRing size={16} /> {lang === 'ru' ? 'Отправить тестовое уведомление' : lang === 'en' ? 'Send test notification' : 'Test bildirishnoma yuborish'}</>
-          )}
-        </button>
-
         {/* Info */}
         {permissionStatus === 'denied' && (
           <div className="p-3 rounded-xl bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800">
