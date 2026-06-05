@@ -27,7 +27,7 @@ export default function DailyPlanner() {
   const todayLabel = dayLabelsUz[todayDow];
   const currentTimeStr = `${String(tashkent.getHours()).padStart(2, '0')}:${String(tashkent.getMinutes()).padStart(2, '0')}`;
 
-  const [newTask, setNewTask] = useState({ title: '', time: '', priority: 'medium', day: todayKey, category: 'personal' });
+  const [newTask, setNewTask] = useState({ title: '', time: '', priority: 'medium', day: todayKey, category: 'personal', location: '' });
 
   // Filter tasks for today
   const todayTasks = tasks.filter(t => t.day === todayKey).sort((a, b) => a.time.localeCompare(b.time));
@@ -133,6 +133,10 @@ export default function DailyPlanner() {
               style={{ background: 'var(--bg-secondary)', borderColor: 'var(--border)', color: 'var(--text-primary)' }}>
               <option value="personal">{t('personal')}</option><option value="education">{t('education')}</option><option value="health">{t('health')}</option><option value="work">{t('work')}</option><option value="finance">{t('finance')}</option>
             </select>
+            <input type="text" placeholder={lang === 'ru' ? '📍 Место (необяз.)' : lang === 'en' ? '📍 Location (optional)' : "📍 Joy/Manzil (ixtiyoriy)"}
+              value={newTask.location} onChange={e => setNewTask({...newTask, location: e.target.value})}
+              className="px-4 py-2 rounded-lg border outline-none focus:ring-2 focus:ring-blue-500 sm:col-span-2"
+              style={{ background: 'var(--bg-secondary)', borderColor: 'var(--border)', color: 'var(--text-primary)' }} />
           </div>
           <div className="flex gap-2 mt-4">
             <button className="btn-primary" onClick={handleAdd}>{t('add')}</button>
@@ -199,6 +203,7 @@ export default function DailyPlanner() {
                     </p>
                     <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
                       {task.category}
+                      {task.location && <span className="ml-2">📍 <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(task.location)}`} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">{task.location}</a></span>}
                       {missed && <span className="ml-2 text-red-500 font-medium">⚠️ O'tib ketdi</span>}
                       {task.completed && <span className="ml-2 text-green-500 font-medium">✓ Bajarildi</span>}
                     </p>

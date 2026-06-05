@@ -20,7 +20,8 @@ function generateAIResponse(message, { tasks, habits, goals, currentUser, lang }
   if (msg.match(/maqsad|goal|цел/)) { return goals.length===0 ? '🎯 Maqsad qo\'shing!' : goals.map(g=>`• ${g.title}: ${g.progress}%`).join('\n'); }
   if (msg.match(/reja|plan|bugun|today|сегодня/)) { const dk=['sunday','monday','tuesday','wednesday','thursday','friday','saturday']; const tt=tasks.filter(t=>t.day===dk[new Date().getDay()]).sort((a,b)=>a.time.localeCompare(b.time)); return tt.length===0 ? '📋 Vazifa yo\'q!' : tt.map(t=>`${t.completed?'✅':'⬜'} ${t.time} ${t.title}`).join('\n'); }
   if (msg.match(/rahmat|спасибо|thanks/)) return `😊 Arzimaydi!`;
-  if (msg.match(/qanday|yordam|помоги|help/)) return lang === 'ru' ? '🆘 статус•план•совет•мотивация•привычки•цели' : lang === 'en' ? '🆘 status•plan•advice•motivation•habits•goals' : '🆘 holat•reja•maslahat•motivatsiya•odat•maqsad';
+  if (msg.match(/qayer|manzil|locat|место|адрес|where|map|xarita|карта/)) return lang === 'ru' ? '📍 Карта → добавьте место → навигация\nВ дневном плане можете указать место для задачи' : lang === 'en' ? '📍 Map → add place → navigate\nIn daily plan you can add location to tasks' : "📍 Xarita → joy qo'shing → yo'l ko'rsatish\nKunlik rejada vazifaga joy qo'shish mumkin";
+  if (msg.match(/qanday|yordam|помоги|help/)) return lang === 'ru' ? '🆘 статус•план•совет•мотивация•привычки•цели•место' : lang === 'en' ? '🆘 status•plan•advice•motivation•habits•goals•location' : '🆘 holat•reja•maslahat•motivatsiya•odat•maqsad•manzil';
   return lang === 'ru' ? '🤔 "помощь"!' : lang === 'en' ? '🤔 Type "help"!' : '🤔 "yordam" deb yozing!';
 }
 

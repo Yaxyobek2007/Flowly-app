@@ -49,6 +49,9 @@ function generateAIResponse(message, { tasks, habits, goals, currentUser, lang }
   if (msg.match(/rahmat|спасибо|thanks/)) {
     return lang === 'ru' ? `😊 Пожалуйста, ${userName}!` : lang === 'en' ? `😊 You're welcome, ${userName}!` : `😊 Arzimaydi, ${userName}!`;
   }
+  if (msg.match(/qayer|manzil|locat|место|адрес|where|map|xarita|карта|borish|uchrashuv/)) {
+    return lang === 'ru' ? `📍 Работа с местами:\n• Дневной план → добавьте место к задаче\n• Карта → сохраните место → навигация\n• Задача с местом → нажмите 📍 для навигации\n\n💡 Совет: указывайте точный адрес!` : lang === 'en' ? `📍 Location features:\n• Daily plan → add location to task\n• Map → save place → get directions\n• Task with location → click 📍 to navigate\n\n💡 Tip: use exact address!` : `📍 Joy bilan ishlash:\n• Kunlik reja → vazifaga joy qo'shing\n• Xarita → joy saqlang → yo'l ko'rsatish\n• Joyli vazifa → 📍 bosib yo'l oling\n\n💡 Maslahat: aniq manzil yozing!`;
+  }
   if (msg.match(/qanday|yordam|помоги|help|how/)) {
     return lang === 'ru' ? `🆘 Команды:\n• "статус" — прогресс\n• "план" — задачи\n• "совет" — советы\n• "мотивация" — цитаты\n• "привычки" — статус\n• "цели" — прогресс` : lang === 'en' ? `🆘 Commands:\n• "status" — progress\n• "plan" — tasks\n• "advice" — tips\n• "motivation" — quotes\n• "habits" — status\n• "goals" — progress` : `🆘 Buyruqlar:\n• "holat" — progress\n• "reja" — vazifalar\n• "maslahat" — tavsiyalar\n• "motivatsiya" — iqtiboslar\n• "odat" — odatlar\n• "maqsad" — maqsadlar`;
   }
