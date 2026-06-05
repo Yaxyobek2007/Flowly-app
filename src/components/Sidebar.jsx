@@ -2,7 +2,7 @@ import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard, CalendarDays, CalendarRange, Calendar,
   Target, CheckSquare, FileText, BarChart3, Trophy, MapPin,
-  ChevronLeft, ChevronRight, Bot
+  ChevronLeft, ChevronRight, Zap
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -12,20 +12,18 @@ const navItems = [
   { path: '/weekly', icon: CalendarRange, label: 'weeklyPlanner' },
   { path: '/monthly', icon: Calendar, label: 'monthlyPlanner' },
   { path: '/goals', icon: Target, label: 'yearlyGoals' },
+  { path: '/smart-plan', icon: Zap, label: 'smartPlan' },
   { path: '/habits', icon: CheckSquare, label: 'habitTracker' },
+  { path: '/achievements', icon: Trophy, label: 'achievements' },
   { path: '/notes', icon: FileText, label: 'notes' },
   { path: '/analytics', icon: BarChart3, label: 'analytics' },
-  { path: '/achievements', icon: Trophy, label: 'achievements' },
   { path: '/location', icon: MapPin, label: 'location' },
-  { path: '/ai', icon: Bot, label: 'ai' },
-  { path: '/smart-plan', icon: Target, label: 'smartPlan' },
 ];
 
-// Translation map for sidebar labels
 const labels = {
-  uz: { dashboard: 'Asosiy', dailyPlanner: 'Kunlik reja', weeklyPlanner: 'Haftalik reja', monthlyPlanner: 'Oylik reja', yearlyGoals: 'Yillik maqsadlar', habitTracker: 'Odatlar', notes: 'Yozuvlar', analytics: 'Statistika', achievements: 'Yutuqlar', location: 'Xarita', ai: '🤖 AI', smartPlan: '📊 Aqlli reja' },
-  ru: { dashboard: 'Главная', dailyPlanner: 'День', weeklyPlanner: 'Неделя', monthlyPlanner: 'Месяц', yearlyGoals: 'Цели', habitTracker: 'Привычки', notes: 'Заметки', analytics: 'Аналитика', achievements: 'Достижения', location: 'Карта', ai: '🤖 AI', smartPlan: '📊 Умный план' },
-  en: { dashboard: 'Main', dailyPlanner: 'Daily', weeklyPlanner: 'Weekly', monthlyPlanner: 'Monthly', yearlyGoals: 'Goals', habitTracker: 'Habits', notes: 'Notes', analytics: 'Analytics', achievements: 'Achievements', location: 'Map', ai: '🤖 AI', smartPlan: '📊 Smart Plan' },
+  uz: { dashboard: 'Asosiy', dailyPlanner: 'Kunlik reja', weeklyPlanner: 'Haftalik', monthlyPlanner: 'Oylik', yearlyGoals: 'Maqsadlar', habitTracker: 'Odatlar', notes: 'Yozuvlar', analytics: 'Statistika', achievements: 'Yutuqlar', location: 'Xarita', smartPlan: 'Aqlli reja' },
+  ru: { dashboard: 'Главная', dailyPlanner: 'День', weeklyPlanner: 'Неделя', monthlyPlanner: 'Месяц', yearlyGoals: 'Цели', habitTracker: 'Привычки', notes: 'Заметки', analytics: 'Аналитика', achievements: 'Достижения', location: 'Карта', smartPlan: 'Умный план' },
+  en: { dashboard: 'Main', dailyPlanner: 'Daily', weeklyPlanner: 'Weekly', monthlyPlanner: 'Monthly', yearlyGoals: 'Goals', habitTracker: 'Habits', notes: 'Notes', analytics: 'Analytics', achievements: 'Achievements', location: 'Map', smartPlan: 'Smart Plan' },
 };
 
 export default function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }) {
@@ -60,7 +58,7 @@ export default function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }
           ))}
         </nav>
 
-        {/* Collapse toggle - desktop only */}
+        {/* Collapse toggle */}
         <div className="hidden lg:block p-3 border-t" style={{ borderColor: 'var(--border)' }}>
           <button onClick={onToggleCollapse}
             className="w-full flex items-center justify-center p-2 rounded-lg transition-colors hover:bg-blue-50 dark:hover:bg-blue-900/20"
