@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { useAuth } from '../context/AuthContext';
-import { Plus, Trash2, CheckCircle2, Clock, Edit2, Save, X, AlertTriangle } from 'lucide-react';
+import { Plus, Trash2, CheckCircle2, Clock, Edit2, Save, X, AlertTriangle, Mic } from 'lucide-react';
 
 const dayOfWeekToKey = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
 const dayLabelsUz = ['Yakshanba', 'Dushanba', 'Seshanba', 'Chorshanba', 'Payshanba', 'Juma', 'Shanba'];
