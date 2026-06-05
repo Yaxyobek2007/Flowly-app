@@ -34,6 +34,7 @@ import RecurringTasks from './pages/RecurringTasks';
 import CalendarView from './pages/CalendarView';
 import Routines from './pages/Routines';
 import SprintMode from './pages/SprintMode';
+import TagsFilters from './pages/TagsFilters';
 
 // Session timeout: 100 hours
 const SESSION_TIMEOUT = 100 * 60 * 60 * 1000;
@@ -124,6 +125,7 @@ function AppRoutes() {
         <Route path="calendar" element={<CalendarView />} />
         <Route path="routines" element={<Routines />} />
         <Route path="sprint" element={<SprintMode />} />
+        <Route path="tags" element={<TagsFilters />} />
         <Route path="crm" element={<CrmErp />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />

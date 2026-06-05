@@ -2,7 +2,7 @@ import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard, CalendarDays, CalendarRange, Calendar,
   Target, CheckSquare, FileText, BarChart3, Trophy, MapPin,
-  ChevronLeft, ChevronRight, Zap, Timer, BookOpen, Grid, ShieldCheck, Repeat, CalendarClock, Sunrise, Rocket
+  ChevronLeft, ChevronRight, Zap, Timer, BookOpen, Grid, ShieldCheck, Repeat, CalendarClock, Sunrise, Rocket, Tag
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -13,7 +13,7 @@ const navItems = [
   { path: '/monthly', icon: Calendar, label: 'monthlyPlanner' },
   { path: '/goals', icon: Target, label: 'yearlyGoals' },
   { path: '/smart-plan', icon: Zap, label: 'smartPlan' },
-  { path: '/pomodoro', icon: Timer, BookOpen, Grid, ShieldCheck, Repeat, CalendarClock, Sunrise, Rocket, label: 'pomodoro' },
+  { path: '/pomodoro', icon: Timer, BookOpen, Grid, ShieldCheck, Repeat, CalendarClock, Sunrise, Rocket, Tag, label: 'pomodoro' },
   { path: '/journal', icon: BookOpen, label: 'journal' },
   { path: '/matrix', icon: Grid, label: 'matrix' },
   { path: '/focus', icon: ShieldCheck, label: 'focus' },
@@ -21,6 +21,7 @@ const navItems = [
   { path: '/calendar', icon: CalendarClock, label: 'calendar' },
   { path: '/routines', icon: Sunrise, label: 'routines' },
   { path: '/sprint', icon: Rocket, label: 'sprint' },
+  { path: '/tags', icon: Tag, label: 'tags' },
   { path: '/habits', icon: CheckSquare, label: 'habitTracker' },
   { path: '/achievements', icon: Trophy, label: 'achievements' },
   { path: '/notes', icon: FileText, label: 'notes' },
@@ -29,9 +30,9 @@ const navItems = [
 ];
 
 const labels = {
-  uz: { dashboard: 'Asosiy', dailyPlanner: 'Kunlik reja', weeklyPlanner: 'Haftalik', monthlyPlanner: 'Oylik', yearlyGoals: 'Maqsadlar', habitTracker: 'Odatlar', notes: 'Yozuvlar', analytics: 'Statistika', achievements: 'Yutuqlar', location: 'Xarita', smartPlan: 'Aqlli reja', pomodoro: 'Pomodoro', journal: 'Kundalik', matrix: 'Matritsa', focus: 'Fokus', recurring: 'Takroriy', calendar: 'Kalendar', routines: 'Rutina', sprint: 'Sprint' },
-  ru: { dashboard: 'Главная', dailyPlanner: 'День', weeklyPlanner: 'Неделя', monthlyPlanner: 'Месяц', yearlyGoals: 'Цели', habitTracker: 'Привычки', notes: 'Заметки', analytics: 'Аналитика', achievements: 'Достижения', location: 'Карта', smartPlan: 'Умный план', pomodoro: 'Помодоро', journal: 'Дневник', matrix: 'Матрица', focus: 'Фокус', recurring: 'Повтор', calendar: 'Календарь', routines: 'Рутина', sprint: 'Спринт' },
-  en: { dashboard: 'Main', dailyPlanner: 'Daily', weeklyPlanner: 'Weekly', monthlyPlanner: 'Monthly', yearlyGoals: 'Goals', habitTracker: 'Habits', notes: 'Notes', analytics: 'Analytics', achievements: 'Achievements', location: 'Map', smartPlan: 'Smart Plan', pomodoro: 'Pomodoro', journal: 'Kundalik', matrix: 'Matritsa', focus: 'Fokus', recurring: 'Takroriy', calendar: 'Kalendar', routines: 'Rutina', sprint: 'Sprint' },
+  uz: { dashboard: 'Asosiy', dailyPlanner: 'Kunlik reja', weeklyPlanner: 'Haftalik', monthlyPlanner: 'Oylik', yearlyGoals: 'Maqsadlar', habitTracker: 'Odatlar', notes: 'Yozuvlar', analytics: 'Statistika', achievements: 'Yutuqlar', location: 'Xarita', smartPlan: 'Aqlli reja', pomodoro: 'Pomodoro', journal: 'Kundalik', matrix: 'Matritsa', focus: 'Fokus', recurring: 'Takroriy', calendar: 'Kalendar', routines: 'Rutina', sprint: 'Sprint', tags: 'Teglar' },
+  ru: { dashboard: 'Главная', dailyPlanner: 'День', weeklyPlanner: 'Неделя', monthlyPlanner: 'Месяц', yearlyGoals: 'Цели', habitTracker: 'Привычки', notes: 'Заметки', analytics: 'Аналитика', achievements: 'Достижения', location: 'Карта', smartPlan: 'Умный план', pomodoro: 'Помодоро', journal: 'Дневник', matrix: 'Матрица', focus: 'Фокус', recurring: 'Повтор', calendar: 'Календарь', routines: 'Рутина', sprint: 'Спринт', tags: 'Теги' },
+  en: { dashboard: 'Main', dailyPlanner: 'Daily', weeklyPlanner: 'Weekly', monthlyPlanner: 'Monthly', yearlyGoals: 'Goals', habitTracker: 'Habits', notes: 'Notes', analytics: 'Analytics', achievements: 'Achievements', location: 'Map', smartPlan: 'Smart Plan', pomodoro: 'Pomodoro', journal: 'Kundalik', matrix: 'Matritsa', focus: 'Fokus', recurring: 'Takroriy', calendar: 'Kalendar', routines: 'Rutina', sprint: 'Sprint', tags: 'Teglar' },
 };
 
 export default function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }) {
