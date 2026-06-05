@@ -4,6 +4,7 @@ import Sidebar from './Sidebar';
 import Header from './Header';
 import DailyBonusModal from './DailyBonusModal';
 import PointsShop from './PointsShop';
+import AiFloatingButton from './AiFloatingButton';
 
 export default function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -41,9 +42,10 @@ export default function Layout() {
         </main>
       </div>
 
-      {/* Global modals */}
+      {/* Global modals & floating */}
       <DailyBonusModal />
       <PointsShop isOpen={showPointsShop} onClose={() => setShowPointsShop(false)} />
+      <AiFloatingButton />
     </div>
   );
 }
