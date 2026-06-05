@@ -3,11 +3,7 @@ import { useApp } from '../context/AppContext';
 import { useAuth } from '../context/AuthContext';
 import { MapPin, Navigation, Plus, Trash2, Search, ExternalLink, X, Save } from 'lucide-react';
 
-const defaultLocations = [
-  { id: 1, name: "TTPU Universitet", address: "Toshkent", lat: 41.3111, lng: 69.2797, type: "education", icon: "🏫" },
-  { id: 2, name: "Tashkent City", address: "Tashkent City Mall", lat: 41.3055, lng: 69.2812, type: "event", icon: "🏙️" },
-  { id: 3, name: "IT Park", address: "IT Park, Toshkent", lat: 41.3200, lng: 69.2850, type: "work", icon: "🏢" },
-];
+const defaultLocations = [];
 
 export default function LocationMap() {
   const { events } = useApp();

@@ -6,10 +6,7 @@ export default function Certificates() {
   const { t } = useAuth();
   const [certificates, setCertificates] = useState(() => {
     const saved = localStorage.getItem('flowly-certificates');
-    return saved ? JSON.parse(saved) : [
-      { id: 1, title: "IELTS 7.0", issuer: "British Council", date: "2026-03-15", category: "language", description: "Ingliz tili bilimi", link: "" },
-      { id: 2, title: "React Developer Certificate", issuer: "Meta", date: "2026-01-20", category: "tech", description: "Frontend development", link: "" },
-    ];
+    return saved ? JSON.parse(saved) : [];
   });
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState(null);
