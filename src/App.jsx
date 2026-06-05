@@ -20,7 +20,7 @@ import Profile from './pages/Profile';
 import Premium from './pages/Premium';
 import Friends from './pages/Friends';
 import Certificates from './pages/Certificates';
-import AdminPanel from './pages/AdminPanel';
+
 import LocationMap from './pages/LocationMap';
 import CrmErp from './pages/CrmErp';
 import HelpSupport from './pages/HelpSupport';
@@ -103,7 +103,7 @@ function AppRoutes() {
         <Route path="premium" element={<Premium />} />
         <Route path="friends" element={<Friends />} />
         <Route path="certificates" element={<Certificates />} />
-        <Route path="admin" element={<AdminPanel />} />
+        <Route path="admin" element={<CrmErp />} />
         <Route path="location" element={<LocationMap />} />
         <Route path="help" element={<HelpSupport />} />
         <Route path="ai" element={<AiChat />} />

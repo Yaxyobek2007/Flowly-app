@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 
 export default function Auth() {
-  const { login, loginWithGoogle, loginWithPhone, signup, language, setLanguage, t } = useAuth();
+  const { login, loginWithPhone, signup, language, setLanguage, t } = useAuth();
   const [mode, setMode] = useState('login');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -57,12 +57,8 @@ export default function Auth() {
   };
 
   const handleGoogleLogin = () => {
-    setLoading(true);
-    setTimeout(() => {
-      const result = loginWithGoogle();
-      if (!result.success) setError(result.error);
-      setLoading(false);
-    }, 500);
+    setMode('signup');
+    setError('');
   };
 
   const handlePhoneSubmit = (e) => {

@@ -804,10 +804,10 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     if (currentUser && currentUser.id) {
       const syncData = { ...currentUser };
-      delete syncData.password; // never store password in Firestore
-      createUserInDB(syncData).catch(() => {});
+      delete syncData.password;
+      try { createUserInDB(syncData).catch(() => {}); } catch(e) {}
     }
-  }, [currentUser]);
+  }, [currentUser?.id, currentUser?.points, currentUser?.plan, currentUser?.avatar, currentUser?.name]);
 
   // Listen to ALL users from Firebase (real-time) for admin panel
   useEffect(() => {
