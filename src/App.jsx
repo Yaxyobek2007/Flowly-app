@@ -38,6 +38,8 @@ import TagsFilters from './pages/TagsFilters';
 import WaterTracker from './pages/WaterTracker';
 import SleepTracker from './pages/SleepTracker';
 import FinanceTracker from './pages/FinanceTracker';
+import DailyQuote from './pages/DailyQuote';
+import WeeklyReview from './pages/WeeklyReview';
 
 // Session timeout: 100 hours
 const SESSION_TIMEOUT = 100 * 60 * 60 * 1000;
@@ -132,6 +134,8 @@ function AppRoutes() {
         <Route path="water" element={<WaterTracker />} />
         <Route path="sleep" element={<SleepTracker />} />
         <Route path="finance" element={<FinanceTracker />} />
+        <Route path="quote" element={<DailyQuote />} />
+        <Route path="review" element={<WeeklyReview />} />
         <Route path="crm" element={<CrmErp />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
