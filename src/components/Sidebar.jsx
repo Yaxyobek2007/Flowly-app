@@ -13,7 +13,7 @@ const navItems = [
   { path: '/monthly', icon: Calendar, label: 'monthlyPlanner' },
   { path: '/goals', icon: Target, label: 'yearlyGoals' },
   { path: '/smart-plan', icon: Zap, label: 'smartPlan' },
-  { path: '/pomodoro', icon: Timer, BookOpen, Grid, ShieldCheck, Repeat, CalendarClock, Sunrise, Rocket, Tag, Droplets, Moon, Wallet, BookMarked, ClipboardCheck, Quote, BookMarked, Award2, Quote, label: 'pomodoro' },
+  { path: '/pomodoro', icon: Timer, label: 'pomodoro' },
   { path: '/journal', icon: BookOpen, label: 'journal' },
   { path: '/matrix', icon: Grid, label: 'matrix' },
   { path: '/focus', icon: ShieldCheck, label: 'focus' },
