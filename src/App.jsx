@@ -47,6 +47,9 @@ import DailyChallenge from './pages/DailyChallenge';
 import MoodCalendar from './pages/MoodCalendar';
 import Flashcards from './pages/Flashcards';
 import InvestmentPlanner from './pages/InvestmentPlanner';
+import VoiceAssistant from './pages/VoiceAssistant';
+import PrivacyPermissions from './pages/PrivacyPermissions';
+import FriendsChat from './pages/FriendsChat';
 
 // Session timeout: 100 hours
 const SESSION_TIMEOUT = 100 * 60 * 60 * 1000;
@@ -150,6 +153,9 @@ function AppRoutes() {
         <Route path="mood" element={<MoodCalendar />} />
         <Route path="flashcards" element={<Flashcards />} />
         <Route path="invest" element={<InvestmentPlanner />} />
+        <Route path="voice" element={<VoiceAssistant />} />
+        <Route path="privacy" element={<PrivacyPermissions />} />
+        <Route path="chat" element={<FriendsChat />} />
         <Route path="crm" element={<CrmErp />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
