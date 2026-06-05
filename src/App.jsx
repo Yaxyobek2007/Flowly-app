@@ -42,6 +42,10 @@ import DailyQuote from './pages/DailyQuote';
 import WeeklyReview from './pages/WeeklyReview';
 import VirtualPet from './pages/VirtualPet';
 import Leaderboard from './pages/Leaderboard';
+import Meditation from './pages/Meditation';
+import DailyChallenge from './pages/DailyChallenge';
+import MoodCalendar from './pages/MoodCalendar';
+import Flashcards from './pages/Flashcards';
 
 // Session timeout: 100 hours
 const SESSION_TIMEOUT = 100 * 60 * 60 * 1000;
@@ -140,6 +144,10 @@ function AppRoutes() {
         <Route path="review" element={<WeeklyReview />} />
         <Route path="pet" element={<VirtualPet />} />
         <Route path="leaderboard" element={<Leaderboard />} />
+        <Route path="meditation" element={<Meditation />} />
+        <Route path="challenge" element={<DailyChallenge />} />
+        <Route path="mood" element={<MoodCalendar />} />
+        <Route path="flashcards" element={<Flashcards />} />
         <Route path="crm" element={<CrmErp />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
