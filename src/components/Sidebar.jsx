@@ -2,7 +2,7 @@ import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard, CalendarDays, CalendarRange, Calendar,
   Target, CheckSquare, FileText, BarChart3, Trophy, MapPin,
-  ChevronLeft, ChevronRight, Zap
+  ChevronLeft, ChevronRight, Zap, Timer
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -13,6 +13,7 @@ const navItems = [
   { path: '/monthly', icon: Calendar, label: 'monthlyPlanner' },
   { path: '/goals', icon: Target, label: 'yearlyGoals' },
   { path: '/smart-plan', icon: Zap, label: 'smartPlan' },
+  { path: '/pomodoro', icon: Timer, label: 'pomodoro' },
   { path: '/habits', icon: CheckSquare, label: 'habitTracker' },
   { path: '/achievements', icon: Trophy, label: 'achievements' },
   { path: '/notes', icon: FileText, label: 'notes' },
@@ -21,9 +22,9 @@ const navItems = [
 ];
 
 const labels = {
-  uz: { dashboard: 'Asosiy', dailyPlanner: 'Kunlik reja', weeklyPlanner: 'Haftalik', monthlyPlanner: 'Oylik', yearlyGoals: 'Maqsadlar', habitTracker: 'Odatlar', notes: 'Yozuvlar', analytics: 'Statistika', achievements: 'Yutuqlar', location: 'Xarita', smartPlan: 'Aqlli reja' },
-  ru: { dashboard: 'Главная', dailyPlanner: 'День', weeklyPlanner: 'Неделя', monthlyPlanner: 'Месяц', yearlyGoals: 'Цели', habitTracker: 'Привычки', notes: 'Заметки', analytics: 'Аналитика', achievements: 'Достижения', location: 'Карта', smartPlan: 'Умный план' },
-  en: { dashboard: 'Main', dailyPlanner: 'Daily', weeklyPlanner: 'Weekly', monthlyPlanner: 'Monthly', yearlyGoals: 'Goals', habitTracker: 'Habits', notes: 'Notes', analytics: 'Analytics', achievements: 'Achievements', location: 'Map', smartPlan: 'Smart Plan' },
+  uz: { dashboard: 'Asosiy', dailyPlanner: 'Kunlik reja', weeklyPlanner: 'Haftalik', monthlyPlanner: 'Oylik', yearlyGoals: 'Maqsadlar', habitTracker: 'Odatlar', notes: 'Yozuvlar', analytics: 'Statistika', achievements: 'Yutuqlar', location: 'Xarita', smartPlan: 'Aqlli reja', pomodoro: 'Pomodoro' },
+  ru: { dashboard: 'Главная', dailyPlanner: 'День', weeklyPlanner: 'Неделя', monthlyPlanner: 'Месяц', yearlyGoals: 'Цели', habitTracker: 'Привычки', notes: 'Заметки', analytics: 'Аналитика', achievements: 'Достижения', location: 'Карта', smartPlan: 'Умный план', pomodoro: 'Помодоро' },
+  en: { dashboard: 'Main', dailyPlanner: 'Daily', weeklyPlanner: 'Weekly', monthlyPlanner: 'Monthly', yearlyGoals: 'Goals', habitTracker: 'Habits', notes: 'Notes', analytics: 'Analytics', achievements: 'Achievements', location: 'Map', smartPlan: 'Smart Plan', pomodoro: 'Pomodoro' },
 };
 
 export default function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }) {

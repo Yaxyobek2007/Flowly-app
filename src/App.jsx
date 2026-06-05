@@ -26,6 +26,7 @@ import CrmErp from './pages/CrmErp';
 import HelpSupport from './pages/HelpSupport';
 import AiChat from './pages/AiChat';
 import SmartPlanner from './pages/SmartPlanner';
+import PomodoroTimer from './pages/PomodoroTimer';
 
 // Session timeout: 100 hours
 const SESSION_TIMEOUT = 100 * 60 * 60 * 1000;
@@ -108,6 +109,7 @@ function AppRoutes() {
         <Route path="help" element={<HelpSupport />} />
         <Route path="ai" element={<AiChat />} />
         <Route path="smart-plan" element={<SmartPlanner />} />
+        <Route path="pomodoro" element={<PomodoroTimer />} />
         <Route path="crm" element={<CrmErp />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
