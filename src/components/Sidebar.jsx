@@ -2,7 +2,7 @@ import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard, CalendarDays, CalendarRange, Calendar,
   Target, CheckSquare, FileText, BarChart3, Trophy, MapPin,
-  ChevronLeft, ChevronRight, Zap, Timer, BookOpen, Grid, ShieldCheck, Repeat, CalendarClock, Sunrise, Rocket, Tag, Droplets, Moon, Wallet, BookMarked, ClipboardCheck, Quote, BookMarked, Award2, Quote
+  ChevronLeft, ChevronRight, Zap, Timer, BookOpen, Grid, ShieldCheck, Repeat, CalendarClock, Sunrise, Rocket, Tag, Droplets, Moon, Wallet
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
