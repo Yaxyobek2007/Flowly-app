@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useApp } from '../context/AppContext';
 import { useAuth } from '../context/AuthContext';
 import { MapPin, Navigation, Plus, Trash2, Search, ExternalLink, X, Save } from 'lucide-react';
+import DevBadge from '../components/DevBadge';
 
 const defaultLocations = [];
 
@@ -92,6 +93,7 @@ export default function LocationMap() {
           <Plus size={18} /> {t('addPlace')}
         </button>
       </div>
+      <DevBadge message={lang === 'ru' ? '⚠️ Карта упрощённая. Координаты вводятся вручную' : lang === 'en' ? '⚠️ Simplified map. Coordinates entered manually' : "⚠️ Soddalashtirilgan xarita. Koordinatalar qo'lda kiritiladi"} />
 
       {/* Search */}
       <div className="card">

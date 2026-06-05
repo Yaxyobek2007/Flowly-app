@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Users, Copy, Share2, Gift, Check } from 'lucide-react';
+import DevBadge from '../components/DevBadge';
 
 export default function Friends() {
   const { currentUser, users, language, t, getReferralBonus } = useAuth();
   const [copied, setCopied] = useState(false);
   const lang = language || 'uz';
+  const devMsg = lang === 'ru' ? '⚠️ Реферал работает на одном устройстве. Для полной работы нужен backend' : lang === 'en' ? '⚠️ Referral works on same device. Full sync needs backend' : "⚠️ Referral bir qurilmada ishlaydi. To'liq sinx uchun backend kerak";
 
   const friendsList = users.filter(u => currentUser?.friends?.includes(u.id));
   
@@ -34,6 +36,7 @@ export default function Friends() {
         <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>Do'stlar & Referral</h1>
         <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Do'stlarni taklif qiling va bonuslar oling</p>
       </div>
+      <DevBadge message={devMsg} />
 
       {/* Stats */}
       <div className="grid grid-cols-3 gap-4">

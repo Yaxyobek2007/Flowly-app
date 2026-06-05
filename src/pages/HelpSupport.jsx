@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { HelpCircle, MessageCircle, Phone, Send, ChevronDown, ChevronRight, BookOpen, Shield, Zap, Users, Star, Calendar, Target, Bell } from 'lucide-react';
+import DevBadge from '../components/DevBadge';
 
 const faqs = [
   // Ilova haqida umumiy
@@ -161,6 +162,7 @@ export default function HelpSupport() {
         <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>{t('helpTitle')}</h1>
         <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{t('helpDesc')}</p>
       </div>
+      <DevBadge message={lang === 'ru' ? '⚠️ Чат работает с автоответами. Живой оператор подключается через Telegram' : lang === 'en' ? '⚠️ Chat uses auto-replies. Live operator via Telegram' : "⚠️ Chat avto-javob bilan ishlaydi. Jonli operator Telegram orqali"} />
 
       {/* Contact Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">

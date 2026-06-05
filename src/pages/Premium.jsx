@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Crown, Check, X, Zap, Star, CreditCard, Lock } from 'lucide-react';
+import DevBadge from '../components/DevBadge';
 
 export default function Premium() {
   const { currentUser, language, t, purchasePlan, spendPoints, getPointsDiscount } = useAuth();
+  const devMsg = language === 'ru' ? '⚠️ Оплата в тестовом режиме (реальные деньги не списываются)' : language === 'en' ? '⚠️ Payment in test mode (no real charges)' : "⚠️ To'lov test rejimda (haqiqiy pul yechilmaydi)";
   const [selectedTier, setSelectedTier] = useState(null);
   const [showPayment, setShowPayment] = useState(false);
   const [cardForm, setCardForm] = useState({ number: '', expiry: '', cvv: '', name: '' });
@@ -92,6 +94,7 @@ export default function Premium() {
         <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>{t('premiumTitle')}</h1>
         <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{t('premiumDesc')}</p>
       </div>
+      <DevBadge message={devMsg} />
 
       {/* Trial Banner */}
       {isTrialActive && (

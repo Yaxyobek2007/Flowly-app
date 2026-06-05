@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useApp } from '../context/AppContext';
 import { Shield, Users, BarChart3, TrendingUp, Activity, Target, Search, Edit2, Save, X, Eye, Trash2, Ban, DollarSign, Crown, CheckCircle2, XCircle, UserX, UserCheck, Calendar, Zap, PieChart } from 'lucide-react';
+import DevBadge from '../components/DevBadge';
 
 export default function CrmErp() {
   const { currentUser, users, updateUserByAdmin, t, language } = useAuth();
@@ -14,6 +15,7 @@ export default function CrmErp() {
   const [confirmDelete, setConfirmDelete] = useState(null);
 
   const lang = language || 'uz';
+  const devMsg = lang === 'ru' ? '⚠️ Данные других устройств видны после настройки Firebase' : lang === 'en' ? '⚠️ Cross-device data visible after Firebase setup' : "⚠️ Boshqa qurilma ma'lumotlari Firebase sozlangandan keyin ko'rinadi";
 
   if (currentUser?.role !== 'admin') {
     return (
@@ -107,6 +109,7 @@ export default function CrmErp() {
       </div>
 
       {/* Tabs */}
+      <DevBadge message={devMsg} />
       <div className="flex gap-2 overflow-x-auto pb-1">
         {tabs.map(tab => (
           <button key={tab.key} onClick={() => setActiveTab(tab.key)}
