@@ -32,6 +32,8 @@ import EisenhowerMatrix from './pages/EisenhowerMatrix';
 import FocusMode from './pages/FocusMode';
 import RecurringTasks from './pages/RecurringTasks';
 import CalendarView from './pages/CalendarView';
+import Routines from './pages/Routines';
+import SprintMode from './pages/SprintMode';
 
 // Session timeout: 100 hours
 const SESSION_TIMEOUT = 100 * 60 * 60 * 1000;
@@ -120,6 +122,8 @@ function AppRoutes() {
         <Route path="focus" element={<FocusMode />} />
         <Route path="recurring" element={<RecurringTasks />} />
         <Route path="calendar" element={<CalendarView />} />
+        <Route path="routines" element={<Routines />} />
+        <Route path="sprint" element={<SprintMode />} />
         <Route path="crm" element={<CrmErp />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />

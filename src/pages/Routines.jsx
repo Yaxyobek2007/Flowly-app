@@ -1,0 +1,21 @@
+import { useState, useEffect } from 'react';
+import { useAuth } from '../context/AuthContext';
+import { Sun, Moon, Plus, Trash2, CheckCircle2 } from 'lucide-react';
+
+export default function Routines() {
+  const { language } = useAuth();
+  const lang = language || 'uz';
+  const [morningItems, setMorningItems] = useState(() => { const s = localStorage.getItem('flowly-morning'); return s ? JSON.parse(s) : []; });
+  const [eveningItems, setEveningItems] = useState(() => { const s = localStorage.getItem('flowly-evening'); return s ? JSON.parse(s) : []; });
+  const [newMorning, setNewMorning] = useState('');
+  const [newEvening, setNewEvening] = useState('');
+  const today = new Date().toISOString().split('T')[0];
+  useEffect(() => { localStorage.setItem('flowly-morning', JSON.stringify(morningItems)); }, [morningItems]);
+  useEffect(() => { localStorage.setItem('flowly-evening', JSON.stringify(eveningItems)); }, [eveningItems]);
+  const addItem = (type) => { if (type === 'morning' && newMorning.trim()) { setMorningItems([...morningItems, { id: Date.now(), text: newMorning, doneDate: null }]); setNewMorning(''); } if (type === 'evening' && newEvening.trim()) { setEveningItems([...eveningItems, { id: Date.now(), text: newEvening, doneDate: null }]); setNewEvening(''); } };
+  const toggleItem = (type, id) => { const setter = type === 'morning' ? setMorningItems : setEveningItems; setter(prev => prev.map(item => item.id === id ? { ...item, doneDate: item.doneDate === today ? null : today } : item)); };
+  const deleteItem = (type, id) => { const setter = type === 'morning' ? setMorningItems : setEveningItems; setter(prev => prev.filter(item => item.id !== id)); };
+  const L = { title: lang==='ru'?'Утренняя и вечерняя рутина':lang==='en'?'Morning & Evening Routine':'Ertalab va kechki rutina', morning: lang==='ru'?'Утро ☀️':lang==='en'?'Morning ☀️':'Ertalab ☀️', evening: lang==='ru'?'Вечер 🌙':lang==='en'?'Evening 🌙':'Kechqurun 🌙', placeholder: lang==='ru'?'Новый пункт...':lang==='en'?'New item...':'Yangi band...' };
+  const renderList = (items, type, icon) => (<div className="card space-y-3"><div className="flex items-center gap-2 mb-2">{icon}<h3 className="font-bold" style={{ color: 'var(--text-primary)' }}>{type === 'morning' ? L.morning : L.evening}</h3><span className="ml-auto text-xs px-2 py-0.5 rounded-full" style={{ background: 'var(--bg-secondary)', color: 'var(--text-secondary)' }}>{items.filter(i => i.doneDate === today).length}/{items.length}</span></div>{items.map(item => (<div key={item.id} className="flex items-center gap-3 p-2 rounded-xl" style={{ background: 'var(--bg-secondary)' }}><button onClick={() => toggleItem(type, item.id)} className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${item.doneDate === today ? 'bg-green-500 border-green-500' : 'border-gray-300'}`}>{item.doneDate === today && <CheckCircle2 size={12} className="text-white" />}</button><span className={`text-sm flex-1 ${item.doneDate === today ? 'line-through opacity-50' : ''}`} style={{ color: 'var(--text-primary)' }}>{item.text}</span><button onClick={() => deleteItem(type, item.id)} className="p-1 rounded hover:bg-red-50 dark:hover:bg-red-900/20"><Trash2 size={13} className="text-red-400" /></button></div>))}<div className="flex gap-2"><input type="text" placeholder={L.placeholder} value={type === 'morning' ? newMorning : newEvening} onChange={e => type === 'morning' ? setNewMorning(e.target.value) : setNewEvening(e.target.value)} onKeyDown={e => e.key === 'Enter' && addItem(type)} className="flex-1 px-3 py-2 rounded-xl border text-sm outline-none focus:ring-2 focus:ring-blue-500" style={{ background: 'var(--bg-primary)', borderColor: 'var(--border)', color: 'var(--text-primary)' }} /><button onClick={() => addItem(type)} className="btn-primary px-3"><Plus size={16} /></button></div></div>);
+  return (<div className="max-w-3xl mx-auto space-y-6"><div><h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>🌅 {L.title}</h1></div><div className="grid grid-cols-1 md:grid-cols-2 gap-6">{renderList(morningItems, 'morning', <Sun size={20} className="text-yellow-500" />)}{renderList(eveningItems, 'evening', <Moon size={20} className="text-blue-500" />)}</div></div>);
+}
