@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Send, Image, Trophy, Camera, X, Plus, Users } from 'lucide-react';
+import DevBadge from '../components/DevBadge';
 
 export default function FriendsChat() {
   const { currentUser, users, language } = useAuth();
@@ -131,6 +132,7 @@ export default function FriendsChat() {
           <Trophy size={16} /> {L.challenge}
         </button>
       </div>
+      <DevBadge message={lang === 'ru' ? '⚠️ Чат работает локально. Для реального обмена нужен backend' : lang === 'en' ? '⚠️ Chat works locally. Real messaging needs backend' : "⚠️ Chat lokal ishlaydi. Real xabar uchun backend kerak"} />
 
       {/* Challenge form */}
       {showChallengeForm && (

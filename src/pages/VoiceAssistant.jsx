@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useApp } from '../context/AppContext';
 import { Mic, MicOff, Volume2, Send, X, HelpCircle } from 'lucide-react';
+import DevBadge from '../components/DevBadge';
 
 const dayOfWeekToKey = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
 
@@ -184,6 +185,7 @@ export default function VoiceAssistant() {
           <HelpCircle size={20} style={{ color: 'var(--text-secondary)' }} />
         </button>
       </div>
+      <DevBadge message={lang === 'ru' ? '⚠️ Работает только в Chrome/Edge (Web Speech API). В Safari/Firefox текстом.' : lang === 'en' ? '⚠️ Voice works in Chrome/Edge only. Type commands in other browsers.' : "⚠️ Ovoz faqat Chrome/Edge da ishlaydi. Boshqa brauzerlarda matn bilan yozing."} />
 
       {/* Help panel */}
       {showHelp && (
