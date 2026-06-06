@@ -1,50 +1,101 @@
 import { NavLink } from 'react-router-dom';
 import {
-  LayoutDashboard, CalendarDays, CalendarRange, Calendar,
-  Target, CheckSquare, FileText, BarChart3, Trophy, MapPin,
-  ChevronLeft, ChevronRight, Zap, Timer, BookOpen, Grid, ShieldCheck, Repeat, CalendarClock, Sunrise, Rocket, Tag, Droplets, Moon, Wallet
+  LayoutDashboard, CalendarDays, Target, Timer, Heart,
+  Trophy, Wallet, BarChart3, Users, Mic, Lock, MessageCircle,
+  BookOpen, MapPin, Crown, Settings, HelpCircle, Shield,
+  ChevronLeft, ChevronRight, FileText, Sparkles
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const navItems = [
   { path: '/', icon: LayoutDashboard, label: 'dashboard' },
-  { path: '/daily', icon: CalendarDays, label: 'dailyPlanner' },
-  { path: '/weekly', icon: CalendarRange, label: 'weeklyPlanner' },
-  { path: '/monthly', icon: Calendar, label: 'monthlyPlanner' },
-  { path: '/goals', icon: Target, label: 'yearlyGoals' },
-  { path: '/smart-plan', icon: Zap, label: 'smartPlan' },
-  { path: '/pomodoro', icon: Timer, label: 'pomodoro' },
-  { path: '/journal', icon: BookOpen, label: 'journal' },
-  { path: '/matrix', icon: Grid, label: 'matrix' },
-  { path: '/focus', icon: ShieldCheck, label: 'focus' },
-  { path: '/recurring', icon: Repeat, label: 'recurring' },
-  { path: '/calendar', icon: CalendarClock, label: 'calendar' },
-  { path: '/routines', icon: Sunrise, label: 'routines' },
-  { path: '/sprint', icon: Rocket, label: 'sprint' },
-  { path: '/tags', icon: Tag, label: 'tags' },
-  { path: '/water', icon: Droplets, label: 'water' },
-  { path: '/sleep', icon: Moon, label: 'sleep' },
+  { path: '/plans', icon: CalendarDays, label: 'plans' },
+  { path: '/goals', icon: Target, label: 'goals' },
+  { path: '/focus', icon: Timer, label: 'focus' },
+  { path: '/health', icon: Heart, label: 'health' },
+  { path: '/motivation', icon: Trophy, label: 'motivation' },
   { path: '/finance', icon: Wallet, label: 'finance' },
-  { path: '/quote', icon: Wallet, label: 'quote' },
-  { path: '/review', icon: Wallet, label: 'review' },
-  { path: '/pet', icon: Wallet, label: 'pet' },
-  { path: '/leaderboard', icon: Wallet, label: 'leaderboard' },
-  { path: '/habits', icon: CheckSquare, label: 'habitTracker' },
-  { path: '/achievements', icon: Trophy, label: 'achievements' },
+  { path: '/analysis', icon: BarChart3, label: 'analysis' },
+  { path: '/social', icon: Users, label: 'social' },
   { path: '/notes', icon: FileText, label: 'notes' },
-  { path: '/analytics', icon: BarChart3, label: 'analytics' },
+  { path: '/voice', icon: Mic, label: 'voice' },
+  { path: '/breakdown', icon: BookOpen, label: 'breakdown' },
   { path: '/location', icon: MapPin, label: 'location' },
+  { path: '/privacy', icon: Lock, label: 'privacy' },
+  { path: '/premium', icon: Crown, label: 'premium' },
+  { path: '/settings', icon: Settings, label: 'settings' },
+  { path: '/help', icon: HelpCircle, label: 'help' },
 ];
 
 const labels = {
-  uz: { dashboard: 'Asosiy', dailyPlanner: 'Kunlik reja', weeklyPlanner: 'Haftalik', monthlyPlanner: 'Oylik', yearlyGoals: 'Maqsadlar', habitTracker: 'Odatlar', notes: 'Yozuvlar', analytics: 'Statistika', achievements: 'Yutuqlar', location: 'Xarita', smartPlan: 'Aqlli reja', pomodoro: 'Pomodoro', journal: 'Kundalik', matrix: 'Matritsa', focus: 'Fokus', recurring: 'Takroriy', calendar: 'Kalendar', routines: 'Rutina', sprint: 'Sprint', tags: 'Teglar', water: 'Suv', sleep: 'Uyqu', finance: 'Moliya', quote: 'Iqtibos', review: 'Sharh', pet: 'Pet', leaderboard: 'Top' },
-  ru: { dashboard: 'Главная', dailyPlanner: 'День', weeklyPlanner: 'Неделя', monthlyPlanner: 'Месяц', yearlyGoals: 'Цели', habitTracker: 'Привычки', notes: 'Заметки', analytics: 'Аналитика', achievements: 'Достижения', location: 'Карта', smartPlan: 'Умный план', pomodoro: 'Помодоро', journal: 'Дневник', matrix: 'Матрица', focus: 'Фокус', recurring: 'Повтор', calendar: 'Календарь', routines: 'Рутина', sprint: 'Спринт', tags: 'Теги', water: 'Вода', sleep: 'Сон', finance: 'Финансы', quote: 'Цитаты', review: 'Обзор', pet: 'Питомец', leaderboard: 'Топ' },
-  en: { dashboard: 'Main', dailyPlanner: 'Daily', weeklyPlanner: 'Weekly', monthlyPlanner: 'Monthly', yearlyGoals: 'Goals', habitTracker: 'Habits', notes: 'Notes', analytics: 'Analytics', achievements: 'Achievements', location: 'Map', smartPlan: 'Smart Plan', pomodoro: 'Pomodoro', journal: 'Kundalik', matrix: 'Matritsa', focus: 'Fokus', recurring: 'Takroriy', calendar: 'Kalendar', routines: 'Rutina', sprint: 'Sprint', tags: 'Teglar', water: 'Suv', sleep: 'Uyqu', finance: 'Moliya', quote: 'Iqtibos', review: 'Sharh', pet: 'Pet', leaderboard: 'Top' },
+  uz: {
+    dashboard: 'Asosiy',
+    plans: '📅 Rejalar',
+    goals: '🎯 Maqsadlar',
+    focus: '⏱️ Fokus',
+    health: '💪 Sog\'liq',
+    motivation: '🏆 Motivatsiya',
+    finance: '💰 Moliya',
+    analysis: '📊 Tahlil',
+    social: '👥 Ijtimoiy',
+    notes: '📝 Yozuvlar',
+    voice: '🎤 Ovozli',
+    breakdown: '📐 Bo\'lish',
+    location: '📍 Xarita',
+    privacy: '🔒 Maxfiylik',
+    premium: '👑 Premium',
+    settings: '⚙️ Sozlamalar',
+    help: '❓ Yordam',
+  },
+  ru: {
+    dashboard: 'Главная',
+    plans: '📅 Планы',
+    goals: '🎯 Цели',
+    focus: '⏱️ Фокус',
+    health: '💪 Здоровье',
+    motivation: '🏆 Мотивация',
+    finance: '💰 Финансы',
+    analysis: '📊 Анализ',
+    social: '👥 Соцсети',
+    notes: '📝 Заметки',
+    voice: '🎤 Голос',
+    breakdown: '📐 Разбивка',
+    location: '📍 Карта',
+    privacy: '🔒 Приватность',
+    premium: '👑 Премиум',
+    settings: '⚙️ Настройки',
+    help: '❓ Помощь',
+  },
+  en: {
+    dashboard: 'Home',
+    plans: '📅 Plans',
+    goals: '🎯 Goals',
+    focus: '⏱️ Focus',
+    health: '💪 Health',
+    motivation: '🏆 Motivation',
+    finance: '💰 Finance',
+    analysis: '📊 Analysis',
+    social: '👥 Social',
+    notes: '📝 Notes',
+    voice: '🎤 Voice',
+    breakdown: '📐 Breakdown',
+    location: '📍 Map',
+    privacy: '🔒 Privacy',
+    premium: '👑 Premium',
+    settings: '⚙️ Settings',
+    help: '❓ Help',
+  },
 };
 
 export default function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }) {
-  const { language } = useAuth();
-  const t = (key) => labels[language]?.[key] || labels.en[key] || key;
+  const { language, currentUser } = useAuth();
+  const lang = language || 'uz';
+  const t = (key) => labels[lang]?.[key] || labels.en[key] || key;
+
+  // Add admin/CRM link if user is admin
+  const allItems = currentUser?.role === 'admin'
+    ? [...navItems, { path: '/crm', icon: Shield, label: 'crm' }]
+    : navItems;
 
   return (
     <>
@@ -64,7 +115,7 @@ export default function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }
 
         {/* Nav */}
         <nav className="flex-1 px-2 space-y-1 overflow-y-auto scrollbar-hide">
-          {navItems.map(item => (
+          {allItems.map(item => (
             <NavLink key={item.path} to={item.path} onClick={onClose}
               className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''} ${collapsed ? 'justify-center px-2' : ''}`}
               title={collapsed ? t(item.label) : undefined}>
