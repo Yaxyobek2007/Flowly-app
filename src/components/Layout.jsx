@@ -11,6 +11,8 @@ export default function Layout() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [headerVisible, setHeaderVisible] = useState(true);
   const [showPointsShop, setShowPointsShop] = useState(false);
+  const [showBackToTop, setShowBackToTop] = useState(false);
+  const [isOffline, setIsOffline] = useState(!navigator.onLine);
   const lastScrollY = useRef(0);
   const location = useLocation();
 
@@ -20,6 +22,15 @@ export default function Layout() {
     setHeaderVisible(true);
   }, [location.pathname]);
 
+  // Offline/Online detection
+  useEffect(() => {
+    const goOffline = () => setIsOffline(true);
+    const goOnline = () => setIsOffline(false);
+    window.addEventListener('offline', goOffline);
+    window.addEventListener('online', goOnline);
+    return () => { window.removeEventListener('offline', goOffline); window.removeEventListener('online', goOnline); };
+  }, []);
+
   useEffect(() => {
     const handleScroll = () => {
       const currentY = window.scrollY;
@@ -28,6 +39,7 @@ export default function Layout() {
       } else {
         setHeaderVisible(true);
       }
+      setShowBackToTop(currentY > 400);
       lastScrollY.current = currentY;
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
@@ -53,6 +65,23 @@ export default function Layout() {
       <DailyBonusModal />
       <PointsShop isOpen={showPointsShop} onClose={() => setShowPointsShop(false)} />
       <AiFloatingButton />
+
+      {/* Offline banner */}
+      {isOffline && (
+        <div className="fixed top-0 left-0 right-0 z-[999] bg-red-500 text-white text-center py-2 text-xs font-medium animate-in">
+          ⚡ Internet aloqasi yo'q — offline rejimda ishlayapsiz
+        </div>
+      )}
+
+      {/* Back to top button */}
+      {showBackToTop && (
+        <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          className="fixed bottom-20 right-5 z-[60] w-10 h-10 rounded-full shadow-lg flex items-center justify-center transition-all hover:scale-110 active:scale-90 animate-in"
+          style={{ background: 'var(--accent)', color: 'white' }}
+          aria-label="Scroll to top">
+          ↑
+        </button>
+      )}
     </div>
   );
 }
