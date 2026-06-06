@@ -1,35 +1,43 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, lazy, Suspense } from 'react';
 import { AppProvider } from './context/AppContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import LoadingScreen from './components/LoadingScreen';
+import ErrorBoundary from './components/ErrorBoundary';
 import Layout from './components/Layout';
+
+// Auth loaded eagerly (first screen)
 import Auth from './pages/Auth';
 import Dashboard from './pages/Dashboard';
 
-// Combined pages (tabbed)
-import Plans from './pages/Plans';
-import Goals from './pages/Goals';
-import FocusPage from './pages/FocusPage';
-import HealthPage from './pages/HealthPage';
-import MotivationPage from './pages/MotivationPage';
-import FinancePage from './pages/FinancePage';
-import AnalysisPage from './pages/AnalysisPage';
-import SocialPage from './pages/SocialPage';
+// Lazy loaded pages (code splitting)
+const Plans = lazy(() => import('./pages/Plans'));
+const Goals = lazy(() => import('./pages/Goals'));
+const FocusPage = lazy(() => import('./pages/FocusPage'));
+const HealthPage = lazy(() => import('./pages/HealthPage'));
+const MotivationPage = lazy(() => import('./pages/MotivationPage'));
+const FinancePage = lazy(() => import('./pages/FinancePage'));
+const AnalysisPage = lazy(() => import('./pages/AnalysisPage'));
+const SocialPage = lazy(() => import('./pages/SocialPage'));
+const Notes = lazy(() => import('./pages/Notes'));
+const Settings = lazy(() => import('./pages/Settings'));
+const Profile = lazy(() => import('./pages/Profile'));
+const Premium = lazy(() => import('./pages/Premium'));
+const Certificates = lazy(() => import('./pages/Certificates'));
+const LocationMap = lazy(() => import('./pages/LocationMap'));
+const CrmErp = lazy(() => import('./pages/CrmErp'));
+const HelpSupport = lazy(() => import('./pages/HelpSupport'));
+const AiChat = lazy(() => import('./pages/AiChat'));
 
-// Standalone pages
-import Notes from './pages/Notes';
-import Settings from './pages/Settings';
-import Profile from './pages/Profile';
-import Premium from './pages/Premium';
-import Certificates from './pages/Certificates';
-import LocationMap from './pages/LocationMap';
-import CrmErp from './pages/CrmErp';
-import HelpSupport from './pages/HelpSupport';
-import AiChat from './pages/AiChat';
-
-// These pages are accessed via combined tabbed pages only
+// Page loading fallback
+function PageLoader() {
+  return (
+    <div className="flex items-center justify-center py-20">
+      <div className="w-8 h-8 border-3 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+    </div>
+  );
+}
 
 // Session timeout: 100 hours
 const SESSION_TIMEOUT = 100 * 60 * 60 * 1000;
@@ -84,26 +92,26 @@ function AppRoutes() {
       <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
         <Route index element={<Dashboard />} />
         
-        {/* Combined tabbed pages */}
-        <Route path="plans" element={<Plans />} />
-        <Route path="goals" element={<Goals />} />
-        <Route path="focus" element={<FocusPage />} />
-        <Route path="health" element={<HealthPage />} />
-        <Route path="motivation" element={<MotivationPage />} />
-        <Route path="finance" element={<FinancePage />} />
-        <Route path="analysis" element={<AnalysisPage />} />
-        <Route path="social" element={<SocialPage />} />
+        {/* Combined tabbed pages — lazy loaded */}
+        <Route path="plans" element={<Suspense fallback={<PageLoader />}><Plans /></Suspense>} />
+        <Route path="goals" element={<Suspense fallback={<PageLoader />}><Goals /></Suspense>} />
+        <Route path="focus" element={<Suspense fallback={<PageLoader />}><FocusPage /></Suspense>} />
+        <Route path="health" element={<Suspense fallback={<PageLoader />}><HealthPage /></Suspense>} />
+        <Route path="motivation" element={<Suspense fallback={<PageLoader />}><MotivationPage /></Suspense>} />
+        <Route path="finance" element={<Suspense fallback={<PageLoader />}><FinancePage /></Suspense>} />
+        <Route path="analysis" element={<Suspense fallback={<PageLoader />}><AnalysisPage /></Suspense>} />
+        <Route path="social" element={<Suspense fallback={<PageLoader />}><SocialPage /></Suspense>} />
 
-        {/* Standalone */}
-        <Route path="notes" element={<Notes />} />
-        <Route path="settings" element={<Settings />} />
-        <Route path="profile" element={<Profile />} />
-        <Route path="premium" element={<Premium />} />
-        <Route path="certificates" element={<Certificates />} />
-        <Route path="location" element={<LocationMap />} />
-        <Route path="help" element={<HelpSupport />} />
-        <Route path="ai" element={<AiChat />} />
-        <Route path="crm" element={<CrmErp />} />
+        {/* Standalone — lazy loaded */}
+        <Route path="notes" element={<Suspense fallback={<PageLoader />}><Notes /></Suspense>} />
+        <Route path="settings" element={<Suspense fallback={<PageLoader />}><Settings /></Suspense>} />
+        <Route path="profile" element={<Suspense fallback={<PageLoader />}><Profile /></Suspense>} />
+        <Route path="premium" element={<Suspense fallback={<PageLoader />}><Premium /></Suspense>} />
+        <Route path="certificates" element={<Suspense fallback={<PageLoader />}><Certificates /></Suspense>} />
+        <Route path="location" element={<Suspense fallback={<PageLoader />}><LocationMap /></Suspense>} />
+        <Route path="help" element={<Suspense fallback={<PageLoader />}><HelpSupport /></Suspense>} />
+        <Route path="ai" element={<Suspense fallback={<PageLoader />}><AiChat /></Suspense>} />
+        <Route path="crm" element={<Suspense fallback={<PageLoader />}><CrmErp /></Suspense>} />
 
         {/* Legacy standalone redirects */}
 
@@ -141,7 +149,7 @@ function AppRoutes() {
         <Route path="recurring" element={<Navigate to="/plans" replace />} />
 
         {/* Admin legacy */}
-        <Route path="admin" element={<CrmErp />} />
+        <Route path="admin" element={<Suspense fallback={<PageLoader />}><CrmErp /></Suspense>} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
@@ -152,17 +160,19 @@ export default function App() {
   const [loading, setLoading] = useState(true);
 
   return (
-    <ThemeProvider>
-      <AuthProvider>
-        <AppProvider>
-          {loading && <LoadingScreen onFinish={() => setLoading(false)} />}
-          {!loading && (
-            <BrowserRouter>
-              <AppRoutes />
-            </BrowserRouter>
-          )}
-        </AppProvider>
-      </AuthProvider>
-    </ThemeProvider>
+    <ErrorBoundary>
+      <ThemeProvider>
+        <AuthProvider>
+          <AppProvider>
+            {loading && <LoadingScreen onFinish={() => setLoading(false)} />}
+            {!loading && (
+              <BrowserRouter>
+                <AppRoutes />
+              </BrowserRouter>
+            )}
+          </AppProvider>
+        </AuthProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
   );
 }

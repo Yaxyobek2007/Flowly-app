@@ -5,21 +5,22 @@ import { useApp } from '../context/AppContext';
 
 const searchablePages = [
   { path: '/', label: 'Dashboard', keywords: ['bosh sahifa', 'dashboard', 'asosiy'] },
-  { path: '/daily', label: 'Daily Planner', keywords: ['kunlik', 'reja', 'daily', 'vazifa'] },
-  { path: '/weekly', label: 'Weekly Planner', keywords: ['haftalik', 'weekly', 'hafta'] },
-  { path: '/monthly', label: 'Monthly Planner', keywords: ['oylik', 'monthly', 'kalendar', 'oy'] },
-  { path: '/goals', label: 'Yearly Goals', keywords: ['yillik', 'maqsad', 'goals', 'target'] },
-  { path: '/habits', label: 'Habit Tracker', keywords: ['odat', 'habit', 'streak'] },
-  { path: '/notes', label: 'Notes', keywords: ['yozuv', 'notes', 'eslatma'] },
-  { path: '/analytics', label: 'Analytics', keywords: ['statistika', 'analytics', 'hisobot'] },
-  { path: '/achievements', label: 'Achievements', keywords: ['yutuq', 'medal', 'achievement'] },
-  { path: '/certificates', label: 'Certificates', keywords: ['sertifikat', 'diplom', 'mukofot'] },
-  { path: '/friends', label: 'Friends', keywords: ["do'st", 'friend', 'taklif'] },
-  { path: '/premium', label: 'Premium', keywords: ['premium', 'pro', 'plan', 'obuna'] },
-  { path: '/settings', label: 'Settings', keywords: ['sozlama', 'settings', 'nastroyka'] },
-  { path: '/profile', label: 'Profile', keywords: ['profil', 'akkaunt', 'shaxsiy'] },
+  { path: '/plans', label: 'Rejalar', keywords: ['kunlik', 'reja', 'daily', 'vazifa', 'haftalik', 'weekly', 'oylik', 'monthly', 'kalendar'] },
+  { path: '/goals', label: 'Maqsadlar', keywords: ['yillik', 'maqsad', 'goals', 'target', 'sprint', 'smart'] },
+  { path: '/focus', label: 'Fokus', keywords: ['pomodoro', 'fokus', 'focus', 'timer', 'rutina', 'journal', 'kundalik'] },
+  { path: '/health', label: 'Odatlar', keywords: ['odat', 'habit', 'streak', 'suv', 'water', 'uyqu', 'sleep'] },
+  { path: '/motivation', label: 'Yutuqlar', keywords: ['yutuq', 'medal', 'achievement', 'pet', 'reyting', 'challenge', 'meditatsiya'] },
+  { path: '/finance', label: 'Moliya', keywords: ['moliya', 'finance', 'pul', 'kirim', 'chiqim', 'investitsiya'] },
+  { path: '/analysis', label: 'Statistika', keywords: ['statistika', 'analytics', 'hisobot', 'matrix', 'sharh'] },
+  { path: '/social', label: "Do'stlar", keywords: ["do'st", 'friend', 'taklif', 'chat', 'guruh'] },
+  { path: '/notes', label: 'Yozuvlar', keywords: ['yozuv', 'notes', 'eslatma'] },
   { path: '/location', label: 'Xarita', keywords: ['xarita', 'lokatsiya', 'map', 'joy', 'geolokatsiya'] },
-  { path: '/crm', label: 'CRM/ERP', keywords: ['crm', 'erp', 'boshqaruv', 'biznes', 'daromad'] },
+  { path: '/certificates', label: 'Sertifikatlar', keywords: ['sertifikat', 'diplom', 'mukofot'] },
+  { path: '/premium', label: 'Premium', keywords: ['premium', 'pro', 'plan', 'obuna'] },
+  { path: '/settings', label: 'Sozlamalar', keywords: ['sozlama', 'settings', 'nastroyka'] },
+  { path: '/profile', label: 'Profil', keywords: ['profil', 'akkaunt', 'shaxsiy'] },
+  { path: '/help', label: 'Yordam', keywords: ['yordam', 'help', 'savol'] },
+  { path: '/crm', label: 'CRM/ERP', keywords: ['crm', 'erp', 'boshqaruv', 'biznes', 'admin'] },
 ];
 
 export default function SearchModal({ isOpen, onClose }) {
@@ -128,7 +129,7 @@ export default function SearchModal({ isOpen, onClose }) {
               <div className="py-6 px-4 space-y-2">
                 <p className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Tez qidiruv:</p>
                 <div className="flex flex-wrap gap-2">
-                  {['Dashboard', 'Vazifalar', 'Odatlar', 'Maqsadlar', 'Yozuvlar'].map(s => (
+                  {['Rejalar', 'Odatlar', 'Maqsadlar', 'Moliya', 'Statistika'].map(s => (
                     <button key={s} onClick={() => setQuery(s)}
                       className="px-3 py-1 rounded-full text-xs font-medium" style={{ background: 'var(--bg-secondary)', color: 'var(--text-secondary)' }}>{s}</button>
                   ))}

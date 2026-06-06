@@ -75,7 +75,7 @@ export default function AiFloatingButton() {
                 <Sparkles size={16} className="text-white" />
               </div>
               <div>
-                <p className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>Flowly AI</p>
+                <p className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>Flowly AI <span className="text-[8px] px-1.5 py-0.5 rounded bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400 font-bold ml-1">Beta</span></p>
                 <p className="text-[9px] flex items-center gap-1" style={{ color: 'var(--text-secondary)' }}>
                   <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span> Online
                 </p>

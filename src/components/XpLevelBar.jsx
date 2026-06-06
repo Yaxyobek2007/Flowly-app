@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useApp } from '../context/AppContext';
 import { Zap } from 'lucide-react';
@@ -74,7 +75,7 @@ export default function XpLevelBar() {
 
   if (!currentUser) return null;
 
-  const xp = calculateXP({ tasks, habits, goals, currentUser });
+  const xp = useMemo(() => calculateXP({ tasks, habits, goals, currentUser }), [tasks, habits, goals, currentUser?.points, currentUser?.loginStreak]);
   const level = getLevel(xp);
   const title = getLevelTitle(level, lang);
   const color = getLevelColor(level);

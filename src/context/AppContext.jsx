@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useMemo } from 'react';
 
 const AppContext = createContext();
 
@@ -173,8 +173,8 @@ export function AppProvider({ children }) {
     setNotifications([]);
   };
 
-  // Life Score calculation
-  const calculateLifeScore = () => {
+  // Life Score calculation (memoized)
+  const lifeScore = useMemo(() => {
     const totalTasks = tasks.length;
     const completedTasks = tasks.filter(t => t.completed).length;
     const taskScore = totalTasks > 0 ? (completedTasks / totalTasks) * 40 : 0;
@@ -188,7 +188,9 @@ export function AppProvider({ children }) {
     const goalScore = (avgGoalProgress / 100) * 30;
 
     return Math.round(taskScore + habitScore + goalScore);
-  };
+  }, [tasks, habits, goals]);
+
+  const calculateLifeScore = () => lifeScore;
 
   return (
     <AppContext.Provider value={{
