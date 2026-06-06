@@ -4,13 +4,17 @@ import DailyPlanner from './DailyPlanner';
 import WeeklyPlanner from './WeeklyPlanner';
 import MonthlyPlanner from './MonthlyPlanner';
 import CalendarView from './CalendarView';
-import { CalendarDays, CalendarRange, Calendar, CalendarClock } from 'lucide-react';
+import RecurringTasks from './RecurringTasks';
+import TagsFilters from './TagsFilters';
+import { CalendarDays, CalendarRange, Calendar, CalendarClock, Repeat, Tag } from 'lucide-react';
 
 const tabs = [
   { key: 'daily', icon: CalendarDays, uz: 'Kunlik', ru: 'День', en: 'Daily' },
   { key: 'weekly', icon: CalendarRange, uz: 'Haftalik', ru: 'Неделя', en: 'Weekly' },
   { key: 'monthly', icon: Calendar, uz: 'Oylik', ru: 'Месяц', en: 'Monthly' },
   { key: 'calendar', icon: CalendarClock, uz: 'Kalendar', ru: 'Календарь', en: 'Calendar' },
+  { key: 'recurring', icon: Repeat, uz: 'Takroriy', ru: 'Повтор', en: 'Recurring' },
+  { key: 'tags', icon: Tag, uz: 'Teglar', ru: 'Теги', en: 'Tags' },
 ];
 
 export default function Plans() {
@@ -37,6 +41,8 @@ export default function Plans() {
       {activeTab === 'weekly' && <WeeklyPlanner />}
       {activeTab === 'monthly' && <MonthlyPlanner />}
       {activeTab === 'calendar' && <CalendarView />}
+      {activeTab === 'recurring' && <RecurringTasks />}
+      {activeTab === 'tags' && <TagsFilters />}
     </div>
   );
 }

@@ -35,7 +35,7 @@ import PrivacyPermissions from './pages/PrivacyPermissions';
 import FriendsChat from './pages/FriendsChat';
 import SmartBreakdown from './pages/SmartBreakdown';
 
-// Extra pages (still accessible)
+// Extra pages (still accessible via combined tabs)
 import Meditation from './pages/Meditation';
 import MoodCalendar from './pages/MoodCalendar';
 import Flashcards from './pages/Flashcards';
