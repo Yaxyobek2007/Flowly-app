@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { useApp } from '../context/AppContext';
 import { Send, Bot, Sparkles, Trash2 } from 'lucide-react';
 import DevBadge from '../components/DevBadge';
+import RemovableBadge from '../components/RemovableBadge';
 
 function generateAIResponse(message, { tasks, habits, goals, currentUser, lang }) {
   const msg = message.toLowerCase().trim();
@@ -109,6 +110,7 @@ export default function AiChat() {
         <button onClick={() => setMessages([{ from: 'ai', text: lang === 'ru' ? 'Чат очищен!' : lang === 'en' ? 'Chat cleared!' : 'Chat tozalandi!' }])} className="p-2 rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20"><Trash2 size={18} className="text-red-400" /></button>
       </div>
 
+      <RemovableBadge message="❌ Bu sahifa o'chirilishi mumkin — AI floating button allaqachon mavjud" />
       <DevBadge message={lang === 'ru' ? '⚠️ AI работает офлайн (заготовленные ответы). Для реального AI нужен OpenAI API' : lang === 'en' ? '⚠️ AI works offline (preset answers). Real AI needs OpenAI API' : "⚠️ AI offline ishlaydi (tayyor javoblar). Haqiqiy AI uchun OpenAI API kerak"} />
 
       <div className="flex gap-2 mb-3 overflow-x-auto scrollbar-hide">

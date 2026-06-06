@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { useApp } from '../context/AppContext';
 import { Heart, Zap, Star } from 'lucide-react';
 import DevBadge from '../components/DevBadge';
+import RemovableBadge from '../components/RemovableBadge';
 
 const petStages = ['🥚','🐣','🐥','🐤','🐦','🦅','🦊','🐺','🦁','🐉'];
 const petNames = { uz: ['Tuxum','Jo\'ja','Chaqaloq','Bolakay','Parvoz','Burgut','Tulki','Bo\'ri','Sher','Ajdaho'], ru: ['Яйцо','Птенец','Малыш','Юный','Летун','Орёл','Лис','Волк','Лев','Дракон'], en: ['Egg','Chick','Baby','Young','Flyer','Eagle','Fox','Wolf','Lion','Dragon'] };
@@ -27,6 +28,7 @@ export default function VirtualPet() {
   const L = { title: lang==='ru'?'Питомец':lang==='en'?'Pet':'Pet', tip: lang==='ru'?'Выполняйте задачи!':lang==='en'?'Complete tasks!':'Vazifa bajaring!', nameQ: lang==='ru'?'Имя питомца?':lang==='en'?'Pet name?':'Pet nomi?' };
   return (
     <div className="max-w-lg mx-auto space-y-6 text-center">
+      <RemovableBadge message="❌ Bu sahifa o'chirilishi mumkin — foyda kam, ko'ngilochar" />
       <DevBadge message={lang === 'ru' ? '⚠️ Развлекательный режим — питомец растёт от вашей активности' : lang === 'en' ? '⚠️ Fun mode — pet grows from your activity' : "⚠️ Ko'ngilochar rejim — pet faolligingizdan o'sadi"} />
       <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>🐾 {L.title}</h1>
       {showName ? (<div className="card space-y-4 py-8"><span className="text-6xl">🥚</span><p style={{ color: 'var(--text-primary)' }}>{L.nameQ}</p><div className="flex gap-2 max-w-xs mx-auto"><input type="text" value={nameInput} onChange={e => setNameInput(e.target.value)} onKeyDown={e => e.key==='Enter'&&saveName()} className="flex-1 px-4 py-2.5 rounded-xl border outline-none text-center" style={{ background: 'var(--bg-secondary)', borderColor: 'var(--border)', color: 'var(--text-primary)' }} /><button onClick={saveName} className="btn-primary px-4">OK</button></div></div>) : (<>

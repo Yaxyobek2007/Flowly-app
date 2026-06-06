@@ -2,6 +2,7 @@ import { useAuth } from '../context/AuthContext';
 import { useApp } from '../context/AppContext';
 import { Trophy, Medal, Crown, Flame } from 'lucide-react';
 import DevBadge from '../components/DevBadge';
+import RemovableBadge from '../components/RemovableBadge';
 
 export default function Leaderboard() {
   const { currentUser, users, language } = useAuth();
@@ -36,6 +37,7 @@ export default function Leaderboard() {
         🏆 {lang === 'ru' ? 'Лидерборд' : lang === 'en' ? 'Leaderboard' : 'Reyting'}
       </h1>
 
+      <RemovableBadge message="❌ Bu sahifa o'chirilishi mumkin — foydalanuvchilar kam, reyting fake" />
       <DevBadge message={devMsg} />
 
       {/* My rank card */}
