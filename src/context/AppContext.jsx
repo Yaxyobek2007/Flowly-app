@@ -89,8 +89,25 @@ export function AppProvider({ children }) {
     setTasks(tasks.filter(t => t.id !== id));
   };
 
+  // Auto-reset habits daily (todayDone resets at midnight)
+  useEffect(() => {
+    const today = new Date().toISOString().split('T')[0];
+    const lastReset = localStorage.getItem('flowly-habits-last-reset');
+    if (lastReset !== today) {
+      setHabits(prev => prev.map(h => ({
+        ...h,
+        todayDone: false,
+        // If yesterday was done, keep streak. If not, reset streak.
+        streak: h.todayDone ? h.streak : (h.lastDoneDate === lastReset ? h.streak : 0),
+        lastDoneDate: h.todayDone ? lastReset : h.lastDoneDate,
+      })));
+      localStorage.setItem('flowly-habits-last-reset', today);
+    }
+  }, []);
+
   const toggleHabit = (id) => {
-    setHabits(habits.map(h => h.id === id ? { ...h, todayDone: !h.todayDone, streak: !h.todayDone ? h.streak + 1 : h.streak - 1 } : h));
+    const today = new Date().toISOString().split('T')[0];
+    setHabits(habits.map(h => h.id === id ? { ...h, todayDone: !h.todayDone, streak: !h.todayDone ? h.streak + 1 : h.streak - 1, lastDoneDate: !h.todayDone ? today : h.lastDoneDate } : h));
   };
 
   const addHabit = (habit) => {

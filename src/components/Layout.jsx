@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Header from './Header';
 import DailyBonusModal from './DailyBonusModal';
@@ -12,6 +12,13 @@ export default function Layout() {
   const [headerVisible, setHeaderVisible] = useState(true);
   const [showPointsShop, setShowPointsShop] = useState(false);
   const lastScrollY = useRef(0);
+  const location = useLocation();
+
+  // Scroll to top on route change
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    setHeaderVisible(true);
+  }, [location.pathname]);
 
   useEffect(() => {
     const handleScroll = () => {

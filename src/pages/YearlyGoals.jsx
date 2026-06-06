@@ -7,6 +7,7 @@ export default function YearlyGoals() {
   const { goals, addGoal, deleteGoal, editGoal, updateGoalProgress } = useApp();
   const { t } = useAuth();
   const [expandedGoal, setExpandedGoal] = useState(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState(null);
   const [form, setForm] = useState({ title: '', deadline: '', steps: '' });
@@ -97,10 +98,21 @@ export default function YearlyGoals() {
               <button onClick={() => handleEdit(goal)} className="p-1.5 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20">
                 <Edit2 size={15} className="text-blue-500" />
               </button>
-              <button onClick={() => deleteGoal(goal.id)} className="p-1.5 rounded hover:bg-red-50 dark:hover:bg-red-900/20">
+              <button onClick={() => setConfirmDeleteId(confirmDeleteId === goal.id ? null : goal.id)} className="p-1.5 rounded hover:bg-red-50 dark:hover:bg-red-900/20">
                 <Trash2 size={15} className="text-red-400" />
               </button>
             </div>
+
+            {/* Delete confirmation */}
+            {confirmDeleteId === goal.id && (
+              <div className="mt-2 p-2.5 rounded-xl bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800 flex items-center justify-between animate-in">
+                <p className="text-xs text-red-600 dark:text-red-400 font-medium">O'chirishni tasdiqlaysizmi?</p>
+                <div className="flex gap-2">
+                  <button onClick={() => { deleteGoal(goal.id); setConfirmDeleteId(null); }} className="px-3 py-1 rounded-lg bg-red-500 text-white text-xs font-medium">Ha</button>
+                  <button onClick={() => setConfirmDeleteId(null)} className="px-3 py-1 rounded-lg border text-xs" style={{ borderColor: 'var(--border)', color: 'var(--text-secondary)' }}>Yo'q</button>
+                </div>
+              </div>
+            )}
 
             <div className="mt-3 w-full h-2 rounded-full" style={{ background: 'var(--bg-secondary)' }}>
               <div className={`h-2 rounded-full transition-all ${goal.progress === 100 ? 'bg-green-500' : 'bg-gradient-to-r from-blue-500 to-blue-400'}`}
