@@ -5,7 +5,9 @@ import VirtualPet from './VirtualPet';
 import Leaderboard from './Leaderboard';
 import DailyChallenge from './DailyChallenge';
 import DailyQuote from './DailyQuote';
-import { Trophy, Heart, Crown, Dice6, BookOpen } from 'lucide-react';
+import Meditation from './Meditation';
+import MoodCalendar from './MoodCalendar';
+import { Trophy, Heart, Crown, Dice6, BookOpen, Sparkles, Smile } from 'lucide-react';
 
 const tabs = [
   { key: 'achievements', icon: Trophy, uz: 'Yutuqlar', ru: 'Достижения', en: 'Achievements' },
@@ -13,6 +15,8 @@ const tabs = [
   { key: 'leaderboard', icon: Crown, uz: 'Reyting', ru: 'Рейтинг', en: 'Leaderboard' },
   { key: 'challenge', icon: Dice6, uz: 'Challenge', ru: 'Челлендж', en: 'Challenge' },
   { key: 'quote', icon: BookOpen, uz: 'Iqtibos', ru: 'Цитата', en: 'Quote' },
+  { key: 'meditation', icon: Sparkles, uz: 'Meditatsiya', ru: 'Медитация', en: 'Meditation' },
+  { key: 'mood', icon: Smile, uz: 'Kayfiyat', ru: 'Настроение', en: 'Mood' },
 ];
 
 export default function MotivationPage() {
@@ -38,6 +42,8 @@ export default function MotivationPage() {
       {activeTab === 'leaderboard' && <Leaderboard />}
       {activeTab === 'challenge' && <DailyChallenge />}
       {activeTab === 'quote' && <DailyQuote />}
+      {activeTab === 'meditation' && <Meditation />}
+      {activeTab === 'mood' && <MoodCalendar />}
     </div>
   );
 }

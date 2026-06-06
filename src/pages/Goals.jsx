@@ -4,13 +4,15 @@ import YearlyGoals from './YearlyGoals';
 import SmartPlanner from './SmartPlanner';
 import SprintMode from './SprintMode';
 import SmartBreakdown from './SmartBreakdown';
-import { Target, Zap, Rocket, BookOpen } from 'lucide-react';
+import Flashcards from './Flashcards';
+import { Target, Zap, Rocket, BookOpen, Brain } from 'lucide-react';
 
 const tabs = [
   { key: 'yearly', icon: Target, uz: 'Yillik', ru: 'Годовые', en: 'Yearly' },
   { key: 'smart', icon: Zap, uz: 'Aqlli reja', ru: 'Умный план', en: 'Smart Plan' },
   { key: 'sprint', icon: Rocket, uz: 'Sprint', ru: 'Спринт', en: 'Sprint' },
   { key: 'breakdown', icon: BookOpen, uz: 'Bo\'lish', ru: 'Разбивка', en: 'Breakdown' },
+  { key: 'flashcards', icon: Brain, uz: 'Flashcard', ru: 'Карточки', en: 'Flashcards' },
 ];
 
 export default function Goals() {
@@ -35,6 +37,7 @@ export default function Goals() {
       {activeTab === 'smart' && <SmartPlanner />}
       {activeTab === 'sprint' && <SprintMode />}
       {activeTab === 'breakdown' && <SmartBreakdown />}
+      {activeTab === 'flashcards' && <Flashcards />}
     </div>
   );
 }

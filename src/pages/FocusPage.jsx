@@ -3,12 +3,14 @@ import { useAuth } from '../context/AuthContext';
 import PomodoroTimer from './PomodoroTimer';
 import FocusMode from './FocusMode';
 import Routines from './Routines';
-import { Timer, Shield, Sunrise } from 'lucide-react';
+import Journal from './Journal';
+import { Timer, Shield, Sunrise, BookOpen } from 'lucide-react';
 
 const tabs = [
   { key: 'pomodoro', icon: Timer, uz: 'Pomodoro', ru: 'Помодоро', en: 'Pomodoro' },
   { key: 'focus', icon: Shield, uz: 'Fokus', ru: 'Фокус', en: 'Focus' },
   { key: 'routines', icon: Sunrise, uz: 'Rutina', ru: 'Рутина', en: 'Routines' },
+  { key: 'journal', icon: BookOpen, uz: 'Kundalik', ru: 'Дневник', en: 'Journal' },
 ];
 
 export default function FocusPage() {
@@ -32,6 +34,7 @@ export default function FocusPage() {
       {activeTab === 'pomodoro' && <PomodoroTimer />}
       {activeTab === 'focus' && <FocusMode />}
       {activeTab === 'routines' && <Routines />}
+      {activeTab === 'journal' && <Journal />}
     </div>
   );
 }
