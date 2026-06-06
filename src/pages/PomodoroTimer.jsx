@@ -37,6 +37,13 @@ export default function PomodoroTimer() {
 
   const handleComplete = () => {
     playSound(); setIsRunning(false);
+    // Send browser notification
+    if ('Notification' in window && Notification.permission === 'granted') {
+      new Notification('Flowly Pomodoro ⏰', {
+        body: mode === 'work' ? (lang === 'ru' ? 'Время отдыха!' : lang === 'en' ? 'Break time!' : 'Dam olish vaqti!') : (lang === 'ru' ? 'Время работать!' : lang === 'en' ? 'Work time!' : 'Ish vaqti!'),
+        icon: '/favicon.svg',
+      });
+    }
     if (mode === 'work') {
       const n = sessions + 1; setSessions(n); localStorage.setItem('flowly-pomo-sessions', n.toString());
       const td = todaySessions + 1; setTodaySessions(td); localStorage.setItem('flowly-pomo-today', td.toString()); localStorage.setItem('flowly-pomo-today-date', new Date().toISOString().split('T')[0]);

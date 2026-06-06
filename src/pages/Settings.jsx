@@ -45,17 +45,18 @@ export default function Settings() {
 
   // Request notification permission
   const requestPermission = async () => {
-    if ('Notification' in window) {
-      const permission = await Notification.requestPermission();
-      setPermissionStatus(permission);
-      if (permission === 'granted') {
-        // Show a test notification
-        new Notification('Flowly 🎉', {
-          body: lang === 'ru' ? 'Уведомления включены!' : lang === 'en' ? 'Notifications enabled!' : 'Bildirishnomalar yoqildi!',
-          icon: '/favicon.svg',
-        });
+    try {
+      if ('Notification' in window) {
+        const permission = await Notification.requestPermission();
+        setPermissionStatus(permission);
+        if (permission === 'granted') {
+          new Notification('Flowly 🎉', {
+            body: lang === 'ru' ? 'Уведомления включены!' : lang === 'en' ? 'Notifications enabled!' : 'Bildirishnomalar yoqildi!',
+            icon: '/favicon.svg',
+          });
+        }
       }
-    }
+    } catch(e) { /* Permission request may fail in some contexts */ }
   };
 
   // Play sound effect
