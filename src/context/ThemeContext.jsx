@@ -4,8 +4,8 @@ const ThemeContext = createContext();
 
 export function ThemeProvider({ children }) {
   const [darkMode, setDarkMode] = useState(() => {
-    const saved = localStorage.getItem('flowly-dark-mode');
-    return saved ? JSON.parse(saved) : false;
+    try { const saved = localStorage.getItem('flowly-dark-mode'); return saved ? JSON.parse(saved) : false; }
+    catch(e) { return false; }
   });
 
   useEffect(() => {
