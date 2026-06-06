@@ -1,8 +1,51 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useApp } from '../context/AppContext';
-import { Shield, Users, BarChart3, TrendingUp, Activity, Target, Search, Edit2, Save, X, Eye, Trash2, Ban, DollarSign, Crown, CheckCircle2, XCircle, UserX, UserCheck, Calendar, Zap, PieChart } from 'lucide-react';
+import { Shield, Users, BarChart3, TrendingUp, Activity, Target, Search, Edit2, Save, X, Eye, Trash2, Ban, DollarSign, Crown, CheckCircle2, XCircle, UserX, UserCheck, Calendar, Zap, PieChart, Monitor, Smartphone, Tablet } from 'lucide-react';
 import DevBadge from '../components/DevBadge';
+
+// Component to show a user's active devices from Firebase
+function UserDevices({ userId, lang }) {
+  const [devices, setDevices] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let unsub;
+    import('../firebase').then(({ onSessionsChange }) => {
+      unsub = onSessionsChange(userId, (sessions) => {
+        setDevices(sessions);
+        setLoading(false);
+      });
+    }).catch(() => setLoading(false));
+    return () => { if (unsub) unsub(); };
+  }, [userId]);
+
+  if (loading) return <div className="p-3 rounded-xl col-span-2 md:col-span-4 text-center" style={{ background: 'var(--bg-secondary)' }}><div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto"></div></div>;
+  if (devices.length === 0) return <div className="p-3 rounded-xl col-span-2 md:col-span-4 text-center" style={{ background: 'var(--bg-secondary)' }}><p className="text-[10px]" style={{ color: 'var(--text-secondary)' }}>📱 {lang === 'ru' ? 'Нет активных устройств' : lang === 'en' ? 'No active devices' : 'Faol qurilma yo\'q'}</p></div>;
+
+  const getIcon = (type) => type === 'mobile' ? Smartphone : type === 'tablet' ? Tablet : Monitor;
+  const isOnline = (d) => { const la = d.lastActive?.toDate?.() || (d.lastActive ? new Date(d.lastActive) : null); return la && (Date.now() - la.getTime()) < 90000; };
+
+  return (
+    <div className="p-3 rounded-xl col-span-2 md:col-span-4" style={{ background: 'var(--bg-secondary)' }}>
+      <p className="text-[10px] mb-2 font-medium" style={{ color: 'var(--text-secondary)' }}>📱 {lang === 'ru' ? 'Устройства:' : lang === 'en' ? 'Devices:' : 'Qurilmalar:'} ({devices.length})</p>
+      <div className="space-y-1.5">
+        {devices.map(d => {
+          const Icon = getIcon(d.deviceType);
+          const online = isOnline(d);
+          return (
+            <div key={d.id} className="flex items-center gap-2 p-2 rounded-lg" style={{ background: 'var(--bg-primary)' }}>
+              <Icon size={14} className={online ? 'text-green-500' : 'text-gray-400'} />
+              <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${online ? 'bg-green-500 animate-pulse' : 'bg-gray-400'}`}></span>
+              <span className="text-[10px] font-medium" style={{ color: 'var(--text-primary)' }}>{d.browser || '?'} • {d.os || '?'}</span>
+              <span className="text-[8px] ml-auto" style={{ color: online ? '#22c55e' : 'var(--text-secondary)' }}>{online ? 'Online' : 'Offline'}</span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
 
 export default function CrmErp() {
   const { currentUser, users, updateUserByAdmin, t, language } = useAuth();
@@ -399,6 +442,8 @@ export default function CrmErp() {
                             </div>
                           </div>
                         )}
+                        {/* Active devices from Firebase */}
+                        <UserDevices userId={user.id} lang={lang} />
                       </div>
                     )}
                   </div>
