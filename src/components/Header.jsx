@@ -51,7 +51,9 @@ export default function Header({ onMenuClick, visible, onOpenShop }) {
 
   return (
     <>
-      <header className={`sticky top-0 z-30 glass px-4 py-3 flex items-center justify-between transition-transform duration-300 ${visible ? 'translate-y-0' : '-translate-y-full'}`}>
+      <header className={`sticky top-0 z-30 glass px-4 py-3 flex items-center justify-between transition-transform duration-300 ${visible ? 'translate-y-0' : '-translate-y-full'}`}
+        role="banner"
+        aria-label="App header">
         {/* Left: Menu only */}
         <div className="flex items-center gap-2">
           <button className="lg:hidden p-1" onClick={onMenuClick}>

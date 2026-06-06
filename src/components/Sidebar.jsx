@@ -94,7 +94,9 @@ export default function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }
     <>
       {isOpen && <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={onClose} />}
       <aside className={`fixed top-0 left-0 h-full z-50 flex flex-col transition-all duration-300 lg:translate-x-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'} ${collapsed ? 'w-16' : 'w-56'}`}
-        style={{ background: 'var(--bg-secondary)', borderRight: '1px solid var(--border)' }}>
+        style={{ background: 'var(--bg-secondary)', borderRight: '1px solid var(--border)' }}
+        role="navigation"
+        aria-label="Main navigation">
         
         {/* Logo */}
         <div className={`flex items-center ${collapsed ? 'justify-center' : 'justify-between'} p-4`}>

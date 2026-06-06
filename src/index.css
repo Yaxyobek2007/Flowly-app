@@ -191,3 +191,49 @@ input:focus, select:focus, textarea:focus {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+
+/* ===== SPEED & ACCESSIBILITY ===== */
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .animate-in, .animate-slide-up, .animate-scale-in { animation: none !important; }
+  .animate-pulse, .animate-bounce, .animate-spin, .animate-ping { animation: none !important; }
+}
+
+/* Focus visible for keyboard navigation */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+/* Prevent layout shift */
+img, svg { max-width: 100%; height: auto; }
+
+/* Touch optimization for mobile */
+@media (pointer: coarse) {
+  button, a, input, select, textarea { min-height: 44px; }
+  .sidebar-link { min-height: 44px; }
+}
+
+/* Smooth scroll */
+html { scroll-behavior: smooth; }
+
+/* Selection color */
+::selection {
+  background: rgba(59, 130, 246, 0.2);
+  color: var(--text-primary);
+}
+
+/* Better text rendering */
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
