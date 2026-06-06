@@ -115,6 +115,20 @@ export default function HabitTracker() {
       )}
 
       {/* Habits with streak progress bars */}
+      {habits.length === 0 && !showForm && (
+        <div className="card text-center py-12">
+          <Flame size={40} className="text-orange-300 mx-auto mb-3" />
+          <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
+            {t('newHabit')}
+          </p>
+          <p className="text-xs mt-1" style={{ color: 'var(--text-secondary)' }}>
+            Kunlik odatlar qo'shing — streak'lar motivatsiya beradi!
+          </p>
+          <button onClick={() => setShowForm(true)} className="btn-primary mt-4">
+            <Plus size={16} className="inline mr-1" /> {t('add')}
+          </button>
+        </div>
+      )}
       <div className="space-y-4">
         {habits.map((habit, idx) => {
           const percent = getStreakPercent(habit.streak);
