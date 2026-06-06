@@ -118,6 +118,7 @@ export default function DailyPlanner() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <input type="text" placeholder={t('taskName')} value={newTask.title}
               onChange={e => setNewTask({...newTask, title: e.target.value})}
+              onKeyDown={e => e.key === 'Enter' && handleAdd()}
               className="px-4 py-2 rounded-lg border outline-none focus:ring-2 focus:ring-blue-500"
               style={{ background: 'var(--bg-secondary)', borderColor: 'var(--border)', color: 'var(--text-primary)' }} />
             <input type="time" value={newTask.time}
