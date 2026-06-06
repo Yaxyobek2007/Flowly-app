@@ -237,3 +237,21 @@ body {
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
 }
+
+
+/* Performance: reduce paint cost for off-screen elements */
+main > * {
+  content-visibility: auto;
+  contain-intrinsic-size: 0 500px;
+}
+
+/* GPU acceleration for animated elements */
+.card, .sidebar-link, .btn-primary {
+  will-change: transform;
+}
+
+/* Prevent text size adjust on mobile orientation change */
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
