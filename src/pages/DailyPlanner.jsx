@@ -56,6 +56,7 @@ export default function DailyPlanner() {
       addTask({ ...newTask, day: todayKey, completed: false });
       setNewTask({ title: '', time: '', priority: 'medium', day: todayKey, category: 'personal' });
       setShowForm(false);
+      if ('vibrate' in navigator) navigator.vibrate(50);
     }
   };
 
@@ -184,7 +185,7 @@ export default function DailyPlanner() {
                 </div>
               ) : (
                 <div className="flex items-center gap-4">
-                  <button onClick={() => !past || !task.completed ? toggleTask(task.id) : null}
+                  <button onClick={() => { if (!past || !task.completed) { toggleTask(task.id); if ('vibrate' in navigator) navigator.vibrate(30); } }}
                     className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all flex-shrink-0 ${
                       task.completed ? 'bg-green-500 border-green-500' :
                       missed ? 'bg-red-500 border-red-500' :

@@ -142,7 +142,7 @@ export default function HabitTracker() {
               <div className="flex items-center gap-4 mb-3">
                 <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-xl transition-all cursor-pointer ${
                   habit.todayDone ? 'bg-green-100 dark:bg-green-900/30 ring-2 ring-green-500' : 'bg-gray-100 dark:bg-gray-800'
-                }`} onClick={() => toggleHabit(habit.id)}>
+                }`} onClick={() => { toggleHabit(habit.id); if ('vibrate' in navigator) navigator.vibrate(30); }}>
                   {habit.icon}
                 </div>
                 <div className="flex-1">
