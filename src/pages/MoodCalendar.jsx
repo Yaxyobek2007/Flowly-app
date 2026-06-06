@@ -1,4 +1,90 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-const moods=['😄','🙂','😐','😔','😢']; const moodColors=['bg-green-500','bg-blue-500','bg-yellow-500','bg-orange-500','bg-red-500'];
-export default function MoodCalendar() { const { language } = useAuth(); const lang = language||'uz'; const today = new Date().toISOString().split('T')[0]; const [moodData, setMoodData] = useState(()=>{const s=localStorage.getItem('flowly-moods');return s?JSON.parse(s):{}}); useEffect(()=>{localStorage.setItem('flowly-moods',JSON.stringify(moodData));},[moodData]); const setMood=(mood)=>setMoodData(prev=>({...prev,[today]:mood})); const todayMood=moodData[today]; const daysInMonth=new Date(new Date().getFullYear(),new Date().getMonth()+1,0).getDate(); return(<div className="max-w-2xl mx-auto space-y-6 text-center"><h1 className="text-2xl font-bold" style={{color:'var(--text-primary)'}}>😊 {lang==='ru'?'Настроение':lang==='en'?'Mood':'Kayfiyat'}</h1>{todayMood===undefined?<div className="card py-8 space-y-4"><p className="text-lg font-medium" style={{color:'var(--text-primary)'}}>{lang==='ru'?'Как вы сегодня?':lang==='en'?'How are you?':'Bugun qandaysiz?'}</p><div className="flex gap-4 justify-center">{moods.map((m,i)=>(<button key={i} onClick={()=>setMood(i)} className="w-14 h-14 rounded-2xl text-3xl flex items-center justify-center hover:scale-125 active:scale-90 transition-all" style={{background:'var(--bg-secondary)'}}>{m}</button>))}</div></div>:<div className="card py-6"><span className="text-5xl">{moods[todayMood]}</span><p className="text-sm mt-2 text-green-500 font-medium">✓ {lang==='ru'?'Отмечено':'Belgilandi'}</p></div>}<div className="card"><div className="grid grid-cols-7 gap-1.5">{Array.from({length:daysInMonth},(_,i)=>{const d=i+1;const dateStr=`${new Date().getFullYear()}-${String(new Date().getMonth()+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;const m=moodData[dateStr];const isToday=dateStr===today;return(<div key={d} className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs ${isToday?'ring-2 ring-blue-500':''} ${m!==undefined?moodColors[m]+' text-white':''}`} style={m===undefined?{background:'var(--bg-secondary)',color:'var(--text-secondary)'}:{}}>{m!==undefined?moods[m]:d}</div>);})}</div></div><div className="card"><div className="flex justify-between">{moods.map((m,i)=>{const count=Object.values(moodData).filter(v=>v===i).length;return(<div key={i} className="text-center"><span className="text-xl">{m}</span><p className="text-xs font-bold mt-1" style={{color:'var(--text-primary)'}}>{count}</p></div>);})}</div></div></div>); }
+
+const moods = ['😄', '🙂', '😐', '😔', '😢'];
+const moodColors = ['bg-green-500', 'bg-blue-500', 'bg-yellow-500', 'bg-orange-500', 'bg-red-500'];
+
+export default function MoodCalendar() {
+  const { language } = useAuth();
+  const lang = language || 'uz';
+  const today = new Date().toISOString().split('T')[0];
+
+  const [moodData, setMoodData] = useState(() => {
+    const s = localStorage.getItem('flowly-moods');
+    return s ? JSON.parse(s) : {};
+  });
+
+  useEffect(() => {
+    localStorage.setItem('flowly-moods', JSON.stringify(moodData));
+  }, [moodData]);
+
+  const setMood = (mood) => setMoodData(prev => ({ ...prev, [today]: mood }));
+  const todayMood = moodData[today];
+  const daysInMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate();
+
+  return (
+    <div className="max-w-2xl mx-auto space-y-6 text-center">
+      <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
+        😊 {lang === 'ru' ? 'Настроение' : lang === 'en' ? 'Mood' : 'Kayfiyat'}
+      </h1>
+
+      {todayMood === undefined ? (
+        <div className="card py-8 space-y-4">
+          <p className="text-lg font-medium" style={{ color: 'var(--text-primary)' }}>
+            {lang === 'ru' ? 'Как вы сегодня?' : lang === 'en' ? 'How are you?' : 'Bugun qandaysiz?'}
+          </p>
+          <div className="flex gap-4 justify-center">
+            {moods.map((m, i) => (
+              <button key={i} onClick={() => setMood(i)}
+                className="w-14 h-14 rounded-2xl text-3xl flex items-center justify-center hover:scale-125 active:scale-90 transition-all"
+                style={{ background: 'var(--bg-secondary)' }}>
+                {m}
+              </button>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <div className="card py-6">
+          <span className="text-5xl">{moods[todayMood]}</span>
+          <p className="text-sm mt-2 text-green-500 font-medium">
+            ✓ {lang === 'ru' ? 'Отмечено' : 'Belgilandi'}
+          </p>
+        </div>
+      )}
+
+      {/* Calendar grid */}
+      <div className="card">
+        <div className="grid grid-cols-7 gap-1.5">
+          {Array.from({ length: daysInMonth }, (_, i) => {
+            const d = i + 1;
+            const dateStr = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+            const m = moodData[dateStr];
+            const isToday = dateStr === today;
+            return (
+              <div key={d}
+                className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs ${isToday ? 'ring-2 ring-blue-500' : ''} ${m !== undefined ? moodColors[m] + ' text-white' : ''}`}
+                style={m === undefined ? { background: 'var(--bg-secondary)', color: 'var(--text-secondary)' } : {}}>
+                {m !== undefined ? moods[m] : d}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Stats */}
+      <div className="card">
+        <div className="flex justify-between">
+          {moods.map((m, i) => {
+            const count = Object.values(moodData).filter(v => v === i).length;
+            return (
+              <div key={i} className="text-center">
+                <span className="text-xl">{m}</span>
+                <p className="text-xs font-bold mt-1" style={{ color: 'var(--text-primary)' }}>{count}</p>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}

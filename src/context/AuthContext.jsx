@@ -39,8 +39,8 @@ const defaultUsers = [
 // Translations imported from separate file
 
 export function AuthProvider({ children }) {
-  // Force reset all data to clean state (version bump clears old data)
-  const DATA_VERSION = 'v6';
+  // Data version — only reset if major breaking change (not on every deploy)
+  const DATA_VERSION = 'v7';
   if (localStorage.getItem('flowly-data-version') !== DATA_VERSION) {
     localStorage.removeItem('flowly-users');
     localStorage.removeItem('flowly-current-user');
