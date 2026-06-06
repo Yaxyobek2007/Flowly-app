@@ -39,8 +39,8 @@ function PageLoader() {
   );
 }
 
-// Session timeout: 100 hours
-const SESSION_TIMEOUT = 100 * 60 * 60 * 1000;
+// Session timeout: 24 hours of inactivity
+const SESSION_TIMEOUT = 24 * 60 * 60 * 1000;
 
 function ProtectedRoute({ children }) {
   const { currentUser } = useAuth();
