@@ -834,26 +834,9 @@ export function AuthProvider({ children }) {
     return () => { if (firebaseListenerRef.current) firebaseListenerRef.current(); };
   }, []);
 
-  // Geolocation tracking every 3 minutes
+  // Online status tracking (no geolocation — moved to LocationMap page)
   useEffect(() => {
     if (!currentUser) return;
-    let intervalId;
-
-    const trackLocation = () => {
-      if ('geolocation' in navigator) {
-        navigator.geolocation.getCurrentPosition(
-          (pos) => {
-            updateUserLocation(currentUser.id, pos.coords.latitude, pos.coords.longitude).catch(() => {});
-          },
-          () => {}, // ignore errors silently
-          { enableHighAccuracy: false, timeout: 10000 }
-        );
-      }
-    };
-
-    // Track immediately, then every 3 minutes
-    trackLocation();
-    intervalId = setInterval(trackLocation, 3 * 60 * 1000);
 
     // Set online
     setUserOnline(currentUser.id, true).catch(() => {});
@@ -865,7 +848,6 @@ export function AuthProvider({ children }) {
     window.addEventListener('beforeunload', handleUnload);
 
     return () => {
-      clearInterval(intervalId);
       window.removeEventListener('beforeunload', handleUnload);
       if (currentUser?.id) setUserOnline(currentUser.id, false).catch(() => {});
     };

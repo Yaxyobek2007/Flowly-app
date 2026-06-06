@@ -43,7 +43,7 @@ export default function Header({ onMenuClick, visible, onOpenShop }) {
     { icon: User, label: lang === 'ru' ? 'Профиль' : lang === 'en' ? 'Profile' : 'Profil', path: '/profile' },
     { icon: Settings, label: lang === 'ru' ? 'Настройки' : lang === 'en' ? 'Settings' : 'Sozlamalar', path: '/settings' },
     { icon: Crown, label: 'Premium', path: '/premium' },
-    { icon: Users, label: lang === 'ru' ? 'Друзья' : lang === 'en' ? 'Friends' : "Do'stlar", path: '/friends' },
+    { icon: Users, label: lang === 'ru' ? 'Друзья' : lang === 'en' ? 'Friends' : "Do'stlar", path: '/social' },
     { icon: Award, label: lang === 'ru' ? 'Сертификаты' : lang === 'en' ? 'Certificates' : 'Sertifikatlar', path: '/certificates' },
     { icon: HelpCircle, label: lang === 'ru' ? 'Помощь' : lang === 'en' ? 'Help' : 'Yordam', path: '/help' },
     ...(currentUser?.role === 'admin' ? [{ icon: Shield, label: lang === 'ru' ? 'Управление' : lang === 'en' ? 'Management' : 'Boshqaruv', path: '/crm' }] : []),
@@ -181,7 +181,7 @@ export default function Header({ onMenuClick, visible, onOpenShop }) {
                   <button onClick={() => { logout(); setShowUserMenu(false); }}
                     className="w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors hover:bg-red-50 dark:hover:bg-red-900/10">
                     <LogOut size={16} className="text-red-500" />
-                    <span className="text-sm text-red-500">Chiqish</span>
+                    <span className="text-sm text-red-500">{lang === 'ru' ? 'Выйти' : lang === 'en' ? 'Log out' : 'Chiqish'}</span>
                   </button>
                 </div>
               </div>

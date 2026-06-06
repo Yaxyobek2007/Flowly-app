@@ -9,12 +9,12 @@ export default function LoadingScreen({ onFinish }) {
       setProgress(prev => {
         if (prev >= 100) {
           clearInterval(interval);
-          setTimeout(() => { setVisible(false); onFinish?.(); }, 300);
+          setTimeout(() => { setVisible(false); onFinish?.(); }, 200);
           return 100;
         }
-        return prev + Math.random() * 15 + 5;
+        return prev + Math.random() * 25 + 10;
       });
-    }, 120);
+    }, 80);
     return () => clearInterval(interval);
   }, []);
 
