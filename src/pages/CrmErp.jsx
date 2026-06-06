@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useApp } from '../context/AppContext';
-import { Shield, Users, BarChart3, TrendingUp, Activity, Target, Search, Edit2, Save, X, Eye, Trash2, Ban, DollarSign, Crown, CheckCircle2, XCircle, UserX, UserCheck, Calendar, Zap, PieChart, Monitor, Smartphone, Tablet } from 'lucide-react';
+import { Shield, Users, BarChart3, TrendingUp, Activity, Target, Search, Edit2, Save, X, Eye, Trash2, Ban, DollarSign, Crown, CheckCircle2, XCircle, UserX, UserCheck, Calendar, Zap, PieChart as PieChartIcon, Monitor, Smartphone, Tablet, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell, CartesianGrid, AreaChart, Area } from 'recharts';
 import DevBadge from '../components/DevBadge';
 
 // Component to show a user's active devices from Firebase
@@ -167,121 +168,201 @@ export default function CrmErp() {
 
       {/* ========== DASHBOARD ========== */}
       {activeTab === 'dashboard' && (
-        <div className="space-y-6">
-          {/* KPI Row */}
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            <div className="card text-center">
-              <Users size={24} className="text-blue-500 mx-auto mb-2" />
+        <div className="space-y-5">
+          {/* KPI Row — YouTube Studio style */}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+            <div className="card text-center" style={{ padding: '1rem' }}>
+              <Users size={20} className="text-blue-500 mx-auto mb-1.5" />
               <p className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>{totalUsers}</p>
-              <p className="text-[10px]" style={{ color: 'var(--text-secondary)' }}>{lang === 'ru' ? 'Всего' : lang === 'en' ? 'Total' : 'Jami'}</p>
+              <p className="text-[9px]" style={{ color: 'var(--text-secondary)' }}>{lang === 'ru' ? 'Всего' : 'Jami'}</p>
             </div>
-            <div className="card text-center">
-              <Crown size={24} className="text-purple-500 mx-auto mb-2" />
+            <div className="card text-center" style={{ padding: '1rem' }}>
+              <Crown size={20} className="text-purple-500 mx-auto mb-1.5" />
               <p className="text-2xl font-bold text-purple-500">{vipUsers.length}</p>
-              <p className="text-[10px]" style={{ color: 'var(--text-secondary)' }}>VIP</p>
+              <p className="text-[9px]" style={{ color: 'var(--text-secondary)' }}>VIP</p>
             </div>
-            <div className="card text-center">
-              <Activity size={24} className="text-green-500 mx-auto mb-2" />
+            <div className="card text-center" style={{ padding: '1rem' }}>
+              <Activity size={20} className="text-green-500 mx-auto mb-1.5" />
               <p className="text-2xl font-bold text-green-500">{activeToday.length}</p>
-              <p className="text-[10px]" style={{ color: 'var(--text-secondary)' }}>{lang === 'ru' ? 'Сегодня' : lang === 'en' ? 'Today' : 'Bugun'}</p>
+              <p className="text-[9px]" style={{ color: 'var(--text-secondary)' }}>{lang === 'ru' ? 'Сегодня' : 'Bugun'}</p>
             </div>
-            <div className="card text-center">
-              <Ban size={24} className="text-red-500 mx-auto mb-2" />
+            <div className="card text-center" style={{ padding: '1rem' }}>
+              <Ban size={20} className="text-red-500 mx-auto mb-1.5" />
               <p className="text-2xl font-bold text-red-500">{blockedUsers.length}</p>
-              <p className="text-[10px]" style={{ color: 'var(--text-secondary)' }}>{lang === 'ru' ? 'Заблок.' : lang === 'en' ? 'Blocked' : 'Bloklangan'}</p>
+              <p className="text-[9px]" style={{ color: 'var(--text-secondary)' }}>{lang === 'ru' ? 'Заблок.' : 'Bloklangan'}</p>
             </div>
-            <div className="card text-center">
-              <DollarSign size={24} className="text-emerald-500 mx-auto mb-2" />
+            <div className="card text-center" style={{ padding: '1rem' }}>
+              <DollarSign size={20} className="text-emerald-500 mx-auto mb-1.5" />
               <p className="text-2xl font-bold text-emerald-500">${totalMRR.toFixed(1)}</p>
-              <p className="text-[10px]" style={{ color: 'var(--text-secondary)' }}>MRR</p>
+              <p className="text-[9px]" style={{ color: 'var(--text-secondary)' }}>MRR</p>
             </div>
-            <div className="card text-center">
-              <Target size={24} className="text-orange-500 mx-auto mb-2" />
+            <div className="card text-center" style={{ padding: '1rem' }}>
+              <Target size={20} className="text-orange-500 mx-auto mb-1.5" />
               <p className="text-2xl font-bold text-orange-500">{taskCompletionRate}%</p>
-              <p className="text-[10px]" style={{ color: 'var(--text-secondary)' }}>{lang === 'ru' ? 'Выполн.' : lang === 'en' ? 'Done' : 'Bajarildi'}</p>
+              <p className="text-[9px]" style={{ color: 'var(--text-secondary)' }}>{lang === 'ru' ? 'Выполн.' : 'Bajarildi'}</p>
             </div>
           </div>
 
-          {/* Subscription breakdown */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Charts Row */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {/* User Growth Chart */}
             <div className="card">
-              <h3 className="font-semibold mb-4 flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
-                <Crown size={18} className="text-purple-500" />
-                {lang === 'ru' ? 'Подписки по типу' : lang === 'en' ? 'Subscriptions by type' : 'Obunalar turi bo\'yicha'}
+              <h3 className="font-semibold text-sm mb-4" style={{ color: 'var(--text-primary)' }}>
+                📈 {lang === 'ru' ? 'Рост пользователей' : lang === 'en' ? 'User Growth' : 'Foydalanuvchilar o\'sishi'}
               </h3>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between p-3 rounded-xl" style={{ background: 'var(--bg-secondary)' }}>
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-                    <span className="text-sm" style={{ color: 'var(--text-primary)' }}>1 {lang === 'ru' ? 'месяц' : lang === 'en' ? 'month' : 'oylik'} ($2.9)</span>
+              <ResponsiveContainer width="100%" height={200}>
+                <AreaChart data={(() => {
+                  const sorted = [...users].filter(u => !u.deleted).sort((a, b) => new Date(a.joinedAt || 0) - new Date(b.joinedAt || 0));
+                  const data = [];
+                  sorted.forEach((u, i) => {
+                    data.push({ x: i + 1, users: i + 1, label: u.joinedAt?.slice(5) || '' });
+                  });
+                  return data.length > 0 ? data : [{ x: 1, users: 1, label: '' }];
+                })()}>
+                  <defs>
+                    <linearGradient id="userGrowth" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" opacity={0.4} />
+                  <XAxis dataKey="label" tick={{ fill: 'var(--text-secondary)', fontSize: 9 }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} axisLine={false} tickLine={false} width={25} />
+                  <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '12px', fontSize: '11px' }} />
+                  <Area type="monotone" dataKey="users" stroke="#3b82f6" strokeWidth={2.5} fill="url(#userGrowth)" dot={{ fill: '#3b82f6', r: 3 }} />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+
+            {/* Revenue Chart */}
+            <div className="card">
+              <h3 className="font-semibold text-sm mb-4" style={{ color: 'var(--text-primary)' }}>
+                💰 {lang === 'ru' ? 'Доход по тарифам' : lang === 'en' ? 'Revenue by Plan' : 'Tarif bo\'yicha daromad'}
+              </h3>
+              <ResponsiveContainer width="100%" height={200}>
+                <BarChart data={[
+                  { plan: '1 oy', revenue: revenue1Mo, users: vip1Month },
+                  { plan: '3 oy', revenue: revenue3Mo, users: vip3Month },
+                  { plan: '1 yil', revenue: revenue1Yr, users: vip1Year },
+                ]}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" opacity={0.4} />
+                  <XAxis dataKey="plan" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} axisLine={false} tickLine={false} width={30} />
+                  <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '12px', fontSize: '11px' }} />
+                  <Bar dataKey="revenue" fill="#22c55e" radius={[6, 6, 0, 0]} name="$ Daromad" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          {/* Subscription Breakdown + Conversion */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            {/* Pie: Plan distribution */}
+            <div className="card">
+              <h3 className="font-semibold text-sm mb-3" style={{ color: 'var(--text-primary)' }}>
+                {lang === 'ru' ? 'Распределение' : 'Taqsimot'}
+              </h3>
+              <ResponsiveContainer width="100%" height={180}>
+                <PieChart>
+                  <Pie data={[
+                    { name: 'Free', value: freeUsers.length },
+                    { name: 'VIP 1mo', value: vip1Month },
+                    { name: 'VIP 3mo', value: vip3Month },
+                    { name: 'VIP 1yr', value: Math.max(vip1Year, 0) },
+                  ]} cx="50%" cy="50%" innerRadius={40} outerRadius={70} dataKey="value" paddingAngle={3}>
+                    <Cell fill="#94a3b8" />
+                    <Cell fill="#3b82f6" />
+                    <Cell fill="#8b5cf6" />
+                    <Cell fill="#22c55e" />
+                  </Pie>
+                  <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '10px', fontSize: '10px' }} />
+                </PieChart>
+              </ResponsiveContainer>
+              <div className="flex flex-wrap gap-2 justify-center">
+                {[{ c: '#94a3b8', l: 'Free' }, { c: '#3b82f6', l: '1 oy' }, { c: '#8b5cf6', l: '3 oy' }, { c: '#22c55e', l: '1 yil' }].map((i, idx) => (
+                  <span key={idx} className="text-[8px] flex items-center gap-1"><span className="w-2 h-2 rounded-full" style={{ background: i.c }}></span>{i.l}</span>
+                ))}
+              </div>
+            </div>
+
+            {/* Conversion & Retention */}
+            <div className="card">
+              <h3 className="font-semibold text-sm mb-3" style={{ color: 'var(--text-primary)' }}>
+                📊 {lang === 'ru' ? 'Конверсия' : 'Konversiya'}
+              </h3>
+              <div className="space-y-4">
+                <div>
+                  <div className="flex justify-between mb-1">
+                    <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>Free → VIP</span>
+                    <span className="text-xs font-bold text-purple-500">{totalUsers > 0 ? Math.round((vipUsers.length / totalUsers) * 100) : 0}%</span>
                   </div>
-                  <span className="font-bold" style={{ color: 'var(--text-primary)' }}>{vip1Month} {lang === 'ru' ? 'чел.' : lang === 'en' ? 'users' : 'ta'}</span>
-                </div>
-                <div className="flex items-center justify-between p-3 rounded-xl" style={{ background: 'var(--bg-secondary)' }}>
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-purple-500"></div>
-                    <span className="text-sm" style={{ color: 'var(--text-primary)' }}>3 {lang === 'ru' ? 'месяца' : lang === 'en' ? 'months' : 'oylik'} ($6.9)</span>
+                  <div className="h-2.5 rounded-full" style={{ background: 'var(--bg-secondary)' }}>
+                    <div className="h-2.5 rounded-full bg-purple-500" style={{ width: `${totalUsers > 0 ? (vipUsers.length / totalUsers) * 100 : 0}%` }} />
                   </div>
-                  <span className="font-bold" style={{ color: 'var(--text-primary)' }}>{vip3Month} {lang === 'ru' ? 'чел.' : lang === 'en' ? 'users' : 'ta'}</span>
                 </div>
-                <div className="flex items-center justify-between p-3 rounded-xl" style={{ background: 'var(--bg-secondary)' }}>
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                    <span className="text-sm" style={{ color: 'var(--text-primary)' }}>1 {lang === 'ru' ? 'год' : lang === 'en' ? 'year' : 'yillik'} ($15)</span>
+                <div>
+                  <div className="flex justify-between mb-1">
+                    <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>{lang === 'ru' ? 'Активность' : 'Faollik'}</span>
+                    <span className="text-xs font-bold text-green-500">{totalUsers > 0 ? Math.round((activeToday.length / totalUsers) * 100) : 0}%</span>
                   </div>
-                  <span className="font-bold" style={{ color: 'var(--text-primary)' }}>{vip1Year} {lang === 'ru' ? 'чел.' : lang === 'en' ? 'users' : 'ta'}</span>
+                  <div className="h-2.5 rounded-full" style={{ background: 'var(--bg-secondary)' }}>
+                    <div className="h-2.5 rounded-full bg-green-500" style={{ width: `${totalUsers > 0 ? (activeToday.length / totalUsers) * 100 : 0}%` }} />
+                  </div>
                 </div>
-                <div className="flex items-center justify-between p-3 rounded-xl border-t" style={{ borderColor: 'var(--border)' }}>
-                  <span className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{lang === 'ru' ? 'Бесплатно' : lang === 'en' ? 'Free' : 'Bepul'}</span>
-                  <span className="font-bold text-gray-500">{freeUsers.length} {lang === 'ru' ? 'чел.' : lang === 'en' ? 'users' : 'ta'}</span>
+                <div>
+                  <div className="flex justify-between mb-1">
+                    <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>{lang === 'ru' ? 'Задачи выполн.' : 'Vazifa bajarilish'}</span>
+                    <span className="text-xs font-bold text-blue-500">{taskCompletionRate}%</span>
+                  </div>
+                  <div className="h-2.5 rounded-full" style={{ background: 'var(--bg-secondary)' }}>
+                    <div className="h-2.5 rounded-full bg-blue-500" style={{ width: `${taskCompletionRate}%` }} />
+                  </div>
                 </div>
               </div>
             </div>
 
+            {/* Quick Actions */}
             <div className="card">
-              <h3 className="font-semibold mb-4 flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
-                <Zap size={18} className="text-yellow-500" />
-                {lang === 'ru' ? 'Быстрые действия' : lang === 'en' ? 'Quick Actions' : 'Tezkor amallar'}
+              <h3 className="font-semibold text-sm mb-3" style={{ color: 'var(--text-primary)' }}>
+                ⚡ {lang === 'ru' ? 'Действия' : 'Amallar'}
               </h3>
-              <div className="grid grid-cols-2 gap-3">
-                <button onClick={() => setActiveTab('users')} className="p-4 rounded-xl text-center transition-all hover:ring-2 hover:ring-blue-300" style={{ background: 'var(--bg-secondary)' }}>
-                  <Users size={24} className="text-blue-500 mx-auto mb-1" />
-                  <p className="text-xs font-medium" style={{ color: 'var(--text-primary)' }}>{lang === 'ru' ? 'Управление' : lang === 'en' ? 'Manage Users' : 'Boshqarish'}</p>
+              <div className="grid grid-cols-2 gap-2">
+                <button onClick={() => setActiveTab('users')} className="p-3 rounded-xl text-center transition-all hover:ring-2 hover:ring-blue-300 active:scale-95" style={{ background: 'var(--bg-secondary)' }}>
+                  <Users size={20} className="text-blue-500 mx-auto mb-1" />
+                  <p className="text-[9px] font-medium" style={{ color: 'var(--text-primary)' }}>{lang === 'ru' ? 'Юзеры' : 'Userlar'}</p>
                 </button>
-                <button onClick={() => setActiveTab('finance')} className="p-4 rounded-xl text-center transition-all hover:ring-2 hover:ring-green-300" style={{ background: 'var(--bg-secondary)' }}>
-                  <DollarSign size={24} className="text-green-500 mx-auto mb-1" />
-                  <p className="text-xs font-medium" style={{ color: 'var(--text-primary)' }}>{lang === 'ru' ? 'Финансы' : lang === 'en' ? 'Finance' : 'Moliya'}</p>
+                <button onClick={() => setActiveTab('finance')} className="p-3 rounded-xl text-center transition-all hover:ring-2 hover:ring-green-300 active:scale-95" style={{ background: 'var(--bg-secondary)' }}>
+                  <DollarSign size={20} className="text-green-500 mx-auto mb-1" />
+                  <p className="text-[9px] font-medium" style={{ color: 'var(--text-primary)' }}>{lang === 'ru' ? 'Финансы' : 'Moliya'}</p>
                 </button>
-                <button onClick={() => setActiveTab('analytics')} className="p-4 rounded-xl text-center transition-all hover:ring-2 hover:ring-purple-300" style={{ background: 'var(--bg-secondary)' }}>
-                  <TrendingUp size={24} className="text-purple-500 mx-auto mb-1" />
-                  <p className="text-xs font-medium" style={{ color: 'var(--text-primary)' }}>{lang === 'ru' ? 'Аналитика' : lang === 'en' ? 'Analytics' : 'Tahlil'}</p>
+                <button onClick={() => setActiveTab('analytics')} className="p-3 rounded-xl text-center transition-all hover:ring-2 hover:ring-purple-300 active:scale-95" style={{ background: 'var(--bg-secondary)' }}>
+                  <TrendingUp size={20} className="text-purple-500 mx-auto mb-1" />
+                  <p className="text-[9px] font-medium" style={{ color: 'var(--text-primary)' }}>{lang === 'ru' ? 'Аналитика' : 'Tahlil'}</p>
                 </button>
-                <div className="p-4 rounded-xl text-center" style={{ background: 'var(--bg-secondary)' }}>
-                  <PieChart size={24} className="text-orange-500 mx-auto mb-1" />
-                  <p className="text-xs font-medium" style={{ color: 'var(--text-primary)' }}>{lang === 'ru' ? 'Конверсия' : 'Konversiya'}</p>
+                <div className="p-3 rounded-xl text-center" style={{ background: 'var(--bg-secondary)' }}>
+                  <PieChartIcon size={20} className="text-orange-500 mx-auto mb-1" />
                   <p className="text-lg font-bold text-orange-500">{totalUsers > 0 ? Math.round((vipUsers.length / totalUsers) * 100) : 0}%</p>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Recent users */}
+          {/* Recent Users */}
           <div className="card">
-            <h3 className="font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>
-              👥 {lang === 'ru' ? 'Последние пользователи' : lang === 'en' ? 'Recent Users' : 'Oxirgi foydalanuvchilar'}
+            <h3 className="font-semibold text-sm mb-3" style={{ color: 'var(--text-primary)' }}>
+              👥 {lang === 'ru' ? 'Последние пользователи' : 'Oxirgi foydalanuvchilar'}
             </h3>
             <div className="space-y-2">
               {users.filter(u => !u.deleted).slice(-5).reverse().map(user => (
-                <div key={user.id} className="flex items-center gap-3 p-3 rounded-xl" style={{ background: 'var(--bg-secondary)' }}>
-                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-400 to-purple-400 flex items-center justify-center">
-                    <span className="text-white text-xs font-bold">{(user.name?.[0] || '?').toUpperCase()}</span>
+                <div key={user.id} className="flex items-center gap-3 p-2.5 rounded-xl" style={{ background: 'var(--bg-secondary)' }}>
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-purple-400 flex items-center justify-center flex-shrink-0">
+                    <span className="text-white text-[10px] font-bold">{(user.name?.[0] || '?').toUpperCase()}</span>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate" style={{ color: 'var(--text-primary)' }}>{user.name} {user.surname}</p>
-                    <p className="text-[10px]" style={{ color: 'var(--text-secondary)' }}>@{user.login} • {user.joinedAt}</p>
+                    <p className="text-xs font-medium truncate" style={{ color: 'var(--text-primary)' }}>{user.name} {user.surname}</p>
+                    <p className="text-[9px]" style={{ color: 'var(--text-secondary)' }}>@{user.login} • {user.joinedAt}</p>
                   </div>
-                  <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${user.plan === 'vip' ? 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' : 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400'}`}>{user.plan?.toUpperCase()}</span>
-                  {user.blocked && <span className="text-[10px] px-2 py-0.5 rounded-full bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400">🚫</span>}
+                  <span className={`text-[9px] px-2 py-0.5 rounded-full font-medium ${user.plan === 'vip' ? 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' : 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400'}`}>{user.plan?.toUpperCase()}</span>
                 </div>
               ))}
             </div>

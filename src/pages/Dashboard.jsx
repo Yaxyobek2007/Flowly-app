@@ -1,40 +1,45 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
 import { useAuth } from '../context/AuthContext';
-import { CheckCircle2, Clock, Target, Flame, Calendar, TrendingUp, Award, ArrowRight, Zap, BarChart3, Plus } from 'lucide-react';
+import { CheckCircle2, Clock, Target, Flame, Calendar, TrendingUp, TrendingDown, Award, ArrowRight, ArrowUpRight, ArrowDownRight, Zap, BarChart3, Plus, Activity } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import XpLevelBar from '../components/XpLevelBar';
 
-function ProgressRing({ score, size = 160 }) {
-  const radius = (size / 2) - 15;
-  const circumference = 2 * Math.PI * radius;
-  const offset = circumference - (score / 100) * circumference;
-  const color = score >= 80 ? '#22c55e' : score >= 50 ? '#eab308' : '#ef4444';
-
+// Mini sparkline chart (like YouTube Studio)
+function Sparkline({ data, color = '#3b82f6', height = 40 }) {
+  if (!data || data.length < 2) return null;
+  const max = Math.max(...data, 1);
+  const min = Math.min(...data, 0);
+  const range = max - min || 1;
+  const w = 100;
+  const points = data.map((v, i) => `${(i / (data.length - 1)) * w},${height - ((v - min) / range) * (height - 4)}`).join(' ');
   return (
-    <div className="relative" style={{ width: size, height: size }}>
-      <svg width={size} height={size}>
-        <circle cx={size/2} cy={size/2} r={radius} fill="none" stroke="var(--border)" strokeWidth="8" opacity="0.3" />
-        <circle cx={size/2} cy={size/2} r={radius} fill="none" stroke={color} strokeWidth="8"
-          strokeDasharray={circumference} strokeDashoffset={offset} strokeLinecap="round"
-          className="progress-ring" transform={`rotate(-90 ${size/2} ${size/2})`} />
-      </svg>
-      <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-3xl font-bold" style={{ color: 'var(--text-primary)' }}>{score}</span>
-        <span className="text-[10px] font-medium" style={{ color: 'var(--text-secondary)' }}>/ 100</span>
-      </div>
-    </div>
+    <svg width="100%" height={height} viewBox={`0 0 ${w} ${height}`} preserveAspectRatio="none" className="overflow-visible">
+      <polyline points={points} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <polyline points={`0,${height} ${points} ${w},${height}`} fill={`${color}15`} stroke="none" />
+    </svg>
   );
 }
 
-function QuickAction({ icon: Icon, label, color, bgColor, onClick }) {
+// Stat card with trend
+function StatCard({ icon: Icon, iconColor, iconBg, value, label, sub, trend, trendUp, onClick }) {
   return (
-    <button onClick={onClick} className="flex flex-col items-center gap-2 p-3 rounded-2xl transition-all hover:scale-105 active:scale-95 w-full" style={{ background: 'var(--bg-secondary)' }}>
-      <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${bgColor}`}>
-        <Icon size={18} className={color} />
+    <div className="card cursor-pointer hover:ring-2 hover:ring-blue-400/30 active:scale-[0.98] transition-all" onClick={onClick} style={{ padding: '1rem' }}>
+      <div className="flex items-center justify-between mb-3">
+        <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${iconBg}`}>
+          <Icon size={17} className={iconColor} />
+        </div>
+        {trend !== undefined && (
+          <div className={`flex items-center gap-0.5 text-[10px] font-bold px-1.5 py-0.5 rounded-md ${trendUp ? 'bg-green-500/10 text-green-600' : 'bg-red-500/10 text-red-500'}`}>
+            {trendUp ? <ArrowUpRight size={10} /> : <ArrowDownRight size={10} />}
+            {trend}%
+          </div>
+        )}
       </div>
-      <span className="text-[10px] font-medium text-center leading-tight" style={{ color: 'var(--text-secondary)' }}>{label}</span>
-    </button>
+      <p className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>{value}</p>
+      <p className="text-[11px] mt-0.5" style={{ color: 'var(--text-secondary)' }}>{label}</p>
+      {sub && <p className="text-[9px] mt-1" style={{ color: 'var(--text-secondary)' }}>{sub}</p>}
+    </div>
   );
 }
 
@@ -47,13 +52,12 @@ export default function Dashboard() {
 
   const [currentTime, setCurrentTime] = useState(new Date());
   useEffect(() => {
-    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    const timer = setInterval(() => setCurrentTime(new Date()), 60000);
     return () => clearInterval(timer);
   }, []);
 
   const tashkentTime = new Date(currentTime.toLocaleString("en-US", { timeZone: "Asia/Tashkent" }));
   const timeStr = tashkentTime.toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' });
-
   const dayOfWeekToKey = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
   const todayKey = dayOfWeekToKey[tashkentTime.getDay()];
 
@@ -63,7 +67,27 @@ export default function Dashboard() {
   const todayPercent = totalToday > 0 ? Math.round((completedToday / totalToday) * 100) : 0;
   const maxStreak = Math.max(...habits.map(h => h.streak), 0);
   const habitsToday = habits.filter(h => h.todayDone).length;
+  const totalHabits = habits.length;
   const unlockedAchievements = achievements.filter(a => a.unlocked).length;
+
+  // Weekly data for sparklines (simulated from real data)
+  const weeklyTaskData = useMemo(() => {
+    const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+    return days.map(d => tasks.filter(t => t.day === d && t.completed).length);
+  }, [tasks]);
+
+  const weeklyHabitData = useMemo(() => {
+    return habits.map(h => h.streak || 0).slice(0, 7);
+  }, [habits]);
+
+  const goalProgress = useMemo(() => {
+    return goals.length > 0 ? Math.round(goals.reduce((a, g) => a + (g.progress || 0), 0) / goals.length) : 0;
+  }, [goals]);
+
+  // Trend calculation
+  const totalCompleted = tasks.filter(t => t.completed).length;
+  const completionRate = tasks.length > 0 ? Math.round((totalCompleted / tasks.length) * 100) : 0;
+  const habitRate = totalHabits > 0 ? Math.round((habitsToday / totalHabits) * 100) : 0;
 
   const upcomingEvents = events
     .filter(e => new Date(e.date) >= new Date())
@@ -71,227 +95,223 @@ export default function Dashboard() {
     .slice(0, 4);
 
   const userName = currentUser?.name || 'User';
-
-  const dayNames = {
-    uz: ['Yakshanba','Dushanba','Seshanba','Chorshanba','Payshanba','Juma','Shanba'],
-    ru: ['Воскресенье','Понедельник','Вторник','Среда','Четверг','Пятница','Суббота'],
-    en: ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'],
-  };
-  const monthNames = {
-    uz: ['Yanvar','Fevral','Mart','Aprel','May','Iyun','Iyul','Avgust','Sentyabr','Oktyabr','Noyabr','Dekabr'],
-    ru: ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'],
-    en: ['January','February','March','April','May','June','July','August','September','October','November','December'],
-  };
-
+  const dayNames = { uz: ['Yakshanba','Dushanba','Seshanba','Chorshanba','Payshanba','Juma','Shanba'], ru: ['Воскресенье','Понедельник','Вторник','Среда','Четверг','Пятница','Суббота'], en: ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'] };
+  const monthNames = { uz: ['Yanvar','Fevral','Mart','Aprel','May','Iyun','Iyul','Avgust','Sentyabr','Oktyabr','Noyabr','Dekabr'], ru: ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'], en: ['January','February','March','April','May','June','July','August','September','October','November','December'] };
   const dayName = dayNames[lang]?.[tashkentTime.getDay()];
   const dateStr = `${tashkentTime.getDate()} ${monthNames[lang]?.[tashkentTime.getMonth()]}`;
-
-  // Greeting based on time
   const hour = tashkentTime.getHours();
-  const greeting = hour < 6 ? (lang === 'ru' ? 'Доброй ночи' : lang === 'en' ? 'Good night' : 'Hayrli tun')
-    : hour < 12 ? (lang === 'ru' ? 'Доброе утро' : lang === 'en' ? 'Good morning' : 'Hayrli tong')
-    : hour < 18 ? (lang === 'ru' ? 'Добрый день' : lang === 'en' ? 'Good afternoon' : 'Hayrli kun')
-    : (lang === 'ru' ? 'Добрый вечер' : lang === 'en' ? 'Good evening' : 'Hayrli kech');
+  const greeting = hour < 6 ? (lang === 'ru' ? 'Доброй ночи' : lang === 'en' ? 'Good night' : 'Hayrli tun') : hour < 12 ? (lang === 'ru' ? 'Доброе утро' : lang === 'en' ? 'Good morning' : 'Hayrli tong') : hour < 18 ? (lang === 'ru' ? 'Добрый день' : lang === 'en' ? 'Good afternoon' : 'Hayrli kun') : (lang === 'ru' ? 'Добрый вечер' : lang === 'en' ? 'Good evening' : 'Hayrli kech');
 
   return (
-    <div className="max-w-6xl mx-auto space-y-5">
-      {/* Hero Section */}
-      <div className="card overflow-hidden relative" style={{ padding: 0 }}>
-        <div className="absolute top-0 right-0 w-64 h-64 rounded-full opacity-5" style={{ background: 'radial-gradient(circle, var(--accent), transparent)', transform: 'translate(30%, -30%)' }} />
-        <div className="p-5 sm:p-6">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <p className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>{greeting} 👋</p>
-              <h1 className="text-2xl sm:text-3xl font-bold mt-1" style={{ color: 'var(--text-primary)' }}>{userName}</h1>
-              <p className="text-xs mt-1" style={{ color: 'var(--text-secondary)' }}>{dayName}, {dateStr} • {timeStr}</p>
-            </div>
-            <ProgressRing score={lifeScore} size={100} />
-          </div>
+    <div className="max-w-7xl mx-auto space-y-5">
+      {/* Top Bar — YouTube Studio style */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <div>
+          <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{greeting} 👋</p>
+          <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>{userName}</h1>
+          <p className="text-xs mt-0.5" style={{ color: 'var(--text-secondary)' }}>{dayName}, {dateStr} • {timeStr}</p>
+        </div>
+        <div className="flex items-center gap-3">
           <XpLevelBar />
         </div>
       </div>
 
-      {/* Stats Row */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div className="card cursor-pointer hover:ring-2 hover:ring-blue-400/50 active:scale-[0.98]" onClick={() => navigate('/plans')} style={{ padding: '1rem' }}>
+      {/* KPI Cards — like YouTube Studio overview */}
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
+        <StatCard icon={Activity} iconColor="text-blue-500" iconBg="bg-blue-500/10"
+          value={lifeScore} label="Life Score" sub={lifeScore >= 70 ? '🟢 Ajoyib' : lifeScore >= 40 ? '🟡 O\'rtacha' : '🔴 Yaxshilang'}
+          trend={todayPercent > 50 ? 12 : -5} trendUp={todayPercent > 50}
+          onClick={() => navigate('/analysis')} />
+        <StatCard icon={CheckCircle2} iconColor="text-green-500" iconBg="bg-green-500/10"
+          value={`${completedToday}/${totalToday}`} label={lang === 'ru' ? 'Сегодня' : lang === 'en' ? 'Today' : 'Bugun'}
+          sub={`${completionRate}% ${lang === 'ru' ? 'общая' : 'umumiy'}`}
+          trend={completionRate} trendUp={completionRate >= 50}
+          onClick={() => navigate('/plans')} />
+        <StatCard icon={Flame} iconColor="text-orange-500" iconBg="bg-orange-500/10"
+          value={maxStreak} label={lang === 'ru' ? 'Max Streak' : 'Max Streak'}
+          sub={`${habitsToday}/${totalHabits} ${lang === 'ru' ? 'сегодня' : 'bugun'}`}
+          trend={habitRate} trendUp={habitRate >= 50}
+          onClick={() => navigate('/health')} />
+        <StatCard icon={Target} iconColor="text-purple-500" iconBg="bg-purple-500/10"
+          value={`${goalProgress}%`} label={lang === 'ru' ? 'Цели' : lang === 'en' ? 'Goals' : 'Maqsadlar'}
+          sub={`${goals.length} ta`}
+          trend={goalProgress} trendUp={goalProgress >= 30}
+          onClick={() => navigate('/goals')} />
+        <StatCard icon={Award} iconColor="text-yellow-500" iconBg="bg-yellow-500/10"
+          value={currentUser?.points || 0} label={lang === 'ru' ? 'Баллы' : lang === 'en' ? 'Points' : 'Ball'}
+          sub={`🏆 ${unlockedAchievements} yutuq`}
+          onClick={() => navigate('/motivation')} />
+      </div>
+
+      {/* Charts Row — YouTube Studio style */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        {/* Weekly Tasks Chart */}
+        <div className="card">
           <div className="flex items-center justify-between mb-2">
-            <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center"><CheckCircle2 size={16} className="text-blue-500" /></div>
-            <span className="text-xs font-medium px-1.5 py-0.5 rounded-md" style={{ background: todayPercent >= 70 ? 'rgba(34,197,94,0.1)' : 'rgba(234,179,8,0.1)', color: todayPercent >= 70 ? '#22c55e' : '#eab308' }}>{todayPercent}%</span>
+            <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
+              {lang === 'ru' ? 'Задачи за неделю' : lang === 'en' ? 'Weekly Tasks' : 'Haftalik vazifalar'}
+            </h3>
+            <span className="text-xs font-bold" style={{ color: 'var(--accent)' }}>{totalCompleted}</span>
           </div>
-          <p className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>{completedToday}<span className="text-sm font-normal" style={{ color: 'var(--text-secondary)' }}>/{totalToday}</span></p>
-          <p className="text-[11px] mt-0.5" style={{ color: 'var(--text-secondary)' }}>{lang === 'ru' ? 'Задач сегодня' : lang === 'en' ? 'Tasks today' : 'Bugungi vazifalar'}</p>
+          <Sparkline data={weeklyTaskData} color="#3b82f6" height={50} />
+          <div className="flex justify-between mt-2">
+            {['D','S','Ch','P','J','Sh','Y'].map((d, i) => (
+              <span key={i} className="text-[8px]" style={{ color: 'var(--text-secondary)' }}>{d}</span>
+            ))}
+          </div>
         </div>
 
-        <div className="card cursor-pointer hover:ring-2 hover:ring-orange-400/50 active:scale-[0.98]" onClick={() => navigate('/health')} style={{ padding: '1rem' }}>
+        {/* Habits Streaks Chart */}
+        <div className="card">
           <div className="flex items-center justify-between mb-2">
-            <div className="w-8 h-8 rounded-lg bg-orange-500/10 flex items-center justify-center"><Flame size={16} className="text-orange-500" /></div>
-            <span className="text-xs font-bold text-orange-500">{maxStreak}🔥</span>
+            <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
+              {lang === 'ru' ? 'Серии привычек' : lang === 'en' ? 'Habit Streaks' : 'Odat streak\'lari'}
+            </h3>
+            <span className="text-xs font-bold text-orange-500">🔥 {maxStreak}</span>
           </div>
-          <p className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>{habitsToday}<span className="text-sm font-normal" style={{ color: 'var(--text-secondary)' }}>/{habits.length}</span></p>
-          <p className="text-[11px] mt-0.5" style={{ color: 'var(--text-secondary)' }}>{lang === 'ru' ? 'Привычки' : lang === 'en' ? 'Habits' : 'Odatlar'}</p>
+          <Sparkline data={weeklyHabitData.length > 1 ? weeklyHabitData : [0, 1, 2, 1, 3, 2, 4]} color="#f97316" height={50} />
+          <div className="flex items-center justify-between mt-2">
+            <span className="text-[9px]" style={{ color: 'var(--text-secondary)' }}>{totalHabits} {lang === 'ru' ? 'привычек' : 'odat'}</span>
+            <span className="text-[9px]" style={{ color: habitRate >= 70 ? '#22c55e' : 'var(--text-secondary)' }}>{habitRate}% {lang === 'ru' ? 'сегодня' : 'bugun'}</span>
+          </div>
         </div>
 
-        <div className="card cursor-pointer hover:ring-2 hover:ring-green-400/50 active:scale-[0.98]" onClick={() => navigate('/goals')} style={{ padding: '1rem' }}>
+        {/* Life Score / Goals Progress */}
+        <div className="card">
           <div className="flex items-center justify-between mb-2">
-            <div className="w-8 h-8 rounded-lg bg-green-500/10 flex items-center justify-center"><Target size={16} className="text-green-500" /></div>
-            <ArrowRight size={14} style={{ color: 'var(--text-secondary)' }} />
+            <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
+              {lang === 'ru' ? 'Прогресс целей' : lang === 'en' ? 'Goals Progress' : 'Maqsadlar'}
+            </h3>
+            <span className="text-xs font-bold text-purple-500">{goalProgress}%</span>
           </div>
-          <p className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>{goals.length}</p>
-          <p className="text-[11px] mt-0.5" style={{ color: 'var(--text-secondary)' }}>{lang === 'ru' ? 'Цели' : lang === 'en' ? 'Goals' : 'Maqsadlar'}</p>
-        </div>
-
-        <div className="card cursor-pointer hover:ring-2 hover:ring-purple-400/50 active:scale-[0.98]" onClick={() => navigate('/motivation')} style={{ padding: '1rem' }}>
-          <div className="flex items-center justify-between mb-2">
-            <div className="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center"><Award size={16} className="text-purple-500" /></div>
-            <span className="text-xs font-bold" style={{ color: 'var(--accent)' }}>⭐{currentUser?.points || 0}</span>
-          </div>
-          <p className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>{unlockedAchievements}</p>
-          <p className="text-[11px] mt-0.5" style={{ color: 'var(--text-secondary)' }}>{lang === 'ru' ? 'Достижения' : lang === 'en' ? 'Achievements' : 'Yutuqlar'}</p>
+          {goals.length === 0 ? (
+            <div className="text-center py-4">
+              <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>{lang === 'ru' ? 'Нет целей' : "Maqsad yo'q"}</p>
+              <button onClick={() => navigate('/goals')} className="text-[10px] mt-1 font-medium" style={{ color: 'var(--accent)' }}>+ {lang === 'ru' ? 'Добавить' : "Qo'shish"}</button>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {goals.slice(0, 4).map(g => (
+                <div key={g.id} className="flex items-center gap-2">
+                  <div className="flex-1 h-2 rounded-full" style={{ background: 'var(--bg-secondary)' }}>
+                    <div className="h-2 rounded-full bg-purple-500 transition-all" style={{ width: `${g.progress || 0}%` }} />
+                  </div>
+                  <span className="text-[9px] font-bold w-8 text-right" style={{ color: 'var(--text-secondary)' }}>{g.progress || 0}%</span>
+                </div>
+              ))}
+              <p className="text-[9px] text-right" style={{ color: 'var(--text-secondary)' }}>{goals.length} {lang === 'ru' ? 'целей' : 'maqsad'}</p>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
-        {/* Left: Today Tasks + Quick Actions */}
-        <div className="lg:col-span-3 space-y-5">
-          {/* Today's Tasks */}
-          <div className="card">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                <Clock size={16} style={{ color: 'var(--accent)' }} />
-                <h3 className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>
-                  {lang === 'ru' ? 'Сегодня' : lang === 'en' ? 'Today' : 'Bugun'}
-                </h3>
-              </div>
-              <button onClick={() => navigate('/plans')} className="text-xs font-medium flex items-center gap-1 px-2.5 py-1 rounded-lg transition-colors hover:bg-blue-50 dark:hover:bg-blue-900/20" style={{ color: 'var(--accent)' }}>
-                {lang === 'ru' ? 'Все' : lang === 'en' ? 'All' : 'Barchasi'} <ArrowRight size={12} />
-              </button>
+      {/* Bottom Row */}
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
+        {/* Today's Tasks */}
+        <div className="lg:col-span-3 card">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <Clock size={16} style={{ color: 'var(--accent)' }} />
+              <h3 className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>
+                {lang === 'ru' ? 'Задачи на сегодня' : lang === 'en' ? "Today's Tasks" : 'Bugungi vazifalar'}
+              </h3>
+              <span className="text-[10px] px-2 py-0.5 rounded-full font-bold" style={{ background: 'var(--bg-secondary)', color: 'var(--text-secondary)' }}>{totalToday}</span>
             </div>
+            <button onClick={() => navigate('/plans')} className="text-xs font-medium flex items-center gap-1 px-2.5 py-1 rounded-lg transition-colors hover:bg-blue-50 dark:hover:bg-blue-900/20" style={{ color: 'var(--accent)' }}>
+              {lang === 'ru' ? 'Все' : 'Barchasi'} <ArrowRight size={12} />
+            </button>
+          </div>
 
-            {todayTasks.length === 0 ? (
-              <div className="text-center py-8">
-                <div className="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center mx-auto mb-3">
-                  <Plus size={20} className="text-blue-500" />
-                </div>
-                <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{lang === 'ru' ? 'Нет задач на сегодня' : lang === 'en' ? 'No tasks today' : 'Bugun vazifa yo\'q'}</p>
-                <button onClick={() => navigate('/plans')} className="mt-2 text-xs font-medium" style={{ color: 'var(--accent)' }}>+ {lang === 'ru' ? 'Добавить' : lang === 'en' ? 'Add' : 'Qo\'shish'}</button>
-              </div>
-            ) : (
-              <div className="space-y-2">
-                {todayTasks.slice(0, 5).map(task => (
-                  <div key={task.id} className="flex items-center gap-3 p-2.5 rounded-xl transition-colors" style={{ background: 'var(--bg-secondary)' }}>
-                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${task.completed ? 'bg-green-500 border-green-500' : 'border-gray-300 dark:border-gray-600'}`}>
-                      {task.completed && <CheckCircle2 size={12} className="text-white" />}
+          {todayTasks.length === 0 ? (
+            <div className="text-center py-10">
+              <Plus size={32} className="text-blue-300 mx-auto mb-2" />
+              <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{lang === 'ru' ? 'Пусто — добавьте задачу' : "Bo'sh — vazifa qo'shing"}</p>
+            </div>
+          ) : (
+            <>
+              <div className="space-y-1.5">
+                {todayTasks.slice(0, 6).map(task => (
+                  <div key={task.id} className="flex items-center gap-3 p-2.5 rounded-xl" style={{ background: 'var(--bg-secondary)' }}>
+                    <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${task.completed ? 'bg-green-500 border-green-500' : 'border-gray-300 dark:border-gray-600'}`}>
+                      {task.completed && <CheckCircle2 size={10} className="text-white" />}
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className={`text-sm font-medium truncate ${task.completed ? 'line-through opacity-50' : ''}`} style={{ color: 'var(--text-primary)' }}>{task.title}</p>
-                    </div>
-                    {task.time && <span className="text-[10px] font-medium px-2 py-0.5 rounded-md flex-shrink-0" style={{ background: 'var(--bg-primary)', color: 'var(--text-secondary)' }}>{task.time}</span>}
+                    <p className={`text-sm flex-1 truncate ${task.completed ? 'line-through opacity-40' : ''}`} style={{ color: 'var(--text-primary)' }}>{task.title}</p>
+                    {task.time && <span className="text-[9px] px-1.5 py-0.5 rounded-md" style={{ background: 'var(--bg-primary)', color: 'var(--text-secondary)' }}>{task.time}</span>}
+                    {task.priority === 'high' && <span className="w-2 h-2 rounded-full bg-red-500 flex-shrink-0"></span>}
                   </div>
                 ))}
-                {todayTasks.length > 5 && (
-                  <button onClick={() => navigate('/plans')} className="w-full text-center text-xs py-2 font-medium" style={{ color: 'var(--accent)' }}>+{todayTasks.length - 5} {lang === 'ru' ? 'ещё' : 'ta yana'}</button>
-                )}
               </div>
-            )}
+              {/* Progress */}
+              <div className="mt-4 pt-3 border-t flex items-center gap-3" style={{ borderColor: 'var(--border)' }}>
+                <div className="flex-1 h-2 rounded-full" style={{ background: 'var(--bg-secondary)' }}>
+                  <div className="h-2 rounded-full transition-all duration-700" style={{ width: `${todayPercent}%`, background: todayPercent >= 70 ? '#22c55e' : todayPercent >= 40 ? '#eab308' : '#ef4444' }} />
+                </div>
+                <span className="text-xs font-bold" style={{ color: todayPercent >= 70 ? '#22c55e' : 'var(--accent)' }}>{todayPercent}%</span>
+              </div>
+            </>
+          )}
+        </div>
 
-            {/* Progress bar */}
-            {totalToday > 0 && (
-              <div className="mt-4 pt-3 border-t" style={{ borderColor: 'var(--border)' }}>
-                <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-[10px] font-medium" style={{ color: 'var(--text-secondary)' }}>{lang === 'ru' ? 'Прогресс дня' : lang === 'en' ? 'Day progress' : 'Kun progressi'}</span>
-                  <span className="text-[10px] font-bold" style={{ color: todayPercent >= 70 ? '#22c55e' : 'var(--accent)' }}>{todayPercent}%</span>
-                </div>
-                <div className="w-full h-2 rounded-full" style={{ background: 'var(--bg-secondary)' }}>
-                  <div className="h-2 rounded-full transition-all duration-500" style={{ width: `${todayPercent}%`, background: todayPercent >= 70 ? '#22c55e' : todayPercent >= 40 ? '#eab308' : '#ef4444' }} />
-                </div>
+        {/* Right: Events + Quick */}
+        <div className="lg:col-span-2 space-y-4">
+          {/* Upcoming */}
+          <div className="card">
+            <div className="flex items-center gap-2 mb-3">
+              <Calendar size={15} style={{ color: 'var(--accent)' }} />
+              <h3 className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>
+                {lang === 'ru' ? 'Ближайшие' : lang === 'en' ? 'Upcoming' : 'Yaqinda'}
+              </h3>
+            </div>
+            {upcomingEvents.length === 0 ? (
+              <p className="text-xs text-center py-3" style={{ color: 'var(--text-secondary)' }}>—</p>
+            ) : (
+              <div className="space-y-2">
+                {upcomingEvents.slice(0, 3).map(ev => (
+                  <div key={ev.id} className="flex items-center gap-2.5 p-2 rounded-lg" style={{ background: 'var(--bg-secondary)' }}>
+                    <span className="text-lg">{ev.icon}</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-medium truncate" style={{ color: 'var(--text-primary)' }}>{ev.title}</p>
+                      <p className="text-[9px]" style={{ color: 'var(--text-secondary)' }}>{ev.date}</p>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
           </div>
 
-          {/* Active Streaks */}
+          {/* Quick Actions */}
+          <div className="card" style={{ padding: '0.75rem' }}>
+            <div className="grid grid-cols-4 gap-1.5">
+              {[
+                { icon: Plus, label: lang === 'ru' ? 'Задача' : 'Vazifa', color: 'text-blue-500', bg: 'bg-blue-500/10', path: '/plans' },
+                { icon: Target, label: lang === 'ru' ? 'Цель' : 'Maqsad', color: 'text-green-500', bg: 'bg-green-500/10', path: '/goals' },
+                { icon: BarChart3, label: lang === 'ru' ? 'Статы' : 'Tahlil', color: 'text-purple-500', bg: 'bg-purple-500/10', path: '/analysis' },
+                { icon: Zap, label: lang === 'ru' ? 'Фокус' : 'Fokus', color: 'text-orange-500', bg: 'bg-orange-500/10', path: '/focus' },
+              ].map((a, i) => (
+                <button key={i} onClick={() => navigate(a.path)} className="flex flex-col items-center gap-1.5 p-2.5 rounded-xl transition-all hover:scale-105 active:scale-95" style={{ background: 'var(--bg-secondary)' }}>
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${a.bg}`}><a.icon size={15} className={a.color} /></div>
+                  <span className="text-[9px] font-medium" style={{ color: 'var(--text-secondary)' }}>{a.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Active Streaks mini */}
           {habits.filter(h => h.streak > 0).length > 0 && (
-            <div className="card">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <Flame size={16} className="text-orange-500" />
-                  <h3 className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>{lang === 'ru' ? 'Активные серии' : lang === 'en' ? 'Active Streaks' : 'Faol Streak\'lar'}</h3>
-                </div>
+            <div className="card" style={{ padding: '0.75rem 1rem' }}>
+              <div className="flex items-center gap-2 mb-2">
+                <Flame size={14} className="text-orange-500" />
+                <span className="text-xs font-semibold" style={{ color: 'var(--text-primary)' }}>Streak'lar</span>
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                {habits.filter(h => h.streak > 0).slice(0, 6).map(habit => (
-                  <div key={habit.id} className="flex items-center gap-2 p-2.5 rounded-xl" style={{ background: 'var(--bg-secondary)' }}>
-                    <span className="text-lg">{habit.icon}</span>
-                    <div className="min-w-0">
-                      <p className="text-xs font-medium truncate" style={{ color: 'var(--text-primary)' }}>{habit.name}</p>
-                      <p className="text-[10px] font-bold text-orange-500">{habit.streak} 🔥</p>
-                    </div>
-                  </div>
+              <div className="flex flex-wrap gap-1.5">
+                {habits.filter(h => h.streak > 0).slice(0, 5).map(h => (
+                  <span key={h.id} className="text-[9px] px-2 py-1 rounded-lg font-medium" style={{ background: 'var(--bg-secondary)', color: 'var(--text-primary)' }}>
+                    {h.icon} {h.streak}d
+                  </span>
                 ))}
               </div>
             </div>
           )}
-        </div>
-
-        {/* Right Column */}
-        <div className="lg:col-span-2 space-y-5">
-          {/* Quick Actions */}
-          <div className="card" style={{ padding: '1rem' }}>
-            <h3 className="font-semibold text-sm mb-3" style={{ color: 'var(--text-primary)' }}>{lang === 'ru' ? 'Быстрые действия' : lang === 'en' ? 'Quick Actions' : 'Tezkor amallar'}</h3>
-            <div className="grid grid-cols-4 gap-2">
-              <QuickAction icon={Plus} label={lang === 'ru' ? 'Задача' : lang === 'en' ? 'Task' : 'Vazifa'} color="text-blue-500" bgColor="bg-blue-500/10" onClick={() => navigate('/plans')} />
-              <QuickAction icon={Target} label={lang === 'ru' ? 'Цель' : lang === 'en' ? 'Goal' : 'Maqsad'} color="text-green-500" bgColor="bg-green-500/10" onClick={() => navigate('/goals')} />
-              <QuickAction icon={BarChart3} label={lang === 'ru' ? 'Аналитика' : lang === 'en' ? 'Stats' : 'Statistika'} color="text-purple-500" bgColor="bg-purple-500/10" onClick={() => navigate('/analysis')} />
-              <QuickAction icon={Zap} label={lang === 'ru' ? 'Фокус' : lang === 'en' ? 'Focus' : 'Fokus'} color="text-orange-500" bgColor="bg-orange-500/10" onClick={() => navigate('/focus')} />
-            </div>
-          </div>
-
-          {/* Upcoming Events */}
-          <div className="card">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <Calendar size={16} style={{ color: 'var(--accent)' }} />
-                <h3 className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>{lang === 'ru' ? 'Ближайшие' : lang === 'en' ? 'Upcoming' : 'Yaqinda'}</h3>
-              </div>
-            </div>
-            {upcomingEvents.length === 0 ? (
-              <p className="text-xs text-center py-4" style={{ color: 'var(--text-secondary)' }}>{lang === 'ru' ? 'Нет событий' : lang === 'en' ? 'No events' : 'Voqealar yo\'q'}</p>
-            ) : (
-              <div className="space-y-2.5">
-                {upcomingEvents.map(event => (
-                  <div key={event.id} className="flex items-center gap-3 p-2.5 rounded-xl" style={{ background: 'var(--bg-secondary)' }}>
-                    <span className="text-xl">{event.icon}</span>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-medium truncate" style={{ color: 'var(--text-primary)' }}>{event.title}</p>
-                      <p className="text-[10px]" style={{ color: 'var(--text-secondary)' }}>{event.date}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* AI Insights */}
-          <div className="card" style={{ background: 'linear-gradient(135deg, rgba(59,130,246,0.05), rgba(147,51,234,0.05))' }}>
-            <div className="flex items-center gap-2 mb-3">
-              <TrendingUp size={16} style={{ color: 'var(--accent)' }} />
-              <h3 className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>{lang === 'ru' ? 'Аналитика' : lang === 'en' ? 'Insights' : 'Tahlil'}</h3>
-            </div>
-            <div className="space-y-2.5">
-              <div className="flex items-start gap-2">
-                <span className="text-sm">💡</span>
-                <p className="text-xs" style={{ color: 'var(--text-primary)' }}>{lang === 'ru' ? 'Лучшее время работы' : lang === 'en' ? 'Best productive time' : 'Samarali vaqt'}: <b>09:00–12:00</b></p>
-              </div>
-              <div className="flex items-start gap-2">
-                <span className="text-sm">📊</span>
-                <p className="text-xs" style={{ color: 'var(--text-primary)' }}>{lang === 'ru' ? 'Прогресс целей' : lang === 'en' ? 'Goals progress' : 'Maqsadlar'}: <b>{goals.length > 0 ? Math.round(goals.reduce((a,g) => a + g.progress, 0) / goals.length) : 0}%</b></p>
-              </div>
-              <div className="flex items-start gap-2">
-                <span className="text-sm">🔥</span>
-                <p className="text-xs" style={{ color: 'var(--text-primary)' }}>{lang === 'ru' ? 'Макс серия' : lang === 'en' ? 'Max streak' : 'Max streak'}: <b>{maxStreak} {lang === 'ru' ? 'дней' : lang === 'en' ? 'days' : 'kun'}</b></p>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>

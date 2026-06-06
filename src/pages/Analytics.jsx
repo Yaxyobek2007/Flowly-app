@@ -1,160 +1,247 @@
+import { useMemo } from 'react';
 import { useApp } from '../context/AppContext';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
-import { AlertTriangle } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell, CartesianGrid, AreaChart, Area } from 'recharts';
+import { TrendingUp, TrendingDown, CheckCircle2, XCircle, Flame, Target, Calendar, ArrowUpRight, ArrowDownRight, Activity } from 'lucide-react';
+
+const COLORS = ['#3b82f6', '#22c55e', '#eab308', '#ef4444', '#8b5cf6', '#06b6d4', '#f97316'];
+const DAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+const DAY_SHORT = { uz: ['Du', 'Se', 'Ch', 'Pa', 'Ju', 'Sh', 'Ya'], ru: ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'], en: ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'] };
+
+function MetricCard({ label, value, sub, icon: Icon, iconColor, trend, trendUp }) {
+  return (
+    <div className="card" style={{ padding: '1rem' }}>
+      <div className="flex items-center justify-between mb-2">
+        <div className={`w-8 h-8 rounded-lg flex items-center justify-center bg-opacity-10`} style={{ background: `${iconColor}15` }}>
+          <Icon size={16} style={{ color: iconColor }} />
+        </div>
+        {trend !== undefined && (
+          <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded flex items-center gap-0.5 ${trendUp ? 'bg-green-500/10 text-green-600' : 'bg-red-500/10 text-red-500'}`}>
+            {trendUp ? <ArrowUpRight size={9} /> : <ArrowDownRight size={9} />} {trend}%
+          </span>
+        )}
+      </div>
+      <p className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>{value}</p>
+      <p className="text-[10px] mt-0.5" style={{ color: 'var(--text-secondary)' }}>{label}</p>
+      {sub && <p className="text-[9px] mt-1 font-medium" style={{ color: iconColor }}>{sub}</p>}
+    </div>
+  );
+}
 
 export default function Analytics() {
   const { tasks, habits, goals, calculateLifeScore } = useApp();
+  const { language } = useAuth();
+  const lang = language || 'uz';
   const lifeScore = calculateLifeScore();
 
-  const completedTasks = tasks.filter(t => t.completed);
-  const failedTasks = tasks.filter(t => !t.completed);
+  const completedTasks = tasks.filter(t => t.completed).length;
+  const totalTasks = tasks.length;
+  const failedTasks = totalTasks - completedTasks;
+  const completionRate = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
 
-  const weeklyData = [
-    { day: 'Dush', completed: tasks.filter(t => t.day === 'monday' && t.completed).length, total: tasks.filter(t => t.day === 'monday').length },
-    { day: 'Sesh', completed: tasks.filter(t => t.day === 'tuesday' && t.completed).length, total: tasks.filter(t => t.day === 'tuesday').length },
-    { day: 'Chor', completed: tasks.filter(t => t.day === 'wednesday' && t.completed).length, total: tasks.filter(t => t.day === 'wednesday').length },
-    { day: 'Pay', completed: tasks.filter(t => t.day === 'thursday' && t.completed).length, total: tasks.filter(t => t.day === 'thursday').length },
-    { day: 'Jum', completed: tasks.filter(t => t.day === 'friday' && t.completed).length, total: tasks.filter(t => t.day === 'friday').length },
-    { day: 'Shan', completed: tasks.filter(t => t.day === 'saturday' && t.completed).length, total: tasks.filter(t => t.day === 'saturday').length },
-    { day: 'Yak', completed: tasks.filter(t => t.day === 'sunday' && t.completed).length, total: tasks.filter(t => t.day === 'sunday').length },
-  ];
+  const totalStreaks = habits.reduce((a, h) => a + (h.streak || 0), 0);
+  const maxStreak = Math.max(...habits.map(h => h.streak || 0), 0);
+  const habitsToday = habits.filter(h => h.todayDone).length;
+  const habitRate = habits.length > 0 ? Math.round((habitsToday / habits.length) * 100) : 0;
 
-  const monthlyData = [
-    { week: '1-hafta', score: 72 }, { week: '2-hafta', score: 78 }, { week: '3-hafta', score: 85 }, { week: '4-hafta', score: lifeScore },
-  ];
+  const goalProgress = goals.length > 0 ? Math.round(goals.reduce((a, g) => a + (g.progress || 0), 0) / goals.length) : 0;
+  const goalsCompleted = goals.filter(g => g.progress >= 100).length;
 
-  const goalData = goals.map(g => ({ name: g.title.length > 18 ? g.title.substring(0, 18) + '...' : g.title, progress: g.progress }));
-  const COLORS = ['#3b82f6', '#22c55e', '#eab308', '#ef4444', '#8b5cf6'];
-
-  const pieData = [
-    { name: 'Bajarildi', value: completedTasks.length },
-    { name: 'Bajarilmadi', value: failedTasks.length },
-  ];
+  // Weekly tasks chart data
+  const weeklyData = useMemo(() => {
+    return DAYS.map((d, i) => ({
+      day: DAY_SHORT[lang]?.[i] || DAY_SHORT.uz[i],
+      completed: tasks.filter(t => t.day === d && t.completed).length,
+      failed: tasks.filter(t => t.day === d && !t.completed).length,
+      total: tasks.filter(t => t.day === d).length,
+    }));
+  }, [tasks, lang]);
 
   // Category breakdown
-  const categories = ['personal', 'education', 'health', 'work', 'finance'];
-  const categoryData = categories.map(cat => ({
-    category: cat,
-    completed: tasks.filter(t => t.category === cat && t.completed).length,
-    failed: tasks.filter(t => t.category === cat && !t.completed).length,
-  }));
+  const categoryData = useMemo(() => {
+    const cats = ['personal', 'education', 'health', 'work', 'finance'];
+    const catLabels = { uz: ['Shaxsiy', "Ta'lim", "Sog'liq", 'Ish', 'Moliya'], ru: ['Личное', 'Учёба', 'Здоровье', 'Работа', 'Финансы'], en: ['Personal', 'Education', 'Health', 'Work', 'Finance'] };
+    return cats.map((c, i) => ({
+      name: catLabels[lang]?.[i] || catLabels.uz[i],
+      value: tasks.filter(t => t.category === c).length,
+    })).filter(c => c.value > 0);
+  }, [tasks, lang]);
+
+  // Habit streaks sorted
+  const sortedHabits = useMemo(() => {
+    return [...habits].sort((a, b) => (b.streak || 0) - (a.streak || 0));
+  }, [habits]);
+
+  // Simulated monthly trend (from real life score)
+  const monthlyTrend = useMemo(() => {
+    const base = lifeScore;
+    return [
+      { w: '1', score: Math.max(0, base - 20 + Math.random() * 10) },
+      { w: '2', score: Math.max(0, base - 10 + Math.random() * 10) },
+      { w: '3', score: Math.max(0, base - 5 + Math.random() * 5) },
+      { w: '4', score: base },
+    ].map(d => ({ ...d, score: Math.round(d.score) }));
+  }, [lifeScore]);
+
+  const L = {
+    title: lang === 'ru' ? 'Аналитика' : lang === 'en' ? 'Analytics' : 'Statistika',
+    desc: lang === 'ru' ? 'Обзор вашей продуктивности' : lang === 'en' ? 'Your productivity overview' : 'Samaradorlik tahlili',
+    lifeScore: 'Life Score',
+    tasks: lang === 'ru' ? 'Задачи' : lang === 'en' ? 'Tasks' : 'Vazifalar',
+    completed: lang === 'ru' ? 'Выполнено' : lang === 'en' ? 'Completed' : 'Bajarildi',
+    failed: lang === 'ru' ? 'Не выполнено' : lang === 'en' ? 'Failed' : 'Bajarilmadi',
+    streaks: lang === 'ru' ? 'Серии' : lang === 'en' ? 'Streaks' : 'Streak',
+    goals: lang === 'ru' ? 'Цели' : lang === 'en' ? 'Goals' : 'Maqsadlar',
+    weekly: lang === 'ru' ? 'Задачи за неделю' : lang === 'en' ? 'Weekly Tasks' : 'Haftalik vazifalar',
+    monthly: lang === 'ru' ? 'Life Score (месяц)' : lang === 'en' ? 'Life Score (month)' : 'Life Score (oylik)',
+    categories: lang === 'ru' ? 'По категориям' : lang === 'en' ? 'By Category' : 'Kategoriyalar',
+    habitStreaks: lang === 'ru' ? 'Серии привычек' : lang === 'en' ? 'Habit Streaks' : 'Odat streak\'lari',
+    goalsProgress: lang === 'ru' ? 'Прогресс целей' : lang === 'en' ? 'Goals Progress' : 'Maqsadlar progressi',
+    days: lang === 'ru' ? 'дн' : lang === 'en' ? 'd' : 'kun',
+    today: lang === 'ru' ? 'сегодня' : lang === 'en' ? 'today' : 'bugun',
+    ofTotal: lang === 'ru' ? 'из' : lang === 'en' ? 'of' : 'dan',
+  };
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6">
+    <div className="max-w-7xl mx-auto space-y-5">
+      {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>Analytics</h1>
-        <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Statistikalar va hisobotlar</p>
+        <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>{L.title}</h1>
+        <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{L.desc}</p>
       </div>
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-        <div className="card text-center">
-          <p className="text-2xl font-bold" style={{ color: 'var(--accent)' }}>{lifeScore}%</p>
-          <p className="text-xs mt-1" style={{ color: 'var(--text-secondary)' }}>Life Score</p>
+      {/* KPI Row */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+        <MetricCard icon={Activity} iconColor="#3b82f6" label={L.lifeScore} value={`${lifeScore}%`}
+          sub={lifeScore >= 70 ? '● Ajoyib' : lifeScore >= 40 ? '● O\'rtacha' : '● Yaxshilang'}
+          trend={lifeScore > 50 ? 8 : -12} trendUp={lifeScore > 50} />
+        <MetricCard icon={CheckCircle2} iconColor="#22c55e" label={L.completed} value={completedTasks}
+          sub={`${completionRate}% ${L.ofTotal} ${totalTasks}`}
+          trend={completionRate} trendUp={completionRate >= 50} />
+        <MetricCard icon={XCircle} iconColor="#ef4444" label={L.failed} value={failedTasks}
+          sub={`${100 - completionRate}%`}
+          trend={100 - completionRate} trendUp={false} />
+        <MetricCard icon={Flame} iconColor="#f97316" label={L.streaks} value={totalStreaks}
+          sub={`Max: ${maxStreak} ${L.days}`}
+          trend={habitRate} trendUp={habitRate >= 50} />
+        <MetricCard icon={Target} iconColor="#8b5cf6" label={L.goals} value={`${goalProgress}%`}
+          sub={`${goalsCompleted}/${goals.length} ✓`}
+          trend={goalProgress} trendUp={goalProgress >= 30} />
+        <MetricCard icon={Calendar} iconColor="#06b6d4" label={L.today} value={`${habitsToday}/${habits.length}`}
+          sub={`${habitRate}% ${L.today}`}
+          trend={habitRate} trendUp={habitRate >= 50} />
+      </div>
+
+      {/* Charts Row 1 */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* Weekly Bar Chart */}
+        <div className="card">
+          <h3 className="font-semibold text-sm mb-4" style={{ color: 'var(--text-primary)' }}>{L.weekly}</h3>
+          <ResponsiveContainer width="100%" height={220}>
+            <BarChart data={weeklyData} barGap={2}>
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" opacity={0.5} />
+              <XAxis dataKey="day" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} axisLine={false} tickLine={false} width={25} />
+              <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '12px', fontSize: '12px' }} />
+              <Bar dataKey="completed" fill="#22c55e" radius={[4, 4, 0, 0]} name={L.completed} />
+              <Bar dataKey="failed" fill="#ef4444" radius={[4, 4, 0, 0]} name={L.failed} opacity={0.6} />
+            </BarChart>
+          </ResponsiveContainer>
         </div>
-        <div className="card text-center">
-          <p className="text-2xl font-bold text-green-500">{completedTasks.length}</p>
-          <p className="text-xs mt-1" style={{ color: 'var(--text-secondary)' }}>Bajarilgan</p>
-        </div>
-        <div className="card text-center">
-          <p className="text-2xl font-bold text-red-500">{failedTasks.length}</p>
-          <p className="text-xs mt-1" style={{ color: 'var(--text-secondary)' }}>Bajarilmagan</p>
-        </div>
-        <div className="card text-center">
-          <p className="text-2xl font-bold text-orange-500">{habits.reduce((a, h) => a + h.streak, 0)}</p>
-          <p className="text-xs mt-1" style={{ color: 'var(--text-secondary)' }}>Jami streak</p>
-        </div>
-        <div className="card text-center">
-          <p className="text-2xl font-bold text-purple-500">{goals.length > 0 ? Math.round(goals.reduce((a, g) => a + g.progress, 0) / goals.length) : 0}%</p>
-          <p className="text-xs mt-1" style={{ color: 'var(--text-secondary)' }}>Maqsadlar</p>
+
+        {/* Monthly Life Score Area */}
+        <div className="card">
+          <h3 className="font-semibold text-sm mb-4" style={{ color: 'var(--text-primary)' }}>{L.monthly}</h3>
+          <ResponsiveContainer width="100%" height={220}>
+            <AreaChart data={monthlyTrend}>
+              <defs>
+                <linearGradient id="scoreGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" opacity={0.5} />
+              <XAxis dataKey="w" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} axisLine={false} tickLine={false} />
+              <YAxis domain={[0, 100]} tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} axisLine={false} tickLine={false} width={25} />
+              <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '12px', fontSize: '12px' }} />
+              <Area type="monotone" dataKey="score" stroke="#3b82f6" strokeWidth={3} fill="url(#scoreGradient)" dot={{ fill: '#3b82f6', r: 4 }} />
+            </AreaChart>
+          </ResponsiveContainer>
         </div>
       </div>
 
-      {/* Failed Tasks Warning */}
-      {failedTasks.length > 0 && (
-        <div className="card flex items-start gap-3" style={{ background: 'rgba(239,68,68,0.05)', borderColor: 'rgba(239,68,68,0.2)' }}>
-          <AlertTriangle size={20} className="text-red-500 mt-0.5" />
-          <div>
-            <h4 className="font-semibold text-red-600 dark:text-red-400">Bajarilmagan vazifalar: {failedTasks.length} ta</h4>
-            <div className="mt-2 space-y-1">
-              {failedTasks.slice(0, 5).map(t => (
-                <p key={t.id} className="text-sm" style={{ color: 'var(--text-secondary)' }}>• {t.title} ({t.day}, {t.time})</p>
-              ))}
-              {failedTasks.length > 5 && <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>va yana {failedTasks.length - 5} ta...</p>}
-            </div>
+      {/* Charts Row 2 */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        {/* Categories Pie */}
+        <div className="card">
+          <h3 className="font-semibold text-sm mb-4" style={{ color: 'var(--text-primary)' }}>{L.categories}</h3>
+          {categoryData.length === 0 ? (
+            <p className="text-center text-xs py-8" style={{ color: 'var(--text-secondary)' }}>—</p>
+          ) : (
+            <ResponsiveContainer width="100%" height={200}>
+              <PieChart>
+                <Pie data={categoryData} cx="50%" cy="50%" innerRadius={50} outerRadius={80} dataKey="value" paddingAngle={3}>
+                  {categoryData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                </Pie>
+                <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '12px', fontSize: '11px' }} />
+              </PieChart>
+            </ResponsiveContainer>
+          )}
+          <div className="flex flex-wrap gap-2 mt-2 justify-center">
+            {categoryData.map((c, i) => (
+              <span key={i} className="text-[9px] flex items-center gap-1">
+                <span className="w-2 h-2 rounded-full" style={{ background: COLORS[i % COLORS.length] }}></span>
+                {c.name}: {c.value}
+              </span>
+            ))}
           </div>
         </div>
-      )}
 
-      {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Goals Progress */}
         <div className="card">
-          <h3 className="font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Haftalik vazifalar</h3>
-          <ResponsiveContainer width="100%" height={250}>
-            <BarChart data={weeklyData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-              <XAxis dataKey="day" tick={{ fill: 'var(--text-secondary)', fontSize: 12 }} />
-              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 12 }} />
-              <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }} />
-              <Bar dataKey="completed" fill="#22c55e" radius={[4, 4, 0, 0]} name="Bajarildi" />
-              <Bar dataKey="total" fill="#e2e8f0" radius={[4, 4, 0, 0]} name="Jami" />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-
-        <div className="card">
-          <h3 className="font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Oylik Life Score</h3>
-          <ResponsiveContainer width="100%" height={250}>
-            <LineChart data={monthlyData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-              <XAxis dataKey="week" tick={{ fill: 'var(--text-secondary)', fontSize: 12 }} />
-              <YAxis domain={[0, 100]} tick={{ fill: 'var(--text-secondary)', fontSize: 12 }} />
-              <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }} />
-              <Line type="monotone" dataKey="score" stroke="#3b82f6" strokeWidth={3} dot={{ fill: '#3b82f6', r: 5 }} />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-
-        <div className="card">
-          <h3 className="font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Vazifalar holati</h3>
-          <ResponsiveContainer width="100%" height={250}>
-            <PieChart>
-              <Pie data={pieData} cx="50%" cy="50%" innerRadius={60} outerRadius={90} dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
-                <Cell fill="#22c55e" /><Cell fill="#ef4444" />
-              </Pie>
-              <Tooltip />
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
-
-        <div className="card">
-          <h3 className="font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Maqsadlar progressi</h3>
-          <ResponsiveContainer width="100%" height={250}>
-            <BarChart data={goalData} layout="vertical">
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-              <XAxis type="number" domain={[0, 100]} tick={{ fill: 'var(--text-secondary)', fontSize: 12 }} />
-              <YAxis type="category" dataKey="name" width={130} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-              <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }} />
-              <Bar dataKey="progress" fill="#8b5cf6" radius={[0, 4, 4, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
-
-      {/* Habit Streaks */}
-      <div className="card">
-        <h3 className="font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Odat streak'lari</h3>
-        <div className="space-y-3">
-          {habits.map((habit, idx) => (
-            <div key={habit.id} className="flex items-center gap-3">
-              <span className="text-lg w-8">{habit.icon}</span>
-              <span className="text-sm font-medium w-28 truncate" style={{ color: 'var(--text-primary)' }}>{habit.name}</span>
-              <div className="flex-1 h-3 rounded-full" style={{ background: 'var(--bg-secondary)' }}>
-                <div className="h-3 rounded-full transition-all" style={{ width: `${Math.min(habit.streak * 2, 100)}%`, background: COLORS[idx % COLORS.length] }}></div>
-              </div>
-              <span className="text-sm font-bold" style={{ color: COLORS[idx % COLORS.length] }}>{habit.streak} kun</span>
+          <h3 className="font-semibold text-sm mb-4" style={{ color: 'var(--text-primary)' }}>{L.goalsProgress}</h3>
+          {goals.length === 0 ? (
+            <p className="text-center text-xs py-8" style={{ color: 'var(--text-secondary)' }}>—</p>
+          ) : (
+            <div className="space-y-3">
+              {goals.slice(0, 6).map((g, i) => (
+                <div key={g.id}>
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-[10px] font-medium truncate max-w-[70%]" style={{ color: 'var(--text-primary)' }}>{g.title}</span>
+                    <span className="text-[10px] font-bold" style={{ color: COLORS[i % COLORS.length] }}>{g.progress || 0}%</span>
+                  </div>
+                  <div className="h-2 rounded-full" style={{ background: 'var(--bg-secondary)' }}>
+                    <div className="h-2 rounded-full transition-all" style={{ width: `${g.progress || 0}%`, background: COLORS[i % COLORS.length] }} />
+                  </div>
+                </div>
+              ))}
             </div>
-          ))}
+          )}
+        </div>
+
+        {/* Habit Streaks */}
+        <div className="card">
+          <h3 className="font-semibold text-sm mb-4" style={{ color: 'var(--text-primary)' }}>{L.habitStreaks}</h3>
+          {sortedHabits.length === 0 ? (
+            <p className="text-center text-xs py-8" style={{ color: 'var(--text-secondary)' }}>—</p>
+          ) : (
+            <div className="space-y-3">
+              {sortedHabits.slice(0, 6).map((h, i) => (
+                <div key={h.id} className="flex items-center gap-2">
+                  <span className="text-base w-6">{h.icon}</span>
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between mb-0.5">
+                      <span className="text-[10px] font-medium truncate" style={{ color: 'var(--text-primary)' }}>{h.name}</span>
+                      <span className="text-[10px] font-bold" style={{ color: COLORS[i % COLORS.length] }}>🔥{h.streak || 0}</span>
+                    </div>
+                    <div className="h-1.5 rounded-full" style={{ background: 'var(--bg-secondary)' }}>
+                      <div className="h-1.5 rounded-full transition-all" style={{ width: `${Math.min((h.streak || 0) * 3, 100)}%`, background: COLORS[i % COLORS.length] }} />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>
