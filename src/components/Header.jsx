@@ -148,7 +148,7 @@ export default function Header({ onMenuClick, visible, onOpenShop }) {
             <button onClick={() => { setShowUserMenu(!showUserMenu); setShowNotifs(false); }}
               className="flex items-center gap-2 p-1 rounded-xl transition-colors hover:bg-blue-50 dark:hover:bg-blue-900/20">
               {currentUser?.avatar ? (
-                <img src={currentUser.avatar} alt="" className="w-8 h-8 rounded-full object-cover ring-2 ring-blue-500/30" />
+                <img src={currentUser.avatar} alt="Profile" className="w-8 h-8 rounded-full object-cover ring-2 ring-blue-500/30" />
               ) : (
                 <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center">
                   <span className="text-white font-bold text-xs">{(currentUser?.name?.[0] || 'U').toUpperCase()}{(currentUser?.surname?.[0] || '').toUpperCase()}</span>

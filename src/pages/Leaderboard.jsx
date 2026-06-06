@@ -61,7 +61,7 @@ export default function Leaderboard() {
             <div className="w-7 flex justify-center">{getRank(i)}</div>
             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-purple-400 flex items-center justify-center overflow-hidden">
               {u.avatar ? (
-                <img src={u.avatar} alt="" className="w-full h-full object-cover" />
+                <img src={u.avatar} alt="User" className="w-full h-full object-cover" />
               ) : (
                 <span className="text-white text-[10px] font-bold">{(u.name?.[0] || '?').toUpperCase()}</span>
               )}

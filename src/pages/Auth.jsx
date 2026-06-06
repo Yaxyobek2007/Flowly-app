@@ -41,7 +41,6 @@ export default function Auth() {
 
   const handleLogoClick = () => {
     setLogoRotation(prev => prev + 360);
-    window.location.reload();
   };
 
   const handleLogin = (e) => {

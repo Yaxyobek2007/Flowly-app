@@ -420,7 +420,7 @@ export default function CrmErp() {
                     <div className="flex items-center gap-4">
                       <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-400 to-purple-400 flex items-center justify-center flex-shrink-0 overflow-hidden">
                         {user.avatar ? (
-                          <img src={user.avatar} alt="" className="w-full h-full object-cover" />
+                          <img src={user.avatar} alt="User avatar" className="w-full h-full object-cover" />
                         ) : (
                           <span className="text-white font-bold">{(user.name?.[0] || '?').toUpperCase()}</span>
                         )}

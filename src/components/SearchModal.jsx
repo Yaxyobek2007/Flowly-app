@@ -95,7 +95,7 @@ export default function SearchModal({ isOpen, onClose }) {
       
       recognition.start();
     } else {
-      alert("Brauzeringiz ovozli qidiruvni qo'llab-quvvatlamaydi");
+      // Browser doesn't support speech recognition — text search still works
     }
   };
 

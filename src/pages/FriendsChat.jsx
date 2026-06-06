@@ -214,7 +214,7 @@ export default function FriendsChat() {
                     isMe ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-br-md' : 'rounded-bl-md'
                   }`} style={!isMe ? { background: 'var(--bg-secondary)', color: 'var(--text-primary)' } : {}}>
                     {msg.image && (
-                      <img src={msg.image} alt="" className="w-full max-w-[200px] rounded-xl mb-2 cursor-pointer" />
+                      <img src={msg.image} alt="Shared photo" className="w-full max-w-[200px] rounded-xl mb-2 cursor-pointer" />
                     )}
                     {msg.text && <p>{msg.text}</p>}
                     <p className={`text-[9px] mt-1 ${isMe ? 'text-blue-200 text-right' : ''}`} style={!isMe ? { color: 'var(--text-secondary)' } : {}}>{msg.time}</p>
@@ -229,7 +229,7 @@ export default function FriendsChat() {
         {/* Image preview */}
         {imagePreview && (
           <div className="px-4 pb-2 flex items-center gap-2">
-            <img src={imagePreview} alt="" className="w-16 h-16 rounded-xl object-cover" />
+            <img src={imagePreview} alt="Preview" className="w-16 h-16 rounded-xl object-cover" />
             <button onClick={() => setImagePreview(null)} className="p-1 rounded-full bg-red-500 text-white"><X size={12} /></button>
             <span className="text-[10px]" style={{ color: 'var(--text-secondary)' }}>{L.photoProof}</span>
           </div>
