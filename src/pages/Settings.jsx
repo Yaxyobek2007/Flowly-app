@@ -250,6 +250,72 @@ export default function Settings() {
       {/* Active Devices / Sessions */}
       <ActiveDevices lang={lang} currentUser={currentUser} />
 
+      {/* Data Export/Backup */}
+      <div className="card space-y-3">
+        <div className="flex items-center gap-3">
+          <Shield size={20} style={{ color: 'var(--accent)' }} />
+          <h3 className="font-semibold" style={{ color: 'var(--text-primary)' }}>
+            {lang === 'ru' ? 'Данные' : lang === 'en' ? 'Data' : "Ma'lumotlar"}
+          </h3>
+        </div>
+        <button onClick={() => {
+          const data = {};
+          for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key?.startsWith('flowly-')) data[key] = localStorage.getItem(key);
+          }
+          const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url; a.download = `flowly-backup-${new Date().toISOString().split('T')[0]}.json`;
+          a.click(); URL.revokeObjectURL(url);
+        }}
+          className="w-full flex items-center gap-3 p-3 rounded-xl transition-colors hover:bg-blue-50 dark:hover:bg-blue-900/10"
+          style={{ background: 'var(--bg-secondary)' }}>
+          <span className="text-lg">📦</span>
+          <div className="flex-1 text-left">
+            <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
+              {lang === 'ru' ? 'Скачать все данные' : lang === 'en' ? 'Export all data' : "Barcha ma'lumotni yuklab olish"}
+            </span>
+            <p className="text-[9px]" style={{ color: 'var(--text-secondary)' }}>
+              {lang === 'ru' ? 'JSON файл с задачами, привычками, целями' : 'Vazifalar, odatlar, maqsadlar — JSON fayl'}
+            </p>
+          </div>
+        </button>
+        <button onClick={() => {
+          const input = document.createElement('input');
+          input.type = 'file'; input.accept = '.json';
+          input.onchange = (e) => {
+            const file = e.target.files?.[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+              try {
+                const data = JSON.parse(ev.target.result);
+                Object.entries(data).forEach(([key, value]) => {
+                  if (key.startsWith('flowly-')) localStorage.setItem(key, value);
+                });
+                window.location.reload();
+              } catch(err) {}
+            };
+            reader.readAsText(file);
+          };
+          input.click();
+        }}
+          className="w-full flex items-center gap-3 p-3 rounded-xl transition-colors hover:bg-green-50 dark:hover:bg-green-900/10"
+          style={{ background: 'var(--bg-secondary)' }}>
+          <span className="text-lg">📥</span>
+          <div className="flex-1 text-left">
+            <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
+              {lang === 'ru' ? 'Восстановить данные' : lang === 'en' ? 'Restore data' : "Ma'lumotni tiklash"}
+            </span>
+            <p className="text-[9px]" style={{ color: 'var(--text-secondary)' }}>
+              {lang === 'ru' ? 'Загрузить JSON backup файл' : "JSON backup faylni yuklash"}
+            </p>
+          </div>
+        </button>
+      </div>
+
       {/* Account Actions */}
       <div className="card space-y-3">
         <div className="flex items-center gap-3">
