@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { Sun, Moon, Globe, User, LogOut, Shield, Bell, Palette, BellRing, BellOff, Vibrate, Mail, Clock, Calendar, Monitor, Smartphone, Tablet, Wifi, WifiOff, Trash2 } from 'lucide-react';
@@ -274,108 +274,95 @@ export default function Settings() {
 
 
 
-// ===== Active Devices Component =====
+// ===== Active Devices Component (Firebase Real-time) =====
 function ActiveDevices({ lang, currentUser }) {
   const [sessions, setSessions] = useState([]);
   const [loading, setLoading] = useState(true);
+  const sessionIdRef = useRef(null);
 
   // Detect current device info
   const getCurrentDevice = () => {
     const ua = navigator.userAgent;
     let deviceType = 'desktop';
-    let deviceName = 'Computer';
     let browser = 'Browser';
     let os = 'Unknown';
 
-    // Device type
-    if (/Mobi|Android/i.test(ua)) { deviceType = 'mobile'; deviceName = 'Telefon'; }
-    else if (/Tablet|iPad/i.test(ua)) { deviceType = 'tablet'; deviceName = 'Planshet'; }
+    if (/Mobi|Android/i.test(ua)) deviceType = 'mobile';
+    else if (/Tablet|iPad/i.test(ua)) deviceType = 'tablet';
 
-    // Browser
     if (/Chrome/i.test(ua) && !/Edge/i.test(ua)) browser = 'Chrome';
     else if (/Firefox/i.test(ua)) browser = 'Firefox';
     else if (/Safari/i.test(ua) && !/Chrome/i.test(ua)) browser = 'Safari';
     else if (/Edge/i.test(ua)) browser = 'Edge';
     else if (/Opera|OPR/i.test(ua)) browser = 'Opera';
 
-    // OS
     if (/Windows/i.test(ua)) os = 'Windows';
     else if (/Mac/i.test(ua)) os = 'macOS';
     else if (/Linux/i.test(ua) && !/Android/i.test(ua)) os = 'Linux';
     else if (/Android/i.test(ua)) os = 'Android';
     else if (/iPhone|iPad/i.test(ua)) os = 'iOS';
 
-    return { deviceType, deviceName, browser, os };
+    return { deviceType, browser, os };
   };
 
-  // Load/save sessions from localStorage + register current
   useEffect(() => {
-    if (!currentUser) { setLoading(false); return; }
+    if (!currentUser?.id) { setLoading(false); return; }
 
-    const storageKey = `flowly-sessions-${currentUser.id}`;
-    const saved = localStorage.getItem(storageKey);
-    let allSessions = saved ? JSON.parse(saved) : [];
+    // Import firebase functions
+    import('../firebase').then(({ addDeviceSession, updateDeviceSession, removeDeviceSession, removeAllDeviceSessions, onSessionsChange }) => {
+      // Generate unique session ID for this browser tab
+      const existingId = sessionStorage.getItem('flowly-session-id');
+      const sessionId = existingId || `s_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+      sessionStorage.setItem('flowly-session-id', sessionId);
+      sessionIdRef.current = sessionId;
 
-    // Generate unique session ID for this tab
-    const sessionId = sessionStorage.getItem('flowly-session-id') || `s_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-    sessionStorage.setItem('flowly-session-id', sessionId);
+      const device = getCurrentDevice();
 
-    const device = getCurrentDevice();
-    const now = new Date().toISOString();
+      // Register this session in Firebase
+      addDeviceSession(currentUser.id, {
+        id: sessionId,
+        ...device,
+        isCurrent: true,
+      }).catch(() => {});
 
-    // Update or add current session
-    const existingIdx = allSessions.findIndex(s => s.id === sessionId);
-    const currentSession = {
-      id: sessionId,
-      ...device,
-      lastActive: now,
-      ip: '***', // privacy
-      isCurrent: true,
-      loginAt: existingIdx >= 0 ? allSessions[existingIdx].loginAt : now,
-    };
+      // Listen to all sessions in real-time
+      const unsubscribe = onSessionsChange(currentUser.id, (firebaseSessions) => {
+        // Mark current session
+        const mapped = firebaseSessions.map(s => ({
+          ...s,
+          isCurrent: s.id === sessionId,
+          // Convert Firestore timestamp to Date string
+          lastActive: s.lastActive?.toDate?.() ? s.lastActive.toDate().toISOString() : s.lastActive || new Date().toISOString(),
+          loginAt: s.createdAt?.toDate?.() ? s.createdAt.toDate().toISOString() : s.createdAt || new Date().toISOString(),
+        }));
+        setSessions(mapped);
+        setLoading(false);
+      });
 
-    if (existingIdx >= 0) {
-      allSessions[existingIdx] = currentSession;
-    } else {
-      allSessions.push(currentSession);
-    }
+      // Update lastActive every 45 seconds
+      const interval = setInterval(() => {
+        updateDeviceSession(currentUser.id, sessionId).catch(() => {});
+      }, 45000);
 
-    // Mark others as not current, remove very old sessions (>30 days)
-    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
-    allSessions = allSessions
-      .map(s => s.id === sessionId ? s : { ...s, isCurrent: false })
-      .filter(s => s.lastActive > thirtyDaysAgo);
-
-    localStorage.setItem(storageKey, JSON.stringify(allSessions));
-    setSessions(allSessions);
-    setLoading(false);
-
-    // Update lastActive every 30 seconds
-    const interval = setInterval(() => {
-      const updated = JSON.parse(localStorage.getItem(storageKey) || '[]')
-        .map(s => s.id === sessionId ? { ...s, lastActive: new Date().toISOString() } : s);
-      localStorage.setItem(storageKey, JSON.stringify(updated));
-      setSessions(updated);
-    }, 30000);
-
-    return () => clearInterval(interval);
+      // Cleanup on unmount
+      return () => {
+        unsubscribe();
+        clearInterval(interval);
+      };
+    });
   }, [currentUser?.id]);
 
-  const removeSession = (sessionId) => {
-    if (!currentUser) return;
-    const storageKey = `flowly-sessions-${currentUser.id}`;
-    const updated = sessions.filter(s => s.id !== sessionId);
-    localStorage.setItem(storageKey, JSON.stringify(updated));
-    setSessions(updated);
+  const removeSession = async (targetSessionId) => {
+    if (!currentUser?.id) return;
+    const { removeDeviceSession } = await import('../firebase');
+    await removeDeviceSession(currentUser.id, targetSessionId).catch(() => {});
   };
 
-  const removeAll = () => {
-    if (!currentUser) return;
-    const currentId = sessionStorage.getItem('flowly-session-id');
-    const storageKey = `flowly-sessions-${currentUser.id}`;
-    const updated = sessions.filter(s => s.id === currentId);
-    localStorage.setItem(storageKey, JSON.stringify(updated));
-    setSessions(updated);
+  const removeAll = async () => {
+    if (!currentUser?.id) return;
+    const currentId = sessionIdRef.current;
+    const { removeAllDeviceSessions } = await import('../firebase');
+    await removeAllDeviceSessions(currentUser.id, currentId).catch(() => {});
   };
 
   const getDeviceIcon = (type) => {
@@ -385,10 +372,11 @@ function ActiveDevices({ lang, currentUser }) {
   };
 
   const getTimeAgo = (dateStr) => {
+    if (!dateStr) return '';
     const diff = Date.now() - new Date(dateStr).getTime();
     const mins = Math.floor(diff / 60000);
-    if (mins < 1) return lang === 'ru' ? 'Сейчас' : lang === 'en' ? 'Now' : 'Hozir';
-    if (mins < 60) return `${mins} ${lang === 'ru' ? 'мин назад' : lang === 'en' ? 'min ago' : 'daqiqa oldin'}`;
+    if (mins < 2) return lang === 'ru' ? 'Сейчас' : lang === 'en' ? 'Now' : 'Hozir';
+    if (mins < 60) return `${mins} ${lang === 'ru' ? 'мин назад' : lang === 'en' ? 'min ago' : 'daq oldin'}`;
     const hrs = Math.floor(mins / 60);
     if (hrs < 24) return `${hrs} ${lang === 'ru' ? 'ч назад' : lang === 'en' ? 'h ago' : 'soat oldin'}`;
     const days = Math.floor(hrs / 24);
@@ -396,20 +384,27 @@ function ActiveDevices({ lang, currentUser }) {
   };
 
   const isOnline = (dateStr) => {
-    return (Date.now() - new Date(dateStr).getTime()) < 60000; // active in last 1 min
+    if (!dateStr) return false;
+    return (Date.now() - new Date(dateStr).getTime()) < 90000; // 1.5 min
   };
 
   const L = {
     title: lang === 'ru' ? 'Активные устройства' : lang === 'en' ? 'Active Devices' : 'Faol qurilmalar',
     current: lang === 'ru' ? 'Это устройство' : lang === 'en' ? 'This device' : 'Bu qurilma',
     online: lang === 'ru' ? 'Онлайн' : lang === 'en' ? 'Online' : 'Online',
-    offline: lang === 'ru' ? 'Оффлайн' : lang === 'en' ? 'Offline' : 'Offline',
-    logoutAll: lang === 'ru' ? 'Завершить все кроме текущего' : lang === 'en' ? 'End all except current' : 'Barchasini tugatish (joriydan tashqari)',
+    logoutAll: lang === 'ru' ? 'Завершить все' : lang === 'en' ? 'End all others' : 'Barchasini tugatish',
     remove: lang === 'ru' ? 'Завершить' : lang === 'en' ? 'End' : 'Tugatish',
     loginAt: lang === 'ru' ? 'Вход' : lang === 'en' ? 'Login' : 'Kirish',
+    noOther: lang === 'ru' ? 'Других устройств нет' : lang === 'en' ? 'No other devices' : 'Boshqa qurilma yo\'q',
   };
 
-  if (loading) return null;
+  if (loading) {
+    return (
+      <div className="card flex items-center justify-center py-6">
+        <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="card space-y-4">
@@ -428,20 +423,20 @@ function ActiveDevices({ lang, currentUser }) {
 
       <div className="space-y-2">
         {sessions
-          .sort((a, b) => b.isCurrent - a.isCurrent || new Date(b.lastActive) - new Date(a.lastActive))
+          .sort((a, b) => (b.isCurrent ? 1 : 0) - (a.isCurrent ? 1 : 0) || new Date(b.lastActive || 0) - new Date(a.lastActive || 0))
           .map(session => {
             const DeviceIcon = getDeviceIcon(session.deviceType);
             const online = isOnline(session.lastActive);
             return (
               <div key={session.id} className={`flex items-center gap-3 p-3 rounded-xl transition-all ${session.isCurrent ? 'ring-1 ring-blue-500/30' : ''}`}
                 style={{ background: 'var(--bg-secondary)' }}>
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${session.isCurrent ? 'bg-blue-500/10' : 'bg-gray-100 dark:bg-gray-800'}`}>
-                  <DeviceIcon size={18} className={session.isCurrent ? 'text-blue-500' : ''} style={!session.isCurrent ? { color: 'var(--text-secondary)' } : {}} />
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${session.isCurrent ? 'bg-blue-500/10' : online ? 'bg-green-500/10' : 'bg-gray-100 dark:bg-gray-800'}`}>
+                  <DeviceIcon size={18} className={session.isCurrent ? 'text-blue-500' : online ? 'text-green-500' : ''} style={!session.isCurrent && !online ? { color: 'var(--text-secondary)' } : {}} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <p className="text-sm font-medium truncate" style={{ color: 'var(--text-primary)' }}>
-                      {session.browser} • {session.os}
+                      {session.browser || '?'} • {session.os || '?'}
                     </p>
                     {session.isCurrent && (
                       <span className="text-[8px] px-1.5 py-0.5 rounded bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 font-bold flex-shrink-0">
@@ -450,14 +445,18 @@ function ActiveDevices({ lang, currentUser }) {
                     )}
                   </div>
                   <div className="flex items-center gap-2 mt-0.5">
-                    <span className={`w-1.5 h-1.5 rounded-full ${online ? 'bg-green-500' : 'bg-gray-400'}`}></span>
-                    <span className="text-[10px]" style={{ color: 'var(--text-secondary)' }}>
+                    <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${online ? 'bg-green-500 animate-pulse' : 'bg-gray-400'}`}></span>
+                    <span className="text-[10px]" style={{ color: online ? '#22c55e' : 'var(--text-secondary)' }}>
                       {online ? L.online : getTimeAgo(session.lastActive)}
                     </span>
-                    <span className="text-[10px]" style={{ color: 'var(--text-secondary)' }}>•</span>
-                    <span className="text-[10px]" style={{ color: 'var(--text-secondary)' }}>
-                      {L.loginAt}: {new Date(session.loginAt).toLocaleDateString()}
-                    </span>
+                    {session.loginAt && (
+                      <>
+                        <span className="text-[10px]" style={{ color: 'var(--text-secondary)' }}>•</span>
+                        <span className="text-[10px]" style={{ color: 'var(--text-secondary)' }}>
+                          {new Date(session.loginAt).toLocaleDateString()}
+                        </span>
+                      </>
+                    )}
                   </div>
                 </div>
                 {!session.isCurrent && (
@@ -471,6 +470,10 @@ function ActiveDevices({ lang, currentUser }) {
             );
           })}
       </div>
+
+      {sessions.length <= 1 && (
+        <p className="text-center text-xs py-2" style={{ color: 'var(--text-secondary)' }}>✓ {L.noOther}</p>
+      )}
     </div>
   );
 }

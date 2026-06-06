@@ -97,3 +97,47 @@ export async function firebaseSignOut() {
 }
 
 export { onAuthStateChanged };
+
+// ===== DEVICE SESSIONS =====
+export const sessionsRef = (userId) => collection(db, "users", userId, "sessions");
+
+export async function addDeviceSession(userId, sessionData) {
+  const sessionDoc = doc(db, "users", userId, "sessions", sessionData.id);
+  await setDoc(sessionDoc, {
+    ...sessionData,
+    lastActive: serverTimestamp(),
+    createdAt: serverTimestamp(),
+  });
+}
+
+export async function updateDeviceSession(userId, sessionId) {
+  const sessionDoc = doc(db, "users", userId, "sessions", sessionId);
+  try {
+    await updateDoc(sessionDoc, { lastActive: serverTimestamp() });
+  } catch(e) {
+    // Doc may not exist yet — ignore
+  }
+}
+
+export async function removeDeviceSession(userId, sessionId) {
+  const sessionDoc = doc(db, "users", userId, "sessions", sessionId);
+  await deleteDoc(sessionDoc);
+}
+
+export async function removeAllDeviceSessions(userId, exceptSessionId) {
+  const snap = await getDocs(sessionsRef(userId));
+  const batch = [];
+  snap.docs.forEach(d => {
+    if (d.id !== exceptSessionId) {
+      batch.push(deleteDoc(doc(db, "users", userId, "sessions", d.id)));
+    }
+  });
+  await Promise.all(batch);
+}
+
+export function onSessionsChange(userId, callback) {
+  return onSnapshot(sessionsRef(userId), (snapshot) => {
+    const sessions = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+    callback(sessions);
+  });
+}
