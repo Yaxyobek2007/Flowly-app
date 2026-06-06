@@ -1,7 +1,9 @@
 import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
 import { getFirestore, collection, doc, setDoc, getDoc, getDocs, updateDoc, deleteDoc, onSnapshot, query, where, serverTimestamp } from "firebase/firestore";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "firebase/auth";
 
+// Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyAz1HHrSQvqsUH9CPgKDnkCY4D73brxo5U",
   authDomain: "flowly-app-weld.firebaseapp.com",
@@ -12,7 +14,10 @@ const firebaseConfig = {
   measurementId: "G-QJ5S310WEX"
 };
 
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
+let analytics = null;
+try { analytics = getAnalytics(app); } catch(e) {} // analytics may fail in non-browser env
 export const db = getFirestore(app);
 export const auth = getAuth(app);
 
