@@ -26,15 +26,18 @@ export default function Flashcards() {
     setShowForm(false);
   };
 
-  const card = decks[currentIdx];
+  const safeIdx = decks.length > 0 ? currentIdx % decks.length : 0;
+  const card = decks[safeIdx];
 
   const next = () => {
-    setCurrentIdx(i => (i + 1) % Math.max(decks.length, 1));
+    if (decks.length === 0) return;
+    setCurrentIdx(i => (i + 1) % decks.length);
     setFlipped(false);
   };
 
   const prev = () => {
-    setCurrentIdx(i => (i - 1 + decks.length) % Math.max(decks.length, 1));
+    if (decks.length === 0) return;
+    setCurrentIdx(i => (i - 1 + decks.length) % decks.length);
     setFlipped(false);
   };
 
@@ -89,7 +92,11 @@ export default function Flashcards() {
               style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border)' }}>
               <ChevronLeft size={20} style={{ color: 'var(--text-secondary)' }} />
             </button>
-            <button onClick={() => setDecks(decks.filter(d => d.id !== card?.id))} className="p-3 rounded-2xl hover:bg-red-50 dark:hover:bg-red-900/20">
+            <button onClick={() => {
+              setDecks(decks.filter(d => d.id !== card?.id));
+              setCurrentIdx(i => Math.max(0, i - 1));
+              setFlipped(false);
+            }} className="p-3 rounded-2xl hover:bg-red-50 dark:hover:bg-red-900/20">
               <Trash2 size={18} className="text-red-400" />
             </button>
             <button onClick={next} className="p-3 rounded-2xl"

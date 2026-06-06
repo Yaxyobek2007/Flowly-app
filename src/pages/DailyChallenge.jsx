@@ -47,7 +47,7 @@ export default function DailyChallenge() {
       <div className="card py-10" style={{ background: 'linear-gradient(135deg, rgba(59,130,246,0.05), rgba(139,92,246,0.05))' }}>
         <Dice6 size={48} className="text-blue-500 mx-auto mb-4" />
         <p className="text-xl font-bold px-4" style={{ color: 'var(--text-primary)' }}>
-          "{challenges[lang][state.idx]}"
+          "{challenges[lang]?.[state.idx] || challenges.uz[0]}"
         </p>
       </div>
 
