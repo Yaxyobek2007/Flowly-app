@@ -39,6 +39,33 @@ function PageLoader() {
   );
 }
 
+// Dynamic page title based on route
+function usePageTitle() {
+  const location = window.location.pathname;
+  useEffect(() => {
+    const titles = {
+      '/': 'Flowly — Dashboard',
+      '/plans': 'Flowly — Rejalar',
+      '/goals': 'Flowly — Maqsadlar',
+      '/focus': 'Flowly — Fokus',
+      '/health': 'Flowly — Odatlar',
+      '/motivation': 'Flowly — Yutuqlar',
+      '/finance': 'Flowly — Moliya',
+      '/analysis': 'Flowly — Statistika',
+      '/social': 'Flowly — Do\'stlar',
+      '/notes': 'Flowly — Yozuvlar',
+      '/location': 'Flowly — Xarita',
+      '/settings': 'Flowly — Sozlamalar',
+      '/profile': 'Flowly — Profil',
+      '/premium': 'Flowly — Premium',
+      '/help': 'Flowly — Yordam',
+      '/crm': 'Flowly — Admin Panel',
+      '/auth': 'Flowly — Kirish',
+    };
+    document.title = titles[location] || 'Flowly — Plan. Act. Achieve.';
+  }, [location]);
+}
+
 // Session timeout: 24 hours of inactivity
 const SESSION_TIMEOUT = 24 * 60 * 60 * 1000;
 
@@ -66,6 +93,7 @@ function JoinRedirect() {
 
 function AppRoutes() {
   const { currentUser, logout } = useAuth();
+  usePageTitle();
 
   // Auto-logout after 100 hours of inactivity
   useEffect(() => {
