@@ -20,14 +20,11 @@ function calculateXP({ tasks, habits, goals, currentUser }) {
   // Pomodoro: +3 per session
   xp += parseInt(localStorage.getItem('flowly-pomo-sessions') || '0') * 3;
   // Journal entries: +10 per entry
-  const journal = JSON.parse(localStorage.getItem('flowly-journal') || '[]');
-  xp += journal.length * 10;
+  try { const journal = JSON.parse(localStorage.getItem('flowly-journal') || '[]'); xp += journal.length * 10; } catch(e) {}
   // Smart plans: +20 per plan
-  const plans = JSON.parse(localStorage.getItem('flowly-smart-plans') || '[]');
-  xp += plans.length * 20;
+  try { const plans = JSON.parse(localStorage.getItem('flowly-smart-plans') || '[]'); xp += plans.length * 20; } catch(e) {}
   // Certificates: +25 per cert
-  const certs = JSON.parse(localStorage.getItem('flowly-certificates') || '[]');
-  xp += certs.length * 25;
+  try { const certs = JSON.parse(localStorage.getItem('flowly-certificates') || '[]'); xp += certs.length * 25; } catch(e) {}
   return xp;
 }
 

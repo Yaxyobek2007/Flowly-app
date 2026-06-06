@@ -31,8 +31,8 @@ export default function AiFloatingButton() {
   const lang = language || 'uz';
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState(() => {
-    const s = localStorage.getItem('flowly-ai-float');
-    return s ? JSON.parse(s) : [{ from: 'ai', text: lang === 'ru' ? 'Привет! 🤖' : lang === 'en' ? 'Hi! 🤖' : 'Salom! 🤖 "yordam" deb yozing' }];
+    try { const s = localStorage.getItem('flowly-ai-float'); return s ? JSON.parse(s) : [{ from: 'ai', text: lang === 'ru' ? 'Привет! 🤖' : lang === 'en' ? 'Hi! 🤖' : 'Salom! 🤖 "yordam" deb yozing' }]; }
+    catch(e) { return [{ from: 'ai', text: 'Salom! 🤖' }]; }
   });
   const [input, setInput] = useState('');
   const [typing, setTyping] = useState(false);

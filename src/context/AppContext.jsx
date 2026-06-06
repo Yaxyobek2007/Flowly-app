@@ -1,5 +1,16 @@
 import { createContext, useContext, useState, useEffect, useMemo } from 'react';
 
+// Safe JSON parse — prevents crash on corrupt localStorage data
+function safeParse(key, fallback) {
+  try {
+    const saved = localStorage.getItem(key);
+    return saved ? JSON.parse(saved) : fallback;
+  } catch (e) {
+    localStorage.removeItem(key);
+    return fallback;
+  }
+}
+
 const AppContext = createContext();
 
 const defaultTasks = [];
@@ -21,37 +32,15 @@ const defaultAchievements = [
 ];
 
 export function AppProvider({ children }) {
-  const [tasks, setTasks] = useState(() => {
-    const saved = localStorage.getItem('flowly-tasks');
-    return saved ? JSON.parse(saved) : defaultTasks;
-  });
-
-  const [habits, setHabits] = useState(() => {
-    const saved = localStorage.getItem('flowly-habits');
-    return saved ? JSON.parse(saved) : defaultHabits;
-  });
-
-  const [goals, setGoals] = useState(() => {
-    const saved = localStorage.getItem('flowly-goals');
-    return saved ? JSON.parse(saved) : defaultGoals;
-  });
-
-  const [notes, setNotes] = useState(() => {
-    const saved = localStorage.getItem('flowly-notes');
-    return saved ? JSON.parse(saved) : defaultNotes;
-  });
-
-  const [events, setEvents] = useState(() => {
-    const saved = localStorage.getItem('flowly-events');
-    return saved ? JSON.parse(saved) : defaultEvents;
-  });
+  const [tasks, setTasks] = useState(() => safeParse('flowly-tasks', defaultTasks));
+  const [habits, setHabits] = useState(() => safeParse('flowly-habits', defaultHabits));
+  const [goals, setGoals] = useState(() => safeParse('flowly-goals', defaultGoals));
+  const [notes, setNotes] = useState(() => safeParse('flowly-notes', defaultNotes));
+  const [events, setEvents] = useState(() => safeParse('flowly-events', defaultEvents));
 
   const [achievements] = useState(defaultAchievements);
 
-  const [notifications, setNotifications] = useState(() => {
-    const saved = localStorage.getItem('flowly-notifications');
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [notifications, setNotifications] = useState(() => safeParse('flowly-notifications', []));
 
   useEffect(() => { localStorage.setItem('flowly-tasks', JSON.stringify(tasks)); }, [tasks]);
   useEffect(() => { localStorage.setItem('flowly-habits', JSON.stringify(habits)); }, [habits]);

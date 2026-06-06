@@ -58,13 +58,13 @@ export function AuthProvider({ children }) {
   }
 
   const [users, setUsers] = useState(() => {
-    const saved = localStorage.getItem('flowly-users');
-    return saved ? JSON.parse(saved) : defaultUsers;
+    try { const saved = localStorage.getItem('flowly-users'); return saved ? JSON.parse(saved) : defaultUsers; }
+    catch(e) { return defaultUsers; }
   });
 
   const [currentUser, setCurrentUser] = useState(() => {
-    const saved = localStorage.getItem('flowly-current-user');
-    return saved ? JSON.parse(saved) : null;
+    try { const saved = localStorage.getItem('flowly-current-user'); return saved ? JSON.parse(saved) : null; }
+    catch(e) { return null; }
   });
 
   const [language, setLanguage] = useState(() => {
