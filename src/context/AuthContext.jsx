@@ -112,12 +112,46 @@ export function AuthProvider({ children }) {
     return () => { if (firebaseListenerRef.current) firebaseListenerRef.current(); };
   }, []);
 
-  // Online status tracking (no geolocation — moved to LocationMap page)
+  // Online status + auto-register device session on login
   useEffect(() => {
     if (!currentUser) return;
 
     // Set online
     setUserOnline(currentUser.id, true).catch(() => {});
+
+    // Register device session in Firebase (so other devices can see it)
+    const registerSession = async () => {
+      try {
+        const { addDeviceSession, updateDeviceSession } = await import('../firebase');
+        const existingId = sessionStorage.getItem('flowly-session-id');
+        const sessionId = existingId || `s_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+        sessionStorage.setItem('flowly-session-id', sessionId);
+
+        const ua = navigator.userAgent;
+        let deviceType = 'desktop', browser = 'Browser', os = 'Unknown';
+        if (/Mobi|Android/i.test(ua)) deviceType = 'mobile';
+        else if (/Tablet|iPad/i.test(ua)) deviceType = 'tablet';
+        if (/Chrome/i.test(ua) && !/Edge/i.test(ua)) browser = 'Chrome';
+        else if (/Firefox/i.test(ua)) browser = 'Firefox';
+        else if (/Safari/i.test(ua) && !/Chrome/i.test(ua)) browser = 'Safari';
+        else if (/Edge/i.test(ua)) browser = 'Edge';
+        if (/Windows/i.test(ua)) os = 'Windows';
+        else if (/Mac/i.test(ua)) os = 'macOS';
+        else if (/Android/i.test(ua)) os = 'Android';
+        else if (/iPhone|iPad/i.test(ua)) os = 'iOS';
+        else if (/Linux/i.test(ua)) os = 'Linux';
+
+        await addDeviceSession(currentUser.id, { id: sessionId, deviceType, browser, os });
+
+        // Keep session alive every 45 sec
+        const interval = setInterval(() => {
+          updateDeviceSession(currentUser.id, sessionId).catch(() => {});
+        }, 45000);
+
+        return () => clearInterval(interval);
+      } catch(e) {}
+    };
+    const cleanup = registerSession();
 
     // Set offline on page close
     const handleUnload = () => {
@@ -128,6 +162,7 @@ export function AuthProvider({ children }) {
     return () => {
       window.removeEventListener('beforeunload', handleUnload);
       if (currentUser?.id) setUserOnline(currentUser.id, false).catch(() => {});
+      if (cleanup && typeof cleanup.then === 'function') cleanup.then(fn => fn && fn());
     };
   }, [currentUser?.id]);
 
