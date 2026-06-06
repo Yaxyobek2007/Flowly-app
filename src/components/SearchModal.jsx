@@ -50,11 +50,11 @@ export default function SearchModal({ isOpen, onClose }) {
 
     const taskResults = tasks.filter(t =>
       t.title.toLowerCase().includes(q)
-    ).slice(0, 5).map(t => ({ type: 'task', label: t.title, path: '/daily', detail: `${t.time} - ${t.day}` }));
+    ).slice(0, 5).map(t => ({ type: 'task', label: t.title, path: '/plans', detail: `${t.time} - ${t.day}` }));
 
     const habitResults = habits.filter(h =>
       h.name.toLowerCase().includes(q)
-    ).slice(0, 3).map(h => ({ type: 'habit', label: `${h.icon} ${h.name}`, path: '/habits', detail: `🔥 ${h.streak} kun streak` }));
+    ).slice(0, 3).map(h => ({ type: 'habit', label: `${h.icon} ${h.name}`, path: '/health', detail: `🔥 ${h.streak} kun streak` }));
 
     const goalResults = goals.filter(g =>
       g.title.toLowerCase().includes(q)
@@ -66,7 +66,7 @@ export default function SearchModal({ isOpen, onClose }) {
 
     const eventResults = events.filter(e =>
       e.title.toLowerCase().includes(q)
-    ).slice(0, 3).map(e => ({ type: 'event', label: `${e.icon} ${e.title}`, path: '/monthly', detail: e.date }));
+    ).slice(0, 3).map(e => ({ type: 'event', label: `${e.icon} ${e.title}`, path: '/plans', detail: e.date }));
 
     setResults([...pageResults, ...taskResults, ...habitResults, ...goalResults, ...noteResults, ...eventResults]);
   }, [query, tasks, habits, goals, notes, events]);
