@@ -73,7 +73,7 @@ export default function Auth() {
     setLoading(true);
     setTimeout(() => {
       const result = loginWithPhone(phone, code);
-      if (!result.success) setError('Kod noto\'g\'ri. Test: 1234');
+      if (!result.success) setError(language === 'ru' ? 'Неверный код' : language === 'en' ? 'Invalid code' : 'Kod noto\'g\'ri');
       setLoading(false);
     }, 600);
   };
@@ -287,7 +287,7 @@ export default function Auth() {
                     ))}
                   </div>
                   {error && <p className="text-red-400 text-xs text-center">{error}</p>}
-                  <button type="button" onClick={() => { if (resetCode === '1234') { setResetCodeVerified(true); setError(''); } else { setError(language === 'ru' ? 'Неверный код (тест: 1234)' : language === 'en' ? 'Wrong code (test: 1234)' : 'Kod noto\'g\'ri (test: 1234)'); } }}
+                  <button type="button" onClick={() => { if (resetCode === '1234') { setResetCodeVerified(true); setError(''); } else { setError(language === 'ru' ? 'Неверный код' : language === 'en' ? 'Wrong code' : 'Kod noto\'g\'ri'); } }}
                     className="w-full py-3 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold shadow-lg">{t('verifyCode')}</button>
                 </>
               ) : (
