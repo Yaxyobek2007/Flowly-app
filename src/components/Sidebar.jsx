@@ -1,9 +1,9 @@
 import { NavLink } from 'react-router-dom';
 import {
-  LayoutDashboard, CalendarDays, Target, Timer, Heart,
-  Trophy, Wallet, BarChart3, Users, Mic, Lock, MessageCircle,
-  BookOpen, MapPin, Crown, Settings, HelpCircle, Shield,
-  ChevronLeft, ChevronRight, FileText, Sparkles
+  LayoutDashboard, CalendarDays, Target, Timer,
+  CheckSquare, FileText, BarChart3, Trophy, MapPin,
+  Crown, Settings, HelpCircle, Shield, Users, Wallet,
+  ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -12,16 +12,16 @@ const navItems = [
   { path: '/plans', icon: CalendarDays, label: 'plans' },
   { path: '/goals', icon: Target, label: 'goals' },
   { path: '/focus', icon: Timer, label: 'focus' },
-  { path: '/health', icon: Heart, label: 'health' },
+  { path: '/health', icon: CheckSquare, label: 'health' },
   { path: '/motivation', icon: Trophy, label: 'motivation' },
   { path: '/finance', icon: Wallet, label: 'finance' },
   { path: '/analysis', icon: BarChart3, label: 'analysis' },
   { path: '/social', icon: Users, label: 'social' },
   { path: '/notes', icon: FileText, label: 'notes' },
-  { path: '/voice', icon: Mic, label: 'voice' },
-  { path: '/breakdown', icon: BookOpen, label: 'breakdown' },
   { path: '/location', icon: MapPin, label: 'location' },
-  { path: '/privacy', icon: Lock, label: 'privacy' },
+];
+
+const bottomItems = [
   { path: '/premium', icon: Crown, label: 'premium' },
   { path: '/settings', icon: Settings, label: 'settings' },
   { path: '/help', icon: HelpCircle, label: 'help' },
@@ -30,60 +30,54 @@ const navItems = [
 const labels = {
   uz: {
     dashboard: 'Asosiy',
-    plans: '📅 Rejalar',
-    goals: '🎯 Maqsadlar',
-    focus: '⏱️ Fokus',
-    health: '💪 Sog\'liq',
-    motivation: '🏆 Motivatsiya',
-    finance: '💰 Moliya',
-    analysis: '📊 Tahlil',
-    social: '👥 Ijtimoiy',
-    notes: '📝 Yozuvlar',
-    voice: '🎤 Ovozli',
-    breakdown: '📐 Bo\'lish',
-    location: '📍 Xarita',
-    privacy: '🔒 Maxfiylik',
-    premium: '👑 Premium',
-    settings: '⚙️ Sozlamalar',
-    help: '❓ Yordam',
+    plans: 'Rejalar',
+    goals: 'Maqsadlar',
+    focus: 'Fokus',
+    health: 'Odatlar',
+    motivation: 'Yutuqlar',
+    finance: 'Moliya',
+    analysis: 'Statistika',
+    social: "Do'stlar",
+    notes: 'Yozuvlar',
+    location: 'Xarita',
+    premium: 'Premium',
+    settings: 'Sozlamalar',
+    help: 'Yordam',
+    crm: 'Boshqaruv',
   },
   ru: {
     dashboard: 'Главная',
-    plans: '📅 Планы',
-    goals: '🎯 Цели',
-    focus: '⏱️ Фокус',
-    health: '💪 Здоровье',
-    motivation: '🏆 Мотивация',
-    finance: '💰 Финансы',
-    analysis: '📊 Анализ',
-    social: '👥 Соцсети',
-    notes: '📝 Заметки',
-    voice: '🎤 Голос',
-    breakdown: '📐 Разбивка',
-    location: '📍 Карта',
-    privacy: '🔒 Приватность',
-    premium: '👑 Премиум',
-    settings: '⚙️ Настройки',
-    help: '❓ Помощь',
+    plans: 'Планы',
+    goals: 'Цели',
+    focus: 'Фокус',
+    health: 'Привычки',
+    motivation: 'Достижения',
+    finance: 'Финансы',
+    analysis: 'Аналитика',
+    social: 'Друзья',
+    notes: 'Заметки',
+    location: 'Карта',
+    premium: 'Премиум',
+    settings: 'Настройки',
+    help: 'Помощь',
+    crm: 'Управление',
   },
   en: {
     dashboard: 'Home',
-    plans: '📅 Plans',
-    goals: '🎯 Goals',
-    focus: '⏱️ Focus',
-    health: '💪 Health',
-    motivation: '🏆 Motivation',
-    finance: '💰 Finance',
-    analysis: '📊 Analysis',
-    social: '👥 Social',
-    notes: '📝 Notes',
-    voice: '🎤 Voice',
-    breakdown: '📐 Breakdown',
-    location: '📍 Map',
-    privacy: '🔒 Privacy',
-    premium: '👑 Premium',
-    settings: '⚙️ Settings',
-    help: '❓ Help',
+    plans: 'Plans',
+    goals: 'Goals',
+    focus: 'Focus',
+    health: 'Habits',
+    motivation: 'Achievements',
+    finance: 'Finance',
+    analysis: 'Analytics',
+    social: 'Friends',
+    notes: 'Notes',
+    location: 'Map',
+    premium: 'Premium',
+    settings: 'Settings',
+    help: 'Help',
+    crm: 'Management',
   },
 };
 
@@ -92,10 +86,9 @@ export default function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }
   const lang = language || 'uz';
   const t = (key) => labels[lang]?.[key] || labels.en[key] || key;
 
-  // Add admin/CRM link if user is admin
-  const allItems = currentUser?.role === 'admin'
-    ? [...navItems, { path: '/crm', icon: Shield, label: 'crm' }]
-    : navItems;
+  const adminItem = currentUser?.role === 'admin'
+    ? [{ path: '/crm', icon: Shield, label: 'crm' }]
+    : [];
 
   return (
     <>
@@ -113,9 +106,19 @@ export default function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }
           </NavLink>
         </div>
 
-        {/* Nav */}
+        {/* Main Nav */}
         <nav className="flex-1 px-2 space-y-1 overflow-y-auto scrollbar-hide">
-          {allItems.map(item => (
+          {navItems.map(item => (
+            <NavLink key={item.path} to={item.path} onClick={onClose}
+              className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''} ${collapsed ? 'justify-center px-2' : ''}`}
+              title={collapsed ? t(item.label) : undefined}>
+              <item.icon size={18} />
+              {!collapsed && <span className="text-sm">{t(item.label)}</span>}
+            </NavLink>
+          ))}
+
+          {/* Admin only */}
+          {adminItem.map(item => (
             <NavLink key={item.path} to={item.path} onClick={onClose}
               className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''} ${collapsed ? 'justify-center px-2' : ''}`}
               title={collapsed ? t(item.label) : undefined}>
@@ -124,6 +127,18 @@ export default function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }
             </NavLink>
           ))}
         </nav>
+
+        {/* Bottom: Premium, Settings, Help */}
+        <div className="px-2 pb-2 space-y-1 border-t pt-2" style={{ borderColor: 'var(--border)' }}>
+          {bottomItems.map(item => (
+            <NavLink key={item.path} to={item.path} onClick={onClose}
+              className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''} ${collapsed ? 'justify-center px-2' : ''}`}
+              title={collapsed ? t(item.label) : undefined}>
+              <item.icon size={18} />
+              {!collapsed && <span className="text-sm">{t(item.label)}</span>}
+            </NavLink>
+          ))}
+        </div>
 
         {/* Collapse toggle */}
         <div className="hidden lg:block p-3 border-t" style={{ borderColor: 'var(--border)' }}>

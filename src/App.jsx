@@ -29,19 +29,7 @@ import CrmErp from './pages/CrmErp';
 import HelpSupport from './pages/HelpSupport';
 import AiChat from './pages/AiChat';
 
-// Special pages (rewritten)
-import VoiceAssistant from './pages/VoiceAssistant';
-import PrivacyPermissions from './pages/PrivacyPermissions';
-import FriendsChat from './pages/FriendsChat';
-import SmartBreakdown from './pages/SmartBreakdown';
-
-// Extra pages (still accessible via combined tabs)
-import Meditation from './pages/Meditation';
-import MoodCalendar from './pages/MoodCalendar';
-import Flashcards from './pages/Flashcards';
-import Journal from './pages/Journal';
-import TagsFilters from './pages/TagsFilters';
-import RecurringTasks from './pages/RecurringTasks';
+// These pages are accessed via combined tabbed pages only
 
 // Session timeout: 100 hours
 const SESSION_TIMEOUT = 100 * 60 * 60 * 1000;
@@ -117,21 +105,9 @@ function AppRoutes() {
         <Route path="ai" element={<AiChat />} />
         <Route path="crm" element={<CrmErp />} />
 
-        {/* Special rewritten pages */}
-        <Route path="voice" element={<VoiceAssistant />} />
-        <Route path="privacy" element={<PrivacyPermissions />} />
-        <Route path="chat" element={<FriendsChat />} />
-        <Route path="breakdown" element={<SmartBreakdown />} />
+        {/* Legacy standalone redirects */}
 
-        {/* Extra pages */}
-        <Route path="meditation" element={<Meditation />} />
-        <Route path="mood" element={<MoodCalendar />} />
-        <Route path="flashcards" element={<Flashcards />} />
-        <Route path="journal" element={<Journal />} />
-        <Route path="tags" element={<TagsFilters />} />
-        <Route path="recurring" element={<RecurringTasks />} />
-
-        {/* Legacy redirects - old URLs redirect to new combined pages */}
+        {/* Legacy URL redirects */}
         <Route path="daily" element={<Navigate to="/plans" replace />} />
         <Route path="weekly" element={<Navigate to="/plans" replace />} />
         <Route path="monthly" element={<Navigate to="/plans" replace />} />
@@ -153,6 +129,16 @@ function AppRoutes() {
         <Route path="review" element={<Navigate to="/analysis" replace />} />
         <Route path="friends" element={<Navigate to="/social" replace />} />
         <Route path="analytics" element={<Navigate to="/analysis" replace />} />
+        <Route path="voice" element={<Navigate to="/social" replace />} />
+        <Route path="privacy" element={<Navigate to="/settings" replace />} />
+        <Route path="chat" element={<Navigate to="/social" replace />} />
+        <Route path="breakdown" element={<Navigate to="/goals" replace />} />
+        <Route path="meditation" element={<Navigate to="/motivation" replace />} />
+        <Route path="mood" element={<Navigate to="/motivation" replace />} />
+        <Route path="flashcards" element={<Navigate to="/goals" replace />} />
+        <Route path="journal" element={<Navigate to="/focus" replace />} />
+        <Route path="tags" element={<Navigate to="/plans" replace />} />
+        <Route path="recurring" element={<Navigate to="/plans" replace />} />
 
         {/* Admin legacy */}
         <Route path="admin" element={<CrmErp />} />
