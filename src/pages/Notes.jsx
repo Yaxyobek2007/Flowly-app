@@ -1,15 +1,17 @@
 import { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { useAuth } from '../context/AuthContext';
-import { Plus, Trash2, FileText, Edit2, Save, X } from 'lucide-react';
+import { Plus, Trash2, FileText, Edit2, Save, X, Search } from 'lucide-react';
 
 export default function Notes() {
   const { notes, addNote, editNote, deleteNote } = useApp();
-  const { t } = useAuth();
+  const { t, language } = useAuth();
+  const lang = language || 'uz';
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState(null);
   const [form, setForm] = useState({ title: '', content: '', category: 'general' });
   const [activeCategory, setActiveCategory] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
 
   const categories = [
     { key: 'all', label: 'Barchasi' },
@@ -20,7 +22,11 @@ export default function Notes() {
     { key: 'general', label: 'Umumiy' },
   ];
 
-  const filteredNotes = activeCategory === 'all' ? notes : notes.filter(n => n.category === activeCategory);
+  const filteredNotes = notes.filter(n => {
+    const matchCategory = activeCategory === 'all' || n.category === activeCategory;
+    const matchSearch = !searchQuery || n.title.toLowerCase().includes(searchQuery.toLowerCase()) || n.content.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchCategory && matchSearch;
+  });
 
   const handleSubmit = () => {
     if (!form.title || !form.content) return;
@@ -60,6 +66,16 @@ export default function Notes() {
         </button>
       </div>
 
+      {/* Search */}
+      <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl" style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border)' }}>
+        <Search size={16} style={{ color: 'var(--text-secondary)' }} />
+        <input type="text" value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
+          placeholder={lang === 'ru' ? 'Поиск заметок...' : lang === 'en' ? 'Search notes...' : "Yozuv qidirish..."}
+          className="flex-1 bg-transparent outline-none text-sm" style={{ color: 'var(--text-primary)' }} />
+        {searchQuery && <button onClick={() => setSearchQuery('')}><X size={14} style={{ color: 'var(--text-secondary)' }} /></button>}
+        <span className="text-[10px] px-2 py-0.5 rounded-full" style={{ background: 'var(--bg-primary)', color: 'var(--text-secondary)' }}>{filteredNotes.length}</span>
+      </div>
+
       {/* Categories */}
       <div className="flex gap-2 flex-wrap">
         {categories.map(cat => (
@@ -96,6 +112,17 @@ export default function Notes() {
       )}
 
       {/* Notes Grid */}
+      {filteredNotes.length === 0 && !showForm && (
+        <div className="card text-center py-12">
+          <FileText size={40} className="text-blue-300 mx-auto mb-3" />
+          <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
+            {searchQuery ? (lang === 'ru' ? 'Ничего не найдено' : "Topilmadi") : (lang === 'ru' ? 'Нет заметок' : "Yozuv yo'q")}
+          </p>
+          <p className="text-xs mt-1" style={{ color: 'var(--text-secondary)' }}>
+            {!searchQuery && (lang === 'ru' ? 'Создайте первую заметку' : "Birinchi yozuvni yarating")}
+          </p>
+        </div>
+      )}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {filteredNotes.map((note, idx) => (
           <div key={note.id} className="card animate-in" style={{ animationDelay: `${idx * 50}ms` }}>
