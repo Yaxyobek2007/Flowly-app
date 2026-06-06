@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Plus, Trash2, Target, TrendingUp, Calendar, ChevronDown, Check, ArrowUpRight } from 'lucide-react';
+import { Plus, Trash2, Target, Calendar, ChevronDown, Check } from 'lucide-react';
 
 // Valyuta kurslari (approximate)
 const RATES = {

@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { useApp } from '../context/AppContext';
 import { useAuth } from '../context/AuthContext';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell, CartesianGrid, AreaChart, Area } from 'recharts';
-import { TrendingUp, TrendingDown, CheckCircle2, XCircle, Flame, Target, Calendar, ArrowUpRight, ArrowDownRight, Activity } from 'lucide-react';
+import { CheckCircle2, XCircle, Flame, Target, Calendar, ArrowUpRight, ArrowDownRight, Activity } from 'lucide-react';
 
 const COLORS = ['#3b82f6', '#22c55e', '#eab308', '#ef4444', '#8b5cf6', '#06b6d4', '#f97316'];
 const DAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
