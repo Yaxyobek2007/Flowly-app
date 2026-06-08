@@ -30,7 +30,11 @@ export default function DailyPlanner() {
   const [newTask, setNewTask] = useState({ title: '', time: currentTimeStr, priority: 'medium', day: todayKey, category: 'personal', location: '' });
 
   // Filter tasks for today
-  const todayTasks = tasks.filter(t => t.day === todayKey).sort((a, b) => a.time.localeCompare(b.time));
+  const todayTasks = tasks.filter(t => t.day === todayKey).sort((a, b) => {
+    // Completed tasks go to bottom, then sort by time
+    if (a.completed !== b.completed) return a.completed ? 1 : -1;
+    return a.time.localeCompare(b.time);
+  });
   const completed = todayTasks.filter(t => t.completed).length;
   const total = todayTasks.length;
 
