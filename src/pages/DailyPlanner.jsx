@@ -27,7 +27,7 @@ export default function DailyPlanner() {
   const todayLabel = dayLabelsUz[todayDow];
   const currentTimeStr = `${String(tashkent.getHours()).padStart(2, '0')}:${String(tashkent.getMinutes()).padStart(2, '0')}`;
 
-  const [newTask, setNewTask] = useState({ title: '', time: '', priority: 'medium', day: todayKey, category: 'personal', location: '' });
+  const [newTask, setNewTask] = useState({ title: '', time: currentTimeStr, priority: 'medium', day: todayKey, category: 'personal', location: '' });
 
   // Filter tasks for today
   const todayTasks = tasks.filter(t => t.day === todayKey).sort((a, b) => a.time.localeCompare(b.time));
@@ -54,7 +54,7 @@ export default function DailyPlanner() {
   const handleAdd = () => {
     if (newTask.title && newTask.time) {
       addTask({ ...newTask, day: todayKey, completed: false });
-      setNewTask({ title: '', time: '', priority: 'medium', day: todayKey, category: 'personal' });
+      setNewTask({ title: '', time: currentTimeStr, priority: 'medium', day: todayKey, category: 'personal' });
       setShowForm(false);
       if ('vibrate' in navigator) navigator.vibrate(50);
     }
