@@ -29,6 +29,9 @@ const defaultAchievements = [
   { id: 3, title: "100 ta task", description: "100 ta task yakunlandi", icon: "🏆", unlocked: false, progress: 0 },
   { id: 4, title: "Birinchi maqsad", description: "Birinchi maqsad bajarildi", icon: "🏆", unlocked: false, progress: 0 },
   { id: 5, title: "50 kun streak", description: "50 kun ketma-ket planner yuritish", icon: "🏆", unlocked: false, progress: 0 },
+  { id: 6, title: "Budjet ustasi", description: "1 oy davomida kunlik limitdan oshmadi", icon: "💰", unlocked: false, progress: 0 },
+  { id: 7, title: "Tejamkor", description: "Oylik jamg'arma maqsadiga erishdi", icon: "🐷", unlocked: false, progress: 0 },
+  { id: 8, title: "10 ta odat", description: "10 ta odatni streak bilan davom ettirdi", icon: "🔥", unlocked: false, progress: 0 },
 ];
 
 export function AppProvider({ children }) {
