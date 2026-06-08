@@ -236,6 +236,9 @@ export default function Dashboard() {
             </div>
           )}
 
+          {/* Budget mini widget */}
+          <BudgetWidget lang={lang} navigate={navigate} />
+
           {/* Quick navigation */}
           <div className="card" style={{ padding: '0.75rem' }}>
             <div className="grid grid-cols-4 gap-1.5">
@@ -253,6 +256,47 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
+      </div>
+    </div>
+  );
+}
+
+
+
+// Budget mini-widget for Dashboard
+function BudgetWidget({ lang, navigate }) {
+  const today = new Date().toISOString().split('T')[0];
+  const currentMonth = today.slice(0, 7);
+  let budget = null;
+  try { const s = localStorage.getItem(`flowly-budget-${currentMonth}`); budget = s ? JSON.parse(s) : null; } catch(e) {}
+  
+  if (!budget || !budget.salary) return null;
+
+  const daysInMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate();
+  const daysLeft = daysInMonth - new Date().getDate();
+  const totalIncome = budget.salary + (budget.extraIncome || 0);
+  const fixed = (budget.fixed?.rent || 0) + (budget.fixed?.phone || 0) + (budget.fixed?.savings || 0);
+  const spent = (budget.expenses || []).reduce((a, e) => a + (e.amount > 0 ? e.amount : 0), 0);
+  const balance = totalIncome - fixed - spent;
+  const dailyLimit = daysLeft > 0 ? Math.floor(balance / daysLeft) : 0;
+  const pct = totalIncome > 0 ? Math.round(((totalIncome - balance) / totalIncome) * 100) : 0;
+  const fmt = (n) => n >= 1000000 ? (n/1000000).toFixed(1) + 'M' : Math.round(n).toLocaleString('ru-RU');
+
+  return (
+    <div className="card cursor-pointer active:scale-[0.98] transition-all" onClick={() => navigate('/finance')} style={{ padding: '0.75rem 1rem' }}>
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center gap-2">
+          <Wallet size={14} className="text-emerald-500" />
+          <span className="text-xs font-semibold" style={{ color: 'var(--text-primary)' }}>{lang === 'ru' ? 'Бюджет' : 'Budjet'}</span>
+        </div>
+        <span className="text-[9px] font-bold" style={{ color: balance > 0 ? '#22c55e' : '#ef4444' }}>{fmt(balance)} so'm</span>
+      </div>
+      <div className="h-1.5 rounded-full mb-1.5" style={{ background: 'var(--bg-secondary)' }}>
+        <div className="h-1.5 rounded-full transition-all" style={{ width: `${Math.min(pct, 100)}%`, background: pct > 80 ? '#ef4444' : pct > 60 ? '#eab308' : '#22c55e' }} />
+      </div>
+      <div className="flex justify-between text-[8px]">
+        <span style={{ color: 'var(--text-secondary)' }}>{pct}% ishlatildi</span>
+        <span style={{ color: 'var(--accent)' }}>{fmt(dailyLimit)}/kun • {daysLeft}d</span>
       </div>
     </div>
   );
