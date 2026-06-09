@@ -314,6 +314,24 @@ export default function Settings() {
             </p>
           </div>
         </button>
+        <button onClick={() => {
+          if (confirm(lang === 'ru' ? 'Все данные будут удалены! Вы уверены?' : "Barcha ma'lumotlar o'chiriladi! Ishonchingiz komilmi?")) {
+            Object.keys(localStorage).filter(k => k.startsWith('flowly-')).forEach(k => localStorage.removeItem(k));
+            window.location.reload();
+          }
+        }}
+          className="w-full flex items-center gap-3 p-3 rounded-xl transition-colors hover:bg-red-50 dark:hover:bg-red-900/10"
+          style={{ background: 'var(--bg-secondary)' }}>
+          <span className="text-lg">🗑️</span>
+          <div className="flex-1 text-left">
+            <span className="text-sm font-medium text-red-500">
+              {lang === 'ru' ? 'Удалить все данные' : lang === 'en' ? 'Delete all data' : "Barcha ma'lumotni o'chirish"}
+            </span>
+            <p className="text-[9px]" style={{ color: 'var(--text-secondary)' }}>
+              {lang === 'ru' ? 'Необратимо! Сначала сделайте бэкап' : "Qaytib kelmaydi! Avval backup qiling"}
+            </p>
+          </div>
+        </button>
       </div>
 
       {/* Account Actions */}
