@@ -1,16 +1,17 @@
 import { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { useAuth } from '../context/AuthContext';
-import { CheckCircle2, Clock, Target, Flame, Calendar, Award, ArrowRight, Plus, Wallet, TrendingUp } from 'lucide-react';
+import { CheckCircle2, Clock, Target, Flame, Calendar, Award, ArrowRight, Plus, Wallet, TrendingUp, Send } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import XpLevelBar from '../components/XpLevelBar';
 
 export default function Dashboard() {
-  const { tasks, habits, goals, events, achievements, calculateLifeScore } = useApp();
+  const { tasks, habits, goals, events, achievements, calculateLifeScore, addTask } = useApp();
   const { currentUser, language } = useAuth();
   const navigate = useNavigate();
   const lifeScore = calculateLifeScore();
   const lang = language || 'uz';
+  const [quickTask, setQuickTask] = useState('');
 
   const [currentTime, setCurrentTime] = useState(new Date());
   useEffect(() => {
@@ -146,6 +147,64 @@ export default function Dashboard() {
                 <span className="text-[10px] font-bold" style={{ color: todayPercent >= 70 ? '#22c55e' : 'var(--accent)' }}>{todayPercent}%</span>
               </div>
             )}
+
+            {/* Quick Add Task */}
+            <div className="mt-3 pt-3 border-t flex gap-2" style={{ borderColor: 'var(--border)' }}>
+              <input type="text" value={quickTask} onChange={e => setQuickTask(e.target.value)}
+                onKeyDown={e => {
+                  if (e.key === 'Enter' && quickTask.trim()) {
+                    const timeStr2 = new Date().toLocaleTimeString('uz', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Tashkent' });
+                    addTask({ title: quickTask.trim(), time: timeStr2, priority: 'medium', day: todayKey, category: 'personal', completed: false });
+                    setQuickTask('');
+                    if ('vibrate' in navigator) navigator.vibrate(30);
+                  }
+                }}
+                placeholder={lang === 'ru' ? '+ Быстрая задача...' : lang === 'en' ? '+ Quick task...' : "+ Tez vazifa qo'shish..."}
+                className="flex-1 px-3 py-2 rounded-xl border text-xs outline-none focus:ring-2 focus:ring-blue-400"
+                style={{ background: 'var(--bg-secondary)', borderColor: 'var(--border)', color: 'var(--text-primary)' }} />
+              <button onClick={() => {
+                if (quickTask.trim()) {
+                  const timeStr2 = new Date().toLocaleTimeString('uz', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Tashkent' });
+                  addTask({ title: quickTask.trim(), time: timeStr2, priority: 'medium', day: todayKey, category: 'personal', completed: false });
+                  setQuickTask('');
+                  if ('vibrate' in navigator) navigator.vibrate(30);
+                }
+              }} className="p-2 rounded-xl bg-blue-500 text-white active:scale-90 transition-all" disabled={!quickTask.trim()}>
+                <Send size={14} />
+              </button>
+            </div>
+          </div>
+
+          {/* Weekly Progress Mini Chart */}
+          <div className="card" style={{ padding: '0.75rem 1rem' }}>
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-semibold" style={{ color: 'var(--text-primary)' }}>
+                {lang === 'ru' ? 'Неделя' : 'Hafta'}
+              </span>
+              <span className="text-[9px]" style={{ color: 'var(--text-secondary)' }}>
+                {tasks.filter(t => t.completed).length}/{tasks.length} {lang === 'ru' ? 'задач' : 'vazifa'}
+              </span>
+            </div>
+            <div className="flex items-end gap-1" style={{ height: '32px' }}>
+              {['monday','tuesday','wednesday','thursday','friday','saturday','sunday'].map((day, i) => {
+                const dayTasks = tasks.filter(t => t.day === day);
+                const done = dayTasks.filter(t => t.completed).length;
+                const total = dayTasks.length;
+                const pct = total > 0 ? (done / total) * 100 : 0;
+                const isToday = day === todayKey;
+                return (
+                  <div key={day} className="flex-1 flex flex-col items-center gap-0.5">
+                    <div className="w-full rounded-sm transition-all" style={{
+                      height: `${Math.max(pct * 0.28, 2)}px`,
+                      background: isToday ? 'var(--accent)' : pct >= 100 ? '#22c55e' : pct > 0 ? '#3b82f680' : 'var(--border)',
+                    }} />
+                    <span className="text-[6px]" style={{ color: isToday ? 'var(--accent)' : 'var(--text-secondary)' }}>
+                      {['D','S','Ch','P','J','Sh','Y'][i]}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
           </div>
 
           {/* Active Habits */}
