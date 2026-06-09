@@ -408,6 +408,27 @@ export default function BudgetManager() {
           <span className="text-lg font-bold text-green-500">{formatMoney(budget.fixed.savings)}</span>
         </div>
       )}
+
+      {/* Mini Statistics */}
+      {(budget?.expenses || []).length > 0 && (
+        <div className="card" style={{ padding: '0.75rem 1rem' }}>
+          <h3 className="text-xs font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>📈 {lang === 'ru' ? 'Статистика' : 'Statistika'}</h3>
+          <div className="grid grid-cols-3 gap-3 text-center">
+            <div>
+              <p className="text-xs font-bold" style={{ color: 'var(--accent)' }}>{formatMoney(Math.round(totalSpent / Math.max(currentDay, 1)))}</p>
+              <p className="text-[8px]" style={{ color: 'var(--text-secondary)' }}>{lang === 'ru' ? 'Средний/день' : "O'rtacha/kun"}</p>
+            </div>
+            <div>
+              <p className="text-xs font-bold text-red-500">{formatMoney(Math.max(...weekData.map(d => d.spent), 0))}</p>
+              <p className="text-[8px]" style={{ color: 'var(--text-secondary)' }}>{lang === 'ru' ? 'Макс за день' : 'Max 1 kunda'}</p>
+            </div>
+            <div>
+              <p className="text-xs font-bold text-green-500">{(budget.expenses || []).length}</p>
+              <p className="text-[8px]" style={{ color: 'var(--text-secondary)' }}>{lang === 'ru' ? 'Операций' : 'Tranzaksiya'}</p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
