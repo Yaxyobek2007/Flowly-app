@@ -121,10 +121,25 @@ export default function HabitTracker() {
           <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
             {t('newHabit')}
           </p>
-          <p className="text-xs mt-1" style={{ color: 'var(--text-secondary)' }}>
+          <p className="text-xs mt-1 mb-4" style={{ color: 'var(--text-secondary)' }}>
             Kunlik odatlar qo'shing — streak'lar motivatsiya beradi!
           </p>
-          <button onClick={() => setShowForm(true)} className="btn-primary mt-4">
+          <div className="flex flex-wrap gap-2 justify-center mb-4">
+            {[
+              { icon: '💧', name: '8 stakan suv' },
+              { icon: '📚', name: "30 daq kitob" },
+              { icon: '🏃', name: '10,000 qadam' },
+              { icon: '🧘', name: '5 daq meditatsiya' },
+              { icon: '💻', name: "1 soat o'rganish" },
+            ].map((s, i) => (
+              <button key={i} onClick={() => { addHabit({ name: s.name, icon: s.icon, dailyTarget: 1 }); }}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium transition-all hover:scale-105 active:scale-95"
+                style={{ background: 'var(--bg-secondary)', color: 'var(--text-primary)', border: '1px solid var(--border)' }}>
+                {s.icon} {s.name}
+              </button>
+            ))}
+          </div>
+          <button onClick={() => setShowForm(true)} className="btn-primary">
             <Plus size={16} className="inline mr-1" /> {t('add')}
           </button>
         </div>

@@ -147,10 +147,15 @@ export default function Notes() {
                 </button>
               </div>
             </div>
-            <p className="text-sm whitespace-pre-line mb-3" style={{ color: 'var(--text-secondary)' }}>{note.content}</p>
+            <p className="text-sm whitespace-pre-line mb-3" style={{ color: 'var(--text-secondary)' }}>
+              {note.content.length > 150 ? note.content.slice(0, 150) + '...' : note.content}
+            </p>
             <div className="flex items-center justify-between">
               <span className={`text-xs px-2 py-0.5 rounded-full ${categoryColors[note.category] || categoryColors.general}`}>{note.category}</span>
-              <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>{note.date}</span>
+              <div className="flex items-center gap-2">
+                <span className="text-[9px]" style={{ color: 'var(--text-secondary)' }}>{note.content.split(/\s+/).length} {lang === 'ru' ? 'сл.' : 'so\'z'}</span>
+                <span className="text-[9px]" style={{ color: 'var(--text-secondary)' }}>{note.date}</span>
+              </div>
             </div>
           </div>
         ))}
