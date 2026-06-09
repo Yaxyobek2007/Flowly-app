@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { useAuth } from '../context/AuthContext';
-import { Plus, Trash2, FileText, Edit2, Save, X, Search } from 'lucide-react';
+import { Plus, Trash2, FileText, Edit2, Save, X, Search, Pin } from 'lucide-react';
 
 export default function Notes() {
   const { notes, addNote, editNote, deleteNote } = useApp();
@@ -26,7 +26,11 @@ export default function Notes() {
     const matchCategory = activeCategory === 'all' || n.category === activeCategory;
     const matchSearch = !searchQuery || n.title.toLowerCase().includes(searchQuery.toLowerCase()) || n.content.toLowerCase().includes(searchQuery.toLowerCase());
     return matchCategory && matchSearch;
-  });
+  }).sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0));
+
+  const togglePin = (id) => {
+    editNote(id, { pinned: !notes.find(n => n.id === id)?.pinned });
+  };
 
   const handleSubmit = () => {
     if (!form.title || !form.content) return;
@@ -132,6 +136,9 @@ export default function Notes() {
                 <h3 className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>{note.title}</h3>
               </div>
               <div className="flex gap-1">
+                <button onClick={() => togglePin(note.id)} className={`p-1 rounded transition-colors ${note.pinned ? 'bg-yellow-100 dark:bg-yellow-900/20' : 'hover:bg-yellow-50 dark:hover:bg-yellow-900/10'}`}>
+                  <Pin size={13} className={note.pinned ? 'text-yellow-500' : 'text-gray-400'} />
+                </button>
                 <button onClick={() => handleEdit(note)} className="p-1 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20">
                   <Edit2 size={13} className="text-blue-500" />
                 </button>

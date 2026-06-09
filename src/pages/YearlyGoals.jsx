@@ -90,7 +90,11 @@ export default function YearlyGoals() {
                 </div>
                 <div className="flex-1">
                   <h3 className="font-semibold" style={{ color: 'var(--text-primary)' }}>{goal.title}</h3>
-                  <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>Deadline: {goal.deadline}</p>
+                  <p className="text-xs" style={{ color: new Date(goal.deadline) < new Date() && goal.progress < 100 ? '#ef4444' : 'var(--text-secondary)' }}>
+                    {new Date(goal.deadline) < new Date() && goal.progress < 100 ? '⚠️ ' : '📅 '}
+                    {goal.deadline}
+                    {new Date(goal.deadline) < new Date() && goal.progress < 100 && <span className="ml-1 text-red-500 font-medium">(muddati o'tdi!)</span>}
+                  </p>
                 </div>
                 <span className="text-sm font-bold" style={{ color: 'var(--accent)' }}>{goal.progress}%</span>
                 {expandedGoal === goal.id ? <ChevronDown size={18} style={{ color: 'var(--text-secondary)' }} /> : <ChevronRight size={18} style={{ color: 'var(--text-secondary)' }} />}
