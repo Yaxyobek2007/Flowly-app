@@ -90,10 +90,11 @@ export default function YearlyGoals() {
                 </div>
                 <div className="flex-1">
                   <h3 className="font-semibold" style={{ color: 'var(--text-primary)' }}>{goal.title}</h3>
-                  <p className="text-xs" style={{ color: new Date(goal.deadline) < new Date() && goal.progress < 100 ? '#ef4444' : 'var(--text-secondary)' }}>
-                    {new Date(goal.deadline) < new Date() && goal.progress < 100 ? '⚠️ ' : '📅 '}
+                  <p className="text-xs" style={{ color: new Date(goal.deadline) < new Date() && goal.progress < 100 ? '#ef4444' : (new Date(goal.deadline) - new Date() < 7 * 86400000 && goal.progress < 100 ? '#eab308' : 'var(--text-secondary)') }}>
+                    {new Date(goal.deadline) < new Date() && goal.progress < 100 ? '⚠️ ' : (new Date(goal.deadline) - new Date() < 7 * 86400000 && goal.progress < 100 ? '⏰ ' : '📅 ')}
                     {goal.deadline}
                     {new Date(goal.deadline) < new Date() && goal.progress < 100 && <span className="ml-1 text-red-500 font-medium">(muddati o'tdi!)</span>}
+                    {new Date(goal.deadline) > new Date() && new Date(goal.deadline) - new Date() < 7 * 86400000 && goal.progress < 100 && <span className="ml-1 text-yellow-600 font-medium">({Math.ceil((new Date(goal.deadline) - new Date()) / 86400000)} kun qoldi)</span>}
                   </p>
                 </div>
                 <span className="text-sm font-bold" style={{ color: 'var(--accent)' }}>{goal.progress}%</span>
