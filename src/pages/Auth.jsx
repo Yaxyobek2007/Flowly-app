@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 export default function Auth() {
   const { login, loginWithPhone, signup, resetPassword, language, setLanguage, t } = useAuth();
+  const navigate = useNavigate();
   const [mode, setMode] = useState('login');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -50,6 +52,7 @@ export default function Auth() {
     setTimeout(() => {
       const result = login(email, password);
       if (!result.success) setError(result.error);
+      else navigate(result.isAdmin ? '/crm' : '/', { replace: true });
       // If admin logs in (yaxyobek/admin123), they'll see CRM in sidebar
       setLoading(false);
     }, 600);
@@ -73,6 +76,7 @@ export default function Auth() {
     setTimeout(() => {
       const result = loginWithPhone(phone, code);
       if (!result.success) setError(language === 'ru' ? 'Неверный код' : language === 'en' ? 'Invalid code' : 'Kod noto\'g\'ri');
+      else navigate('/', { replace: true });
       setLoading(false);
     }, 600);
   };
@@ -85,6 +89,7 @@ export default function Auth() {
     setTimeout(() => {
       const result = signup(signupData);
       if (!result.success) setError(result.error);
+      else navigate('/', { replace: true });
       setLoading(false);
     }, 600);
   };

@@ -1,5 +1,7 @@
 // Flowly Service Worker — Cache-first strategy for speed
-const CACHE_NAME = 'flowly-v1';
+// Bump this whenever the application shell changes so clients do not keep
+// executing an obsolete JavaScript bundle after a deploy.
+const CACHE_NAME = 'flowly-v2';
 const STATIC_ASSETS = ['/', '/index.html', '/favicon.svg', '/manifest.json'];
 
 // Install: cache core files
