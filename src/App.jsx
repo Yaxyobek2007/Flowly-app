@@ -26,7 +26,6 @@ const Profile = lazy(() => import('./pages/Profile'));
 const Premium = lazy(() => import('./pages/Premium'));
 const Certificates = lazy(() => import('./pages/Certificates'));
 const LocationMap = lazy(() => import('./pages/LocationMap'));
-const CrmErp = lazy(() => import('./pages/CrmErp'));
 const HelpSupport = lazy(() => import('./pages/HelpSupport'));
 const AiChat = lazy(() => import('./pages/AiChat'));
 
@@ -77,10 +76,7 @@ function ProtectedRoute({ children }) {
 
 function AuthRoute({ children }) {
   const { currentUser } = useAuth();
-  if (currentUser) {
-    if (currentUser.role === 'admin') return <Navigate to="/crm" replace />;
-    return <Navigate to="/" replace />;
-  }
+  if (currentUser) return <Navigate to="/" replace />;
   return children;
 }
 
@@ -139,7 +135,6 @@ function AppRoutes() {
         <Route path="location" element={<Suspense fallback={<PageLoader />}><LocationMap /></Suspense>} />
         <Route path="help" element={<Suspense fallback={<PageLoader />}><HelpSupport /></Suspense>} />
         <Route path="ai" element={<Suspense fallback={<PageLoader />}><AiChat /></Suspense>} />
-        <Route path="crm" element={<Suspense fallback={<PageLoader />}><CrmErp /></Suspense>} />
 
         {/* Legacy standalone redirects */}
 
@@ -176,8 +171,9 @@ function AppRoutes() {
         <Route path="tags" element={<Navigate to="/plans" replace />} />
         <Route path="recurring" element={<Navigate to="/plans" replace />} />
 
-        {/* Admin legacy */}
-        <Route path="admin" element={<Suspense fallback={<PageLoader />}><CrmErp /></Suspense>} />
+        {/* The CRM is temporarily disabled while its backend is rebuilt. */}
+        <Route path="crm" element={<Navigate to="/" replace />} />
+        <Route path="admin" element={<Navigate to="/" replace />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

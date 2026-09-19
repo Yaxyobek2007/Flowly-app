@@ -2,7 +2,7 @@ import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard, CalendarDays, Target, Timer,
   CheckSquare, FileText, BarChart3, Trophy, MapPin,
-  Crown, Settings, HelpCircle, Shield, Users, Wallet,
+  Crown, Settings, HelpCircle, Users, Wallet,
   ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
@@ -43,7 +43,6 @@ const labels = {
     premium: 'Premium',
     settings: 'Sozlamalar',
     help: 'Yordam',
-    crm: 'Boshqaruv',
   },
   ru: {
     dashboard: 'Главная',
@@ -60,7 +59,6 @@ const labels = {
     premium: 'Премиум',
     settings: 'Настройки',
     help: 'Помощь',
-    crm: 'Управление',
   },
   en: {
     dashboard: 'Home',
@@ -77,18 +75,13 @@ const labels = {
     premium: 'Premium',
     settings: 'Settings',
     help: 'Help',
-    crm: 'Management',
   },
 };
 
 export default function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }) {
-  const { language, currentUser } = useAuth();
+  const { language } = useAuth();
   const lang = language || 'uz';
   const t = (key) => labels[lang]?.[key] || labels.en[key] || key;
-
-  const adminItem = currentUser?.role === 'admin'
-    ? [{ path: '/crm', icon: Shield, label: 'crm' }]
-    : [];
 
   return (
     <>
@@ -119,15 +112,6 @@ export default function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }
             </NavLink>
           ))}
 
-          {/* Admin only */}
-          {adminItem.map(item => (
-            <NavLink key={item.path} to={item.path} onClick={onClose}
-              className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''} ${collapsed ? 'justify-center px-2' : ''}`}
-              title={collapsed ? t(item.label) : undefined}>
-              <item.icon size={18} />
-              {!collapsed && <span className="text-sm">{t(item.label)}</span>}
-            </NavLink>
-          ))}
         </nav>
 
         {/* Bottom: Premium, Settings, Help */}

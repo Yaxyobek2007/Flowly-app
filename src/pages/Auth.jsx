@@ -52,7 +52,7 @@ export default function Auth() {
     setTimeout(() => {
       const result = login(email, password);
       if (!result.success) setError(result.error);
-      else navigate(result.isAdmin ? '/crm' : '/', { replace: true });
+      else navigate('/', { replace: true });
       // If admin logs in (yaxyobek/admin123), they'll see CRM in sidebar
       setLoading(false);
     }, 600);
