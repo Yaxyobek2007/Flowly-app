@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 
 export default function Auth() {
-  const { login, loginWithPhone, signup, language, setLanguage, t } = useAuth();
+  const { login, loginWithPhone, signup, resetPassword, language, setLanguage, t } = useAuth();
   const [mode, setMode] = useState('login');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -310,7 +310,8 @@ export default function Auth() {
                   <button type="button" onClick={() => {
                     if (newPassword !== confirmPassword) { setError(language === 'ru' ? 'Пароли не совпадают' : language === 'en' ? 'Passwords don\'t match' : 'Parollar mos emas'); return; }
                     if (newPassword.length < 8) { setError(language === 'ru' ? 'Мин. 8 символов' : language === 'en' ? 'Min 8 chars' : 'Kamida 8 belgi'); return; }
-                    // Reset successful
+                    const result = resetPassword(email, newPassword);
+                    if (!result.success) { setError(result.error); return; }
                     setMode('login'); setResetCodeSent(false); setResetCodeVerified(false); setResetCode(''); setNewPassword(''); setConfirmPassword('');
                   }} className="w-full py-3 rounded-xl bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold shadow-lg">
                     {language === 'ru' ? 'Сохранить новый пароль' : language === 'en' ? 'Save new password' : 'Yangi parolni saqlash'}

@@ -20,11 +20,11 @@ function calculateXP({ tasks, habits, goals, currentUser }) {
   // Pomodoro: +3 per session
   xp += parseInt(localStorage.getItem('flowly-pomo-sessions') || '0') * 3;
   // Journal entries: +10 per entry
-  try { const journal = JSON.parse(localStorage.getItem('flowly-journal') || '[]'); xp += journal.length * 10; } catch(e) {}
+  try { const journal = JSON.parse(localStorage.getItem('flowly-journal') || '[]'); xp += journal.length * 10; } catch {}
   // Smart plans: +20 per plan
-  try { const plans = JSON.parse(localStorage.getItem('flowly-smart-plans') || '[]'); xp += plans.length * 20; } catch(e) {}
+  try { const plans = JSON.parse(localStorage.getItem('flowly-smart-plans') || '[]'); xp += plans.length * 20; } catch {}
   // Certificates: +25 per cert
-  try { const certs = JSON.parse(localStorage.getItem('flowly-certificates') || '[]'); xp += certs.length * 25; } catch(e) {}
+  try { const certs = JSON.parse(localStorage.getItem('flowly-certificates') || '[]'); xp += certs.length * 25; } catch {}
   return xp;
 }
 
@@ -70,9 +70,9 @@ export default function XpLevelBar() {
   const { tasks, habits, goals } = useApp();
   const lang = language || 'uz';
 
-  if (!currentUser) return null;
-
   const xp = useMemo(() => calculateXP({ tasks, habits, goals, currentUser }), [tasks, habits, goals, currentUser?.points, currentUser?.loginStreak]);
+
+  if (!currentUser) return null;
   const level = getLevel(xp);
   const title = getLevelTitle(level, lang);
   const color = getLevelColor(level);

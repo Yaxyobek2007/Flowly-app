@@ -11,6 +11,12 @@ function safeParse(key, fallback) {
   }
 }
 
+function localDate() {
+  const now = new Date();
+  const offset = now.getTimezoneOffset() * 60000;
+  return new Date(now - offset).toISOString().slice(0, 10);
+}
+
 const AppContext = createContext();
 
 const defaultTasks = [];
@@ -77,7 +83,7 @@ export function AppProvider({ children }) {
   }, [events]);
 
   const toggleTask = (id) => {
-    setTasks(tasks.map(t => t.id === id ? { ...t, completed: !t.completed } : t));
+    setTasks(prev => prev.map(t => t.id === id ? { ...t, completed: !t.completed } : t));
   };
 
   const addTask = (task) => {
@@ -89,7 +95,7 @@ export function AppProvider({ children }) {
   };
 
   const deleteTask = (id) => {
-    setTasks(tasks.filter(t => t.id !== id));
+    setTasks(prev => prev.filter(t => t.id !== id));
   };
 
   // Auto-reset habits daily (todayDone resets at midnight)
@@ -109,8 +115,13 @@ export function AppProvider({ children }) {
   }, []);
 
   const toggleHabit = (id) => {
-    const today = new Date().toISOString().split('T')[0];
-    setHabits(habits.map(h => h.id === id ? { ...h, todayDone: !h.todayDone, streak: !h.todayDone ? h.streak + 1 : h.streak - 1, lastDoneDate: !h.todayDone ? today : h.lastDoneDate } : h));
+    const today = localDate();
+    setHabits(prev => prev.map(h => h.id === id ? {
+      ...h,
+      todayDone: !h.todayDone,
+      streak: h.todayDone ? Math.max(0, (h.streak || 0) - 1) : (h.streak || 0) + 1,
+      lastDoneDate: !h.todayDone ? today : h.lastDoneDate,
+    } : h));
   };
 
   const addHabit = (habit) => {
@@ -122,7 +133,7 @@ export function AppProvider({ children }) {
   };
 
   const deleteHabit = (id) => {
-    setHabits(habits.filter(h => h.id !== id));
+    setHabits(prev => prev.filter(h => h.id !== id));
   };
 
   const addGoal = (goal) => {
@@ -134,16 +145,19 @@ export function AppProvider({ children }) {
   };
 
   const deleteGoal = (id) => {
-    setGoals(goals.filter(g => g.id !== id));
+    setGoals(prev => prev.filter(g => g.id !== id));
   };
 
   const updateGoalProgress = (id, stepIndex) => {
-    setGoals(goals.map(g => {
+    setGoals(prev => prev.map(g => {
       if (g.id === id) {
-        const completedSteps = g.completedSteps.includes(stepIndex)
-          ? g.completedSteps.filter(s => s !== stepIndex)
-          : [...g.completedSteps, stepIndex];
-        const progress = Math.round((completedSteps.length / g.steps.length) * 100);
+        const completed = Array.isArray(g.completedSteps) ? g.completedSteps : [];
+        const steps = Array.isArray(g.steps) ? g.steps : [];
+        if (stepIndex < 0 || stepIndex >= steps.length) return g;
+        const completedSteps = completed.includes(stepIndex)
+          ? completed.filter(s => s !== stepIndex)
+          : [...completed, stepIndex];
+        const progress = Math.round((completedSteps.length / steps.length) * 100);
         return { ...g, completedSteps, progress, status: progress === 100 ? 'completed' : 'in-progress' };
       }
       return g;
@@ -159,7 +173,7 @@ export function AppProvider({ children }) {
   };
 
   const deleteNote = (id) => {
-    setNotes(notes.filter(n => n.id !== id));
+    setNotes(prev => prev.filter(n => n.id !== id));
   };
 
   const addEvent = (event) => {
@@ -171,7 +185,7 @@ export function AppProvider({ children }) {
   };
 
   const deleteEvent = (id) => {
-    setEvents(events.filter(e => e.id !== id));
+    setEvents(prev => prev.filter(e => e.id !== id));
   };
 
   const markNotificationRead = (id) => {

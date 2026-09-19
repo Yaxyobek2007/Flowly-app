@@ -1,10 +1,12 @@
 import { createContext, useContext, useState, useEffect, useRef } from 'react';
-import { createUserInDB, updateUserInDB, getAllUsersFromDB, onUsersChange, setUserOnline, updateUserLocation, findUserByReferralCode, firebaseSignUp, firebaseSignIn, firebaseSignOut } from '../firebase';
+import { createUserInDB, updateUserInDB, onUsersChange, setUserOnline } from '../firebase';
 import { translations } from '../translations';
 
 const AuthContext = createContext();
 
-// Admin credentials — encoded for basic protection
+// NOTE: Firebase Authentication must be enabled before putting a production
+// administrator account in use. Encoding a password is not protection; this
+// legacy local account remains only so existing installations can sign in.
 const _a = atob('WWFhMDcwNzIwMDdA'); // decoded at runtime
 const defaultUsers = [
   {
@@ -39,23 +41,12 @@ const defaultUsers = [
 // Translations imported from separate file
 
 export function AuthProvider({ children }) {
-  // Data version — only reset if major breaking change (not on every deploy)
+  // Keep the version as migration metadata. Clearing localStorage here erased a
+  // person's tasks and profile after every data-version change.
   const DATA_VERSION = 'v7';
-  if (localStorage.getItem('flowly-data-version') !== DATA_VERSION) {
-    localStorage.removeItem('flowly-users');
-    localStorage.removeItem('flowly-current-user');
-    localStorage.removeItem('flowly-tasks');
-    localStorage.removeItem('flowly-habits');
-    localStorage.removeItem('flowly-goals');
-    localStorage.removeItem('flowly-notes');
-    localStorage.removeItem('flowly-events');
-    localStorage.removeItem('flowly-notifications');
-    localStorage.removeItem('flowly-certificates');
-    localStorage.removeItem('flowly-locations');
-    localStorage.removeItem('flowly-notif-settings');
-    localStorage.removeItem('flowly-last-activity');
+  useEffect(() => {
     localStorage.setItem('flowly-data-version', DATA_VERSION);
-  }
+  }, []);
 
   const [users, setUsers] = useState(() => {
     try { const saved = localStorage.getItem('flowly-users'); return saved ? JSON.parse(saved) : defaultUsers; }
@@ -120,6 +111,8 @@ export function AuthProvider({ children }) {
     setUserOnline(currentUser.id, true).catch(() => {});
 
     // Register device session in Firebase (so other devices can see it)
+    let disposed = false;
+    let interval;
     const registerSession = async () => {
       try {
         const { addDeviceSession, updateDeviceSession } = await import('../firebase');
@@ -144,14 +137,13 @@ export function AuthProvider({ children }) {
         await addDeviceSession(currentUser.id, { id: sessionId, deviceType, browser, os });
 
         // Keep session alive every 45 sec
-        const interval = setInterval(() => {
+        if (disposed) return;
+        interval = setInterval(() => {
           updateDeviceSession(currentUser.id, sessionId).catch(() => {});
         }, 45000);
-
-        return () => clearInterval(interval);
       } catch(e) {}
     };
-    const cleanup = registerSession();
+    registerSession();
 
     // Set offline on page close
     const handleUnload = () => {
@@ -162,7 +154,8 @@ export function AuthProvider({ children }) {
     return () => {
       window.removeEventListener('beforeunload', handleUnload);
       if (currentUser?.id) setUserOnline(currentUser.id, false).catch(() => {});
-      if (cleanup && typeof cleanup.then === 'function') cleanup.then(fn => fn && fn());
+      disposed = true;
+      clearInterval(interval);
     };
   }, [currentUser?.id]);
 
@@ -302,6 +295,17 @@ export function AuthProvider({ children }) {
 
   const logout = () => { setCurrentUser(null); };
 
+  const resetPassword = (email, newPassword) => {
+    const normalizedEmail = email.trim().toLowerCase();
+    const user = users.find(u => u.email?.toLowerCase() === normalizedEmail);
+    if (!user) return { success: false, error: language === 'ru' ? 'Аккаунт не найден' : language === 'en' ? 'Account not found' : 'Akkaunt topilmadi' };
+    if (newPassword.length < 8) return { success: false, error: language === 'ru' ? 'Пароль мин. 8 символов' : language === 'en' ? 'Password min 8 characters' : 'Parol kamida 8 ta belgi' };
+    const updated = { ...user, password: newPassword };
+    setUsers(prev => prev.map(u => u.id === user.id ? updated : u));
+    if (currentUser?.id === user.id) setCurrentUser(updated);
+    return { success: true };
+  };
+
   const updateProfile = (data) => {
     const updated = { ...currentUser, ...data };
     setCurrentUser(updated);
@@ -435,7 +439,7 @@ export function AuthProvider({ children }) {
   return (
     <AuthContext.Provider value={{
       currentUser, users, language, setLanguage, t,
-      login, loginWithGoogle, loginWithPhone, signup, logout,
+      login, loginWithGoogle, loginWithPhone, signup, logout, resetPassword,
       updateProfile, updateUserByAdmin, addPoints,
       checkDailyBonus, claimDailyBonus, getPointsDiscount, purchasePlan, spendPoints,
       changeLogin, canChangeLogin, getReferralBonus,
