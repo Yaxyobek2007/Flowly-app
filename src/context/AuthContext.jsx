@@ -38,6 +38,19 @@ const defaultUsers = [
   }
 ];
 
+function getInitialUsers() {
+  try {
+    const saved = localStorage.getItem('flowly-users');
+    const users = saved ? JSON.parse(saved) : [];
+    if (!Array.isArray(users)) return defaultUsers;
+    // Older releases could leave an empty/incomplete user list in storage.
+    // Keep the built-in administrator available for the owner to recover access.
+    return users.some(user => user.id === 'admin') ? users : [...users, defaultUsers[0]];
+  } catch {
+    return defaultUsers;
+  }
+}
+
 // Translations imported from separate file
 
 export function AuthProvider({ children }) {
@@ -48,10 +61,7 @@ export function AuthProvider({ children }) {
     localStorage.setItem('flowly-data-version', DATA_VERSION);
   }, []);
 
-  const [users, setUsers] = useState(() => {
-    try { const saved = localStorage.getItem('flowly-users'); return saved ? JSON.parse(saved) : defaultUsers; }
-    catch(e) { return defaultUsers; }
-  });
+  const [users, setUsers] = useState(getInitialUsers);
 
   const [currentUser, setCurrentUser] = useState(() => {
     try { const saved = localStorage.getItem('flowly-current-user'); return saved ? JSON.parse(saved) : null; }
@@ -191,8 +201,13 @@ export function AuthProvider({ children }) {
   const t = (key) => translations[language]?.[key] || translations['en'][key] || key;
 
   const login = (emailOrPhone, password) => {
-    // Admin shortcut: yaxyobek + admin123 goes directly to admin panel
-    const user = users.find(u => (u.email === emailOrPhone || u.phone === emailOrPhone || u.login === emailOrPhone) && u.password === password);
+    const identifier = emailOrPhone.trim();
+    const normalizedIdentifier = identifier.toLowerCase();
+    const user = users.find(u => (
+      u.email?.toLowerCase() === normalizedIdentifier ||
+      u.phone === identifier ||
+      u.login?.toLowerCase() === normalizedIdentifier
+    ) && u.password === password);
     if (user) {
       if (user.blocked) return { success: false, error: language === 'ru' ? 'Аккаунт заблокирован' : language === 'en' ? 'Account blocked' : 'Akkaunt bloklangan' };
       const updated = { ...user, totalLogins: (user.totalLogins || 0) + 1 };
